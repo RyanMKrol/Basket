@@ -49,9 +49,20 @@ final class EmojiTests: XCTestCase {
         XCTAssertEqual(Emoji.forName("T-bone steak"), "🥩") // hyphenated keyword
     }
 
-    func testUnknownFallsBackToCart() {
-        XCTAssertEqual(Emoji.forName("widget"), Emoji.fallback)
+    func testUnknownFallsBackToBasket() {
+        XCTAssertEqual(Emoji.forName("qwertyuiop"), Emoji.fallback)
         XCTAssertEqual(Emoji.forName(""), Emoji.fallback)
+    }
+
+    func testSemanticFallbackForNovelItems() {
+        // Not in the curated table — resolved via on-device word embeddings.
+        XCTAssertEqual(Emoji.forName("Flounder"), "🐟")
+        XCTAssertEqual(Emoji.forName("Grouper"), "🐟")
+    }
+
+    func testVariantsCollapseToSameEmoji() {
+        XCTAssertEqual(Emoji.forName("Frozen peas"), Emoji.forName("Peas"))
+        XCTAssertEqual(Emoji.forName("Smoked haddock"), Emoji.forName("Haddock"))
     }
 }
 

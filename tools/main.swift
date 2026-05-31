@@ -75,6 +75,14 @@ check(Suggestions.rank(query: "t", candidates: [cand("Tortillas", times: 1, days
 check(Suggestions.rank(query: "thing", candidates: (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }, onList: [], now: now).count == Suggestions.maxResults,
       "caps at maxResults")
 
+print("Semantic fallback (NLEmbedding):")
+check(Emoji.forName("Flounder") == "🐟", "novel fish Flounder → 🐟")
+check(Emoji.forName("Grouper") == "🐟", "novel fish Grouper → 🐟")
+check(Emoji.forName("Frozen peas") == Emoji.forName("Peas"), "frozen peas == peas (variant collapse)")
+check(Emoji.forName("Smoked haddock") == "🐟", "smoked haddock → 🐟")
+check(Emoji.forName("qwertyuiop") == Emoji.fallback, "nonsense → basket fallback")
+check(Emoji.forName("") == Emoji.fallback, "empty → basket fallback")
+
 print("Capitalisation:")
 check("milk".capitalisedFirstLetter == "Milk", "milk → Milk")
 check("olive oil".capitalisedFirstLetter == "Olive oil", "olive oil → Olive oil (only first)")
