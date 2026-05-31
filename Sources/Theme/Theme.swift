@@ -14,6 +14,12 @@ enum BackgroundStyle {
     case ocean        // deep-sea vertical gradient + light rays
     case parchment    // warm paper with a soft vignette
     case neon         // near-black with a faint grid + neon glow
+    // Fresh, light backdrops (parameterised) for the Cozy-pixel explorations:
+    case freshBlooms([Color])     // soft light colour blooms in the corners
+    case wash(Color, Color)       // vertical gradient (top → bottom)
+    case softGrid(Color)          // faint pixel graph-paper grid in a colour
+    case dotted(Color)            // pixel polka-dots
+    case stripes(Color, Color)    // soft horizontal bands
 }
 
 /// A complete look. Themes are swapped at launch via the BASKET_THEME env var.
@@ -53,7 +59,7 @@ enum Theme {
     /// The active theme. Set once at launch from the BASKET_THEME env var.
     static var current: ThemeStyle = .soft
 
-    static let all: [ThemeStyle] = [.soft, .pixelPantry, .deepDive, .cozyCabin, .nightArcade]
+    static let all: [ThemeStyle] = [.soft, .pixelPantry, .deepDive, .cozyCabin, .nightArcade] + ThemeStyle.fresh
 
     static func select(id: String?) {
         if let id, let match = all.first(where: { $0.id == id }) { current = match }
@@ -114,6 +120,12 @@ struct BasketBackground: View {
                 case .ocean: ocean(w, h)
                 case .parchment: vignette(w, h)
                 case .neon: neon(w, h)
+                case .freshBlooms(let colors): freshBlooms(colors, w, h)
+                case .wash(let top, let bottom):
+                    LinearGradient(colors: [top, bottom], startPoint: .top, endPoint: .bottom)
+                case .softGrid(let c): grid(w, h, line: c, step: 20)
+                case .dotted(let c): dots(c, w, h)
+                case .stripes(let a, let b): stripes(a, b, h)
                 }
             }
         }
@@ -163,6 +175,48 @@ struct BasketBackground: View {
             grid(w, h, line: Color.white.opacity(0.05), step: 22)
             RadialGradient(colors: [Theme.leaf.opacity(0.18), .clear], center: .topLeading, startRadius: 0, endRadius: w * 0.8)
             RadialGradient(colors: [Theme.tomato.opacity(0.18), .clear], center: .bottomTrailing, startRadius: 0, endRadius: w * 0.9)
+        }
+    }
+
+    /// Soft, light colour blooms in the four corners (cycles the given colours).
+    private func freshBlooms(_ colors: [Color], _ w: CGFloat, _ h: CGFloat) -> some View {
+        let corners: [UnitPoint] = [.topLeading, .topTrailing, .bottomTrailing, .bottomLeading]
+        return ZStack {
+            ForEach(Array(corners.enumerated()), id: \.offset) { i, corner in
+                if !colors.isEmpty {
+                    RadialGradient(colors: [colors[i % colors.count].opacity(0.42), .clear],
+                                   center: corner, startRadius: 0, endRadius: w * 0.95)
+                }
+            }
+        }
+    }
+
+    private func dots(_ color: Color, _ w: CGFloat, _ h: CGFloat) -> some View {
+        Canvas { ctx, size in
+            let step: CGFloat = 26, r: CGFloat = 2.4
+            var y: CGFloat = step / 2
+            while y <= size.height {
+                var x: CGFloat = step / 2
+                while x <= size.width {
+                    ctx.fill(Path(ellipseIn: CGRect(x: x - r, y: y - r, width: r * 2, height: r * 2)),
+                             with: .color(color))
+                    x += step
+                }
+                y += step
+            }
+        }
+    }
+
+    private func stripes(_ a: Color, _ b: Color, _ h: CGFloat) -> some View {
+        Canvas { ctx, size in
+            let band: CGFloat = 26
+            var y: CGFloat = 0
+            var on = true
+            while y < size.height {
+                ctx.fill(Path(CGRect(x: 0, y: y, width: size.width, height: band)),
+                         with: .color(on ? a : b))
+                y += band; on.toggle()
+            }
         }
     }
 }

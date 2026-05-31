@@ -4,6 +4,56 @@ private func rgb(_ r: Double, _ g: Double, _ b: Double) -> Color {
     Color(red: r, green: g, blue: b)
 }
 
+// Fresh, light, fruity accent colours shared by the Cozy-pixel background studies.
+private let mint = rgb(0.55, 0.85, 0.70)
+private let lemon = rgb(0.99, 0.90, 0.50)
+private let coral = rgb(0.99, 0.62, 0.55)
+private let sky = rgb(0.60, 0.83, 0.87)
+private let pink = rgb(0.99, 0.76, 0.79)
+private let freshGreen = rgb(0.36, 0.72, 0.52)
+
+extension ThemeStyle {
+    /// A Cozy-pixel theme that holds cards + fonts + accents constant, varying
+    /// only the paper colour and background — for the "fresh backgrounds" study.
+    static func cozyFresh(_ id: String, _ name: String,
+                          paper: Color, background: BackgroundStyle) -> ThemeStyle {
+        ThemeStyle(
+            id: id, name: name, isDark: false,
+            paper: paper, card: rgb(1.0, 0.99, 0.965),
+            ink: rgb(0.17, 0.21, 0.19), inkSoft: rgb(0.48, 0.52, 0.49),
+            onPaper: rgb(0.17, 0.21, 0.19), onPaperSoft: rgb(0.42, 0.47, 0.44),
+            leaf: freshGreen, tomato: rgb(0.95, 0.45, 0.42), sun: rgb(0.98, 0.80, 0.33),
+            cardRadius: 8, borderWidth: 2, borderColor: rgb(0.88, 0.90, 0.85),
+            cardShadow: Color.black.opacity(0.07), shadowRadius: 5,
+            bodyFont: .custom("VT323", scale: 1.15),
+            titleFont: .custom("Silkscreen", scale: 0.78),
+            background: background)
+    }
+
+    static let fresh: [ThemeStyle] = [
+        .cozyFresh("fresh1", "Cream Blooms", paper: rgb(0.992, 0.984, 0.957),
+                   background: .freshBlooms([mint, lemon, coral, sky])),
+        .cozyFresh("fresh2", "Mint Air", paper: rgb(0.93, 0.97, 0.93),
+                   background: .wash(rgb(0.86, 0.95, 0.88), rgb(0.99, 0.99, 0.96))),
+        .cozyFresh("fresh3", "Lemon Soda", paper: rgb(0.992, 0.984, 0.90),
+                   background: .freshBlooms([lemon, mint])),
+        .cozyFresh("fresh4", "Sky Field", paper: rgb(0.95, 0.98, 0.97),
+                   background: .wash(rgb(0.78, 0.91, 0.92), rgb(0.97, 0.99, 0.93))),
+        .cozyFresh("fresh5", "Berry Cream", paper: rgb(0.992, 0.95, 0.93),
+                   background: .freshBlooms([coral, pink, lemon])),
+        .cozyFresh("fresh6", "Garden Grid", paper: rgb(0.97, 0.985, 0.94),
+                   background: .softGrid(freshGreen.opacity(0.14))),
+        .cozyFresh("fresh7", "Pastel Dots", paper: rgb(0.992, 0.985, 0.96),
+                   background: .dotted(freshGreen.opacity(0.18))),
+        .cozyFresh("fresh8", "Seafoam Bands", paper: rgb(0.95, 0.98, 0.96),
+                   background: .stripes(rgb(0.90, 0.96, 0.92), rgb(0.985, 0.99, 0.96))),
+        .cozyFresh("fresh9", "Fruit Punch", paper: rgb(0.992, 0.975, 0.95),
+                   background: .freshBlooms([coral, lemon, mint, sky])),
+        .cozyFresh("fresh10", "Morning Light", paper: rgb(0.992, 0.985, 0.93),
+                   background: .wash(rgb(0.99, 0.95, 0.78), rgb(0.88, 0.96, 0.90))),
+    ]
+}
+
 extension ThemeStyle {
     /// The original — soft, friendly, rounded, with grocery-colour blooms.
     static let soft = ThemeStyle(
