@@ -8,8 +8,11 @@ Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
 
 ## Features
 
-- **Quick add** — always-visible bottom bar; as you type, things you've bought in
-  the last month float up as one-tap suggestions, ranked by frequency + recency.
+- **Quick add** — always-visible bottom bar with a green **＋** add button; as you
+  type, suggestions float up as one-tap chips: your personal history first (things
+  you've bought in the last month, ranked by frequency + recency), then a built-in
+  food dictionary (`SuggestionDictionary`) for instant autocomplete. Items already
+  on the list are filtered out.
 - **Tap anywhere on a row** to check it off — it strikes through and slides into a
   dimmed **"Got it"** section (tap again to restore it).
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops.

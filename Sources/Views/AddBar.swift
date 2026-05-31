@@ -42,12 +42,10 @@ struct AddBar: View {
                 .padding(.horizontal, 16)
             }
 
-            // The pinned input field.
+            // The pinned input field. The leading + is the add button: it adds
+            // the typed item (keeping the keyboard up), or just focuses the field
+            // when empty. It turns from grey to green once there's something to add.
             HStack(spacing: 12) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 22))
-                    .foregroundStyle(Theme.leaf)
-
                 TextField("Add an item…", text: $text)
                     .font(.system(.body, design: .rounded))
                     .textInputAutocapitalization(.sentences)
@@ -56,16 +54,20 @@ struct AddBar: View {
                     .focused($focused)
                     .onSubmit(submit)
 
-                if !text.isEmpty {
-                    Button {
+                Button {
+                    if text.trimmingCharacters(in: .whitespaces).isEmpty {
+                        focused = true
+                    } else {
                         submit()
-                    } label: {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundStyle(Theme.tomato)
                     }
-                    .transition(.scale.combined(with: .opacity))
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundStyle(text.trimmingCharacters(in: .whitespaces).isEmpty
+                                         ? Theme.inkSoft.opacity(0.4) : Theme.leaf)
                 }
+                .buttonStyle(.plain)
+                .animation(.easeInOut(duration: 0.2), value: text.isEmpty)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)

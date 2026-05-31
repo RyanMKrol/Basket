@@ -133,4 +133,23 @@ final class SuggestionsTests: XCTestCase {
         let result = Suggestions.rank(query: "thing", candidates: many, onList: [], now: now)
         XCTAssertEqual(result.count, Suggestions.maxResults)
     }
+
+    private let dict = ["Tomatoes", "Tomato Soup", "Tomato Ketchup", "Milk", "Bananas"]
+
+    func testCombinedAutocompletesFromDictionary() {
+        let r = Suggestions.combined(query: "tom", history: [], dictionary: dict, onList: [], now: now)
+        XCTAssertTrue(r.map(\.name).contains("Tomatoes"))
+    }
+
+    func testCombinedExcludesOnListButKeepsOthers() {
+        let r = Suggestions.combined(query: "tom", history: [], dictionary: dict, onList: ["tomatoes"], now: now)
+        XCTAssertFalse(r.map(\.name).contains("Tomatoes"))
+        XCTAssertTrue(r.map(\.name).contains("Tomato Soup"))
+    }
+
+    func testCombinedRanksPersonalHistoryFirst() {
+        let hist = [cand("Harissa", times: 3, daysAgo: 0)]
+        let r = Suggestions.combined(query: "har", history: hist, dictionary: dict, onList: [], now: now)
+        XCTAssertEqual(r.first?.name, "Harissa")
+    }
 }

@@ -121,16 +121,22 @@ struct ShoppingListView: View {
         .padding(.bottom, 2)
     }
 
-    // History-backed suggestions: things you've added in the last month, ranked
-    // by frequency + recency, excluding anything already on the list.
+    // Typing suggestions: your personal history first (last month, ranked by
+    // frequency + recency), then a built-in food dictionary for autocomplete.
+    // Only items still on the to-get list are excluded (checked-off ones can be
+    // re-suggested so you can re-add them).
     private var liveSuggestions: [Suggestion] {
-        let present = Set(items.map { $0.name.lowercased() })
+        let onList = Set(items.filter { !$0.isChecked }.map { $0.name.lowercased() })
         let candidates = known.map {
             SuggestionCandidate(name: $0.displayName,
                                 timesAdded: $0.timesAdded,
                                 lastAddedAt: $0.lastAddedAt)
         }
-        return Suggestions.rank(query: draft, candidates: candidates, onList: present, now: now)
+        return Suggestions.combined(query: draft,
+                                    history: candidates,
+                                    dictionary: SuggestionDictionary.items,
+                                    onList: onList,
+                                    now: now)
     }
 
     // MARK: - Actions

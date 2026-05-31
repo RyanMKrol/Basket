@@ -83,6 +83,19 @@ check(Emoji.forName("Smoked haddock") == "🐟", "smoked haddock → 🐟")
 check(Emoji.forName("qwertyuiop") == Emoji.fallback, "nonsense → basket fallback")
 check(Emoji.forName("") == Emoji.fallback, "empty → basket fallback")
 
+print("Combined suggestions (history + dictionary):")
+let dict = ["Tomatoes", "Tomato Soup", "Tomato Ketchup", "Milk", "Bananas"]
+let hist = [SuggestionCandidate(name: "Harissa", timesAdded: 3, lastAddedAt: now)]
+let r1 = Suggestions.combined(query: "tom", history: [], dictionary: dict, onList: [], now: now)
+check(r1.map(\.name).contains("Tomatoes"), "dictionary autocomplete: tom → Tomatoes")
+let r2 = Suggestions.combined(query: "tom", history: [], dictionary: dict, onList: ["tomatoes"], now: now)
+check(!r2.map(\.name).contains("Tomatoes"), "on-list Tomatoes excluded")
+check(r2.map(\.name).contains("Tomato Soup"), "but Tomato Soup still suggested")
+let r3 = Suggestions.combined(query: "har", history: hist, dictionary: dict, onList: [], now: now)
+check(r3.first?.name == "Harissa", "personal history ranks first")
+check(Suggestions.combined(query: "  ", history: hist, dictionary: dict, onList: [], now: now).isEmpty,
+      "empty query → nothing")
+
 print("Capitalisation:")
 check("milk".capitalisedFirstLetter == "Milk", "milk → Milk")
 check("olive oil".capitalisedFirstLetter == "Olive oil", "olive oil → Olive oil (only first)")

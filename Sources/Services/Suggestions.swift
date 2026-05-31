@@ -13,6 +13,43 @@ enum Suggestions {
     /// Only suggest things bought within this window (~1 month).
     static let memoryTTL: TimeInterval = 60 * 60 * 24 * 30
     static let maxResults = 3
+    /// Cap for the combined (history + dictionary) suggestion list.
+    static let combinedMax = 4
+
+    /// Typing suggestions from the user's personal history first (ranked by
+    /// frequency + recency), then a built-in food dictionary for autocomplete.
+    /// De-duplicated and with anything currently on the list removed.
+    static func combined(query: String,
+                         history: [SuggestionCandidate],
+                         dictionary: [String],
+                         onList: Set<String>,
+                         now: Date) -> [Suggestion] {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !q.isEmpty else { return [] }
+
+        var ordered: [String] = []
+        var seen = Set<String>()
+        func consider(_ name: String) {
+            let key = name.lowercased()
+            guard !onList.contains(key), seen.insert(key).inserted else { return }
+            ordered.append(name)
+        }
+
+        // 1) Personal history, ranked by frequency + recency.
+        let cutoff = now.addingTimeInterval(-memoryTTL)
+        let hist = history
+            .filter { $0.lastAddedAt > cutoff && $0.name.lowercased().contains(q) }
+            .sorted { score($0, query: q, now: now) > score($1, query: q, now: now) }
+        for c in hist { consider(c.name) }
+
+        // 2) Dictionary: prefix matches first ("tom" → Tomatoes), then mid-word.
+        for n in dictionary where n.lowercased().hasPrefix(q) { consider(n) }
+        for n in dictionary where !n.lowercased().hasPrefix(q) && n.lowercased().contains(q) {
+            consider(n)
+        }
+
+        return ordered.prefix(combinedMax).map { Suggestion(name: $0, emoji: Emoji.forName($0)) }
+    }
 
     static func rank(query: String,
                      candidates: [SuggestionCandidate],
