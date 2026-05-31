@@ -7,7 +7,7 @@ struct BasketApp: App {
 
     init() {
         do {
-            container = try ModelContainer(for: GroceryItem.self)
+            container = try ModelContainer(for: GroceryItem.self, KnownItem.self)
         } catch {
             fatalError("Failed to create SwiftData container: \(error)")
         }

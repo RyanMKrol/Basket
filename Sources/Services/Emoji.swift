@@ -51,8 +51,17 @@ enum Emoji {
 
     static func forName(_ name: String) -> String {
         let lower = name.lowercased()
-        for (keyword, glyph) in table where lower.contains(keyword) {
-            return glyph
+        // Split into letter-only words so we can match on word boundaries and
+        // avoid interior false hits (e.g. "oil" inside "toilet", "ham" in "shampoo").
+        let words = lower.split { !$0.isLetter }.map(String.init)
+        // Multi-word keywords first (more specific, e.g. "ice cream" should beat "cream").
+        for (keyword, glyph) in table where keyword.contains(" ") {
+            if lower.contains(keyword) { return glyph }
+        }
+        // Then single keywords: a word must START with the keyword, so stems like
+        // "apple" still match "apples" without matching mid-word ("oil" in "toilet").
+        for (keyword, glyph) in table where !keyword.contains(" ") {
+            if words.contains(where: { $0.hasPrefix(keyword) }) { return glyph }
         }
         return fallback
     }

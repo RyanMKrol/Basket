@@ -77,17 +77,3 @@ struct AddBar: View {
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: text.isEmpty)
     }
 }
-
-/// A lightweight value for a suggestion row (decoupled from SwiftData so it's
-/// easy to preview and test).
-struct Suggestion: Identifiable, Equatable {
-    let id: String       // the lower-cased name, stable identity
-    let name: String     // display name
-    let emoji: String
-
-    init(name: String, emoji: String) {
-        self.id = name.lowercased()
-        self.name = name
-        self.emoji = emoji
-    }
-}

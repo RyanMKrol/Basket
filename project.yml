@@ -40,3 +40,13 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: YES
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.basket.tests
+schemes:
+  Basket:
+    build:
+      targets:
+        Basket: all
+        BasketTests: [test]
+    test:
+      targets:
+        - BasketTests
+      gatherCoverageData: false

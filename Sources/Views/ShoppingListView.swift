@@ -6,6 +6,7 @@ import SwiftData
 struct ShoppingListView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \GroceryItem.createdAt, order: .reverse) private var items: [GroceryItem]
+    @Query private var known: [KnownItem]
 
     @State private var draft: String = ""
     @State private var now: Date = .now
@@ -114,22 +115,23 @@ struct ShoppingListView: View {
         .padding(.bottom, 2)
     }
 
-    // Placeholder suggestions until history-backed ones arrive (M4).
+    // History-backed suggestions: things you've added in the last month, ranked
+    // by frequency + recency, excluding anything already on the list.
     private var liveSuggestions: [Suggestion] {
-        let q = draft.trimmingCharacters(in: .whitespaces)
-        guard !q.isEmpty else { return [] }
-        let pool = ["Tomatoes", "Toilet roll", "Tortillas", "Tea", "Butter", "Bananas"]
         let present = Set(items.map { $0.name.lowercased() })
-        return pool
-            .filter { $0.lowercased().contains(q.lowercased()) && !present.contains($0.lowercased()) }
-            .prefix(3)
-            .map { Suggestion(name: $0, emoji: Emoji.forName($0)) }
+        let candidates = known.map {
+            SuggestionCandidate(name: $0.displayName,
+                                timesAdded: $0.timesAdded,
+                                lastAddedAt: $0.lastAddedAt)
+        }
+        return Suggestions.rank(query: draft, candidates: candidates, onList: present, now: now)
     }
 
     // MARK: - Actions
 
     /// Toggle an item between the to-get list and the faded "Got it" section.
     private func toggle(_ item: GroceryItem) {
+        let checkingOff = !item.isChecked
         withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
             if item.isChecked {
                 item.isChecked = false
@@ -139,6 +141,7 @@ struct ShoppingListView: View {
                 item.checkedAt = .now
             }
         }
+        if checkingOff { Haptics.success() }
     }
 
     /// Remove checked items whose TTL has elapsed.
@@ -158,11 +161,26 @@ struct ShoppingListView: View {
         withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
             context.insert(GroceryItem(name: name))
         }
+        rememberAdd(name)
+        Haptics.soft()
         draft = ""
+    }
+
+    /// Upsert into the long-term memory that powers suggestions.
+    private func rememberAdd(_ name: String) {
+        let key = name.lowercased()
+        let descriptor = FetchDescriptor<KnownItem>(predicate: #Predicate { $0.key == key })
+        if let existing = try? context.fetch(descriptor).first {
+            existing.timesAdded += 1
+            existing.lastAddedAt = .now
+            existing.displayName = name
+        } else {
+            context.insert(KnownItem(key: key, displayName: name))
+        }
     }
 }
 
 #Preview {
     ShoppingListView()
-        .modelContainer(for: GroceryItem.self, inMemory: true)
+        .modelContainer(for: [GroceryItem.self, KnownItem.self], inMemory: true)
 }
