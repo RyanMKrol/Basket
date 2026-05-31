@@ -34,21 +34,21 @@ struct BasketBackground: View {
                 ZStack {
                     // Green blooms from the top-left.
                     RadialGradient(
-                        colors: [Theme.leaf.opacity(0.24), .clear],
+                        colors: [Theme.leaf.opacity(0.28), .clear],
                         center: .topLeading,
                         startRadius: 0,
                         endRadius: w * 0.95
                     )
                     // Yellow blooms from the top-right.
                     RadialGradient(
-                        colors: [Theme.sun.opacity(0.22), .clear],
+                        colors: [Theme.sun.opacity(0.26), .clear],
                         center: .topTrailing,
                         startRadius: 0,
                         endRadius: w * 0.9
                     )
                     // Tomato blooms up from the bottom.
                     RadialGradient(
-                        colors: [Theme.tomato.opacity(0.22), .clear],
+                        colors: [Theme.tomato.opacity(0.26), .clear],
                         center: .bottomTrailing,
                         startRadius: 0,
                         endRadius: w * 1.05
@@ -56,7 +56,7 @@ struct BasketBackground: View {
                     .offset(y: h * 0.02)
                     // A second tomato touch in the bottom-left for balance.
                     RadialGradient(
-                        colors: [Theme.tomato.opacity(0.12), .clear],
+                        colors: [Theme.tomato.opacity(0.15), .clear],
                         center: .bottomLeading,
                         startRadius: 0,
                         endRadius: w * 0.8
