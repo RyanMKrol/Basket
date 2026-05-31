@@ -10,6 +10,7 @@ enum Theme {
     // Soft grocery accents — kept gentle and desaturated.
     static let leaf = Color(red: 0.42, green: 0.66, blue: 0.40)  // soft green
     static let tomato = Color(red: 0.92, green: 0.45, blue: 0.42) // soft coral/red
+    static let sun = Color(red: 0.97, green: 0.80, blue: 0.36)   // soft yellow
 
     // Card + text colours.
     static let card = Color.white
@@ -31,19 +32,35 @@ struct BasketBackground: View {
                 let w = geo.size.width
                 let h = geo.size.height
                 ZStack {
+                    // Green blooms from the top-left.
                     RadialGradient(
-                        colors: [Theme.leaf.opacity(0.16), .clear],
+                        colors: [Theme.leaf.opacity(0.24), .clear],
                         center: .topLeading,
                         startRadius: 0,
                         endRadius: w * 0.95
                     )
+                    // Yellow blooms from the top-right.
                     RadialGradient(
-                        colors: [Theme.tomato.opacity(0.14), .clear],
+                        colors: [Theme.sun.opacity(0.22), .clear],
+                        center: .topTrailing,
+                        startRadius: 0,
+                        endRadius: w * 0.9
+                    )
+                    // Tomato blooms up from the bottom.
+                    RadialGradient(
+                        colors: [Theme.tomato.opacity(0.22), .clear],
                         center: .bottomTrailing,
                         startRadius: 0,
                         endRadius: w * 1.05
                     )
                     .offset(y: h * 0.02)
+                    // A second tomato touch in the bottom-left for balance.
+                    RadialGradient(
+                        colors: [Theme.tomato.opacity(0.12), .clear],
+                        center: .bottomLeading,
+                        startRadius: 0,
+                        endRadius: w * 0.8
+                    )
                 }
             }
         }

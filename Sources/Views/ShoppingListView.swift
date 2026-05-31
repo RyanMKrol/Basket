@@ -1,24 +1,16 @@
 import SwiftUI
+import SwiftData
 
-/// Main screen: the title, the scrolling list of item cards, and the pinned
-/// bottom add bar. M1 uses in-memory sample data; persistence + real behaviour
-/// arrive in later milestones.
+/// Main screen: title, the scrolling list of item cards, and the pinned bottom
+/// add bar. Backed by SwiftData — adds persist, and checking a row off animates
+/// it away and removes it.
 struct ShoppingListView: View {
-    // Temporary in-memory model for M1 (replaced by SwiftData @Query in M2).
-    private struct Row: Identifiable {
-        let id = UUID()
-        var name: String
-        var isChecked: Bool
-    }
+    @Environment(\.modelContext) private var context
+    @Query(sort: \GroceryItem.createdAt, order: .reverse) private var items: [GroceryItem]
 
-    @State private var rows: [Row] = [
-        Row(name: "Milk", isChecked: false),
-        Row(name: "Sourdough bread", isChecked: false),
-        Row(name: "Eggs", isChecked: false),
-        Row(name: "Tomatoes", isChecked: false),
-        Row(name: "Bananas", isChecked: true),
-    ]
     @State private var draft: String = ""
+
+    private var remaining: Int { items.filter { !$0.isChecked }.count }
 
     var body: some View {
         ZStack {
@@ -28,14 +20,18 @@ struct ShoppingListView: View {
                 header
 
                 ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(rows) { row in
+                    VStack(spacing: 12) {
+                        ForEach(items) { item in
                             ItemRow(
-                                name: row.name,
-                                emoji: Emoji.forName(row.name),
-                                isChecked: row.isChecked,
-                                onToggle: { toggle(row) }
+                                name: item.name,
+                                emoji: Emoji.forName(item.name),
+                                isChecked: item.isChecked,
+                                onToggle: { checkOff(item) }
                             )
+                            .transition(.asymmetric(
+                                insertion: .scale(scale: 0.9).combined(with: .opacity),
+                                removal: .move(edge: .trailing).combined(with: .opacity)
+                            ))
                         }
                     }
                     .padding(.horizontal, 16)
@@ -47,7 +43,7 @@ struct ShoppingListView: View {
         .safeAreaInset(edge: .bottom) {
             AddBar(
                 text: $draft,
-                suggestions: sampleSuggestions,
+                suggestions: liveSuggestions,
                 onSubmit: addDraft,
                 onPickSuggestion: { add($0.name) }
             )
@@ -60,7 +56,7 @@ struct ShoppingListView: View {
                 .font(.system(size: 34, weight: .bold, design: .rounded))
                 .foregroundStyle(Theme.ink)
             Spacer()
-            Text("\(rows.filter { !$0.isChecked }.count) to get")
+            Text(remaining == 1 ? "1 to get" : "\(remaining) to get")
                 .font(.system(.subheadline, design: .rounded).weight(.medium))
                 .foregroundStyle(Theme.inkSoft)
         }
@@ -69,32 +65,43 @@ struct ShoppingListView: View {
         .padding(.bottom, 6)
     }
 
-    // Visual-only suggestions for M1, shown while the user is typing.
-    private var sampleSuggestions: [Suggestion] {
-        guard !draft.trimmingCharacters(in: .whitespaces).isEmpty else { return [] }
-        let pool = ["Tomatoes", "Toilet roll", "Tortillas", "Tea"]
+    // Placeholder suggestions until history-backed ones arrive (M4).
+    private var liveSuggestions: [Suggestion] {
+        let q = draft.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return [] }
+        let pool = ["Tomatoes", "Toilet roll", "Tortillas", "Tea", "Butter", "Bananas"]
+        let onList = Set(items.map { $0.name.lowercased() })
         return pool
-            .filter { $0.lowercased().contains(draft.lowercased()) }
+            .filter { $0.lowercased().contains(q.lowercased()) && !onList.contains($0.lowercased()) }
             .prefix(3)
             .map { Suggestion(name: $0, emoji: Emoji.forName($0)) }
     }
 
-    private func toggle(_ row: Row) {
-        guard let idx = rows.firstIndex(where: { $0.id == row.id }) else { return }
+    // MARK: - Actions
+
+    /// Check an item off: show the green tick + strikethrough, then animate the
+    /// row away and delete it shortly after.
+    private func checkOff(_ item: GroceryItem) {
+        guard !item.isChecked else { return }
         withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            rows[idx].isChecked.toggle()
+            item.isChecked = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                context.delete(item)
+            }
         }
     }
 
     private func addDraft() {
-        let name = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty else { return }
-        add(name)
+        add(draft)
     }
 
-    private func add(_ name: String) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-            rows.insert(Row(name: name, isChecked: false), at: 0)
+    private func add(_ rawName: String) {
+        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+            context.insert(GroceryItem(name: name))
         }
         draft = ""
     }
@@ -102,4 +109,5 @@ struct ShoppingListView: View {
 
 #Preview {
     ShoppingListView()
+        .modelContainer(for: GroceryItem.self, inMemory: true)
 }

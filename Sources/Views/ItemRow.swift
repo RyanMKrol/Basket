@@ -23,11 +23,12 @@ struct ItemRow: View {
             Spacer(minLength: 8)
 
             CheckCircle(isChecked: isChecked)
-                .onTapGesture(perform: onToggle)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .basketCard()
+        .contentShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
+        .onTapGesture(perform: onToggle)
     }
 }
 
