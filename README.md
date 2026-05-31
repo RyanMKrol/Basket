@@ -15,7 +15,8 @@ Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
   on the list are filtered out.
 - **Tap anywhere on a row** to check it off — it strikes through and slides into a
   dimmed **"Got it"** section (tap again to restore it).
-- **1-hour TTL** on the "Got it" section, so it tidies itself between shops.
+- **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
+  tap **Clear all** in the section header to empty it immediately.
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the
   existing row instead of creating a copy.
 - **Playful auto-emoji** per item, via a three-stage cascade

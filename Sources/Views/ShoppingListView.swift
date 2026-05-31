@@ -115,6 +115,16 @@ struct ShoppingListView: View {
             Rectangle()
                 .fill(Theme.inkSoft.opacity(0.2))
                 .frame(height: 1)
+            Button(action: clearGot) {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Clear all")
+                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                }
+                .foregroundStyle(Theme.inkSoft)
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 6)
         .padding(.top, 14)
@@ -154,6 +164,16 @@ struct ShoppingListView: View {
             }
         }
         if checkingOff { Haptics.success() }
+    }
+
+    /// Clear the whole "Got it" section now (manual tidy-up).
+    private func clearGot() {
+        let checked = items.filter { $0.isChecked }
+        guard !checked.isEmpty else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            for item in checked { context.delete(item) }
+        }
+        Haptics.soft()
     }
 
     /// Remove checked items whose TTL has elapsed.
