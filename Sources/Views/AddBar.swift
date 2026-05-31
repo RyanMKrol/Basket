@@ -19,6 +19,7 @@ struct AddBar: View {
                     ForEach(suggestions) { s in
                         Button {
                             onPickSuggestion(s)
+                            focused = true   // keep the keyboard up for rapid adding
                         } label: {
                             HStack(spacing: 12) {
                                 Text(s.emoji).font(.system(size: 20))
@@ -53,11 +54,11 @@ struct AddBar: View {
                     .autocorrectionDisabled(false)
                     .submitLabel(.done)
                     .focused($focused)
-                    .onSubmit(onSubmit)
+                    .onSubmit(submit)
 
                 if !text.isEmpty {
                     Button {
-                        onSubmit()
+                        submit()
                     } label: {
                         Image(systemName: "arrow.up.circle.fill")
                             .font(.system(size: 26))
@@ -75,5 +76,12 @@ struct AddBar: View {
         }
         .animation(.spring(response: 0.32, dampingFraction: 0.8), value: suggestions)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: text.isEmpty)
+    }
+
+    /// Submit the current text, then keep focus so the keyboard stays up — adding
+    /// many items in a row is the common case.
+    private func submit() {
+        onSubmit()
+        focused = true
     }
 }

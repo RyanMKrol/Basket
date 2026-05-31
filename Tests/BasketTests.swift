@@ -27,6 +27,28 @@ final class EmojiTests: XCTestCase {
         XCTAssertEqual(Emoji.forName("Apples"), "🍎")
     }
 
+    func testBroadCategoryCoverage() {
+        XCTAssertEqual(Emoji.forName("Cheddar"), "🧀")
+        XCTAssertEqual(Emoji.forName("Salmon fillet"), "🐟")
+        XCTAssertEqual(Emoji.forName("Chicken breast"), "🍗")
+        XCTAssertEqual(Emoji.forName("Spaghetti"), "🍝")
+        XCTAssertEqual(Emoji.forName("Coffee"), "☕")
+        XCTAssertEqual(Emoji.forName("Red wine"), "🍷")
+        XCTAssertEqual(Emoji.forName("Chickpeas"), "🫘")
+        XCTAssertEqual(Emoji.forName("Olive oil"), "🫒")
+        XCTAssertEqual(Emoji.forName("Washing up liquid"), "🧴")
+        XCTAssertEqual(Emoji.forName("Dog food"), "🐾")
+    }
+
+    func testPrefixCollisionsResolveToLongestMatch() {
+        XCTAssertEqual(Emoji.forName("Peach"), "🍑")       // not "pea"
+        XCTAssertEqual(Emoji.forName("Cornflour"), "🥣")   // not "corn"
+        XCTAssertEqual(Emoji.forName("Ginger"), "🥔")      // not "gin"
+        XCTAssertEqual(Emoji.forName("Brandy"), "🥃")      // not "bran"
+        XCTAssertEqual(Emoji.forName("Pineapple"), "🍍")   // not "apple"
+        XCTAssertEqual(Emoji.forName("T-bone steak"), "🥩") // hyphenated keyword
+    }
+
     func testUnknownFallsBackToCart() {
         XCTAssertEqual(Emoji.forName("widget"), Emoji.fallback)
         XCTAssertEqual(Emoji.forName(""), Emoji.fallback)
