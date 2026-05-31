@@ -1,0 +1,490 @@
+galangal
+lesser galangal (fingerroot)
+lemongrass
+kaffir lime leaves (makrut)
+kaffir lime fruit
+Thai basil (horapha)
+holy basil (krapao)
+lemon basil (manglak)
+Thai bird's eye chili
+Thai chili (prik chee fa)
+dried red chili
+bird's eye chili (siling labuyo)
+banana blossom
+banana leaf
+cooking banana (saba)
+morning glory (kangkong)
+Thai eggplant
+pea eggplant (makhuea phuang)
+Thai long green eggplant
+purple eggplant
+winged bean
+yardlong bean (snake bean)
+long bean
+bitter melon (ampalaya)
+chayote (sayote)
+green papaya
+ripe papaya
+pomelo
+green mango
+ripe mango
+mangosteen
+rambutan
+longan
+lychee
+durian
+ripe jackfruit
+young jackfruit
+dragon fruit
+star fruit (carambola)
+guava
+soursop (guyabano)
+custard apple
+sapodilla (chiku)
+salak (snake fruit)
+langsat (lanzones)
+calamansi
+key lime (limau)
+fresh turmeric
+ground turmeric
+ginger
+fingerroot (krachai)
+Asian shallots
+red shallots
+garlic
+Thai garlic
+spring onion (scallion)
+Chinese chives
+garlic chives
+coriander (cilantro)
+sawtooth coriander (culantro)
+Vietnamese coriander (rau ram)
+Vietnamese mint
+spearmint
+betel leaf (la lot)
+perilla leaf (tia to)
+fish mint (diep ca)
+rice paddy herb (rau om)
+pandan leaf
+curry leaf
+laksa leaf (daun kesum)
+turmeric leaf
+banana heart
+lotus root
+lotus stem
+lotus seed
+water chestnut
+fresh bamboo shoot
+canned bamboo shoot
+pickled bamboo shoot
+taro root
+taro stem
+cassava (yuca)
+purple sweet potato
+jicama (singkamas)
+daikon radish
+Chinese broccoli (gai lan)
+choy sum
+bok choy (pak choi)
+napa cabbage
+mustard greens (sawi)
+water spinach
+Malabar spinach
+sweet potato leaves
+chayote leaves
+fresh tamarind pods
+tamarind block (seedless)
+young tamarind leaves
+roselle (sour leaf)
+fresh green peppercorns
+white peppercorns
+black peppercorns
+candlenut (kemiri)
+torch ginger flower
+sugarcane
+attap seed (palm fruit)
+jackfruit seeds
+winter melon
+luffa (sponge gourd)
+bottle gourd (upo)
+ridge gourd (patola)
+snake gourd
+ash gourd
+okra (lady's finger)
+drumstick (moringa pod)
+moringa leaves (malunggay)
+Thai pumpkin (kabocha)
+fresh prawn
+tiger prawn
+small shrimp
+dried shrimp
+dried prawns
+mud crab
+blue swimmer crab
+soft-shell crab
+squid
+cuttlefish
+dried squid
+octopus
+green-lipped mussels
+clams
+cockles (kerang)
+oyster
+milkfish (bangus)
+tilapia
+mackerel
+Indian mackerel (kembung)
+catfish
+snakehead fish
+pomfret
+red snapper
+grouper
+sardines
+fresh anchovies
+dried anchovies (ikan bilis)
+salted fish
+dried fish
+fish balls
+fish cake
+Thai fish cake (tod mun)
+surimi
+pork belly
+pork shoulder
+ground pork
+pork ribs
+pork hock
+pork floss
+char siu (BBQ pork)
+whole chicken
+chicken thigh
+chicken feet
+duck
+roast duck
+century egg
+salted duck egg
+balut
+quail eggs
+beef brisket
+beef shank
+beef tripe
+beef balls
+lamb
+goat meat
+liver
+chicken liver
+pork blood cake
+jasmine rice
+glutinous rice (sticky rice)
+black glutinous rice
+broken rice (com tam)
+red rice
+brown rice
+rice flour
+glutinous rice flour
+tapioca flour
+tapioca starch
+mung bean flour
+rice vermicelli (bee hoon)
+banh pho (flat rice noodle)
+rice stick noodle
+wide rice noodle (sen yai)
+thin rice noodle (sen lek)
+fresh rice noodle
+rice paper (banh trang)
+spring roll wrapper
+egg roll wrapper
+wonton wrapper
+glass noodles (woon sen)
+mung bean vermicelli
+egg noodles (ba mee)
+hokkien noodles
+yellow noodles (mee)
+laksa noodles
+khanom jeen
+banh canh
+mee sua
+instant noodles
+instant pho
+instant laksa
+instant pad thai
+puffed rice
+rice crackers
+firm tofu
+silken tofu
+fried tofu puffs
+beancurd skin (yuba)
+beancurd sheets
+fermented tofu (fu yu)
+red fermented bean curd
+stinky tofu
+tempeh
+tofu pudding (taho)
+tau kwa (pressed tofu)
+whole coconut
+young coconut
+coconut milk
+coconut cream
+coconut water
+desiccated coconut
+grated coconut
+coconut oil
+coconut sugar
+palm sugar (gula melaka)
+palm sugar (gula jawa)
+toddy palm
+coconut jam (kaya)
+fish sauce (nam pla)
+fish sauce (nuoc mam)
+fish sauce (patis)
+shrimp paste (kapi)
+shrimp paste (belacan)
+shrimp paste (bagoong)
+fermented shrimp paste (mam tom)
+fermented fish (pla ra)
+fermented fish sauce (padaek)
+oyster sauce
+light soy sauce
+dark soy sauce
+sweet soy sauce (kecap manis)
+seasoning soy sauce
+mushroom soy sauce
+hoisin sauce
+sweet chili sauce
+sriracha sauce
+chili garlic sauce
+sambal oelek
+sambal belacan
+sambal terasi
+sambal matah
+chili paste (nam prik pao)
+roasted chili paste
+Thai red curry paste
+Thai green curry paste
+Thai yellow curry paste
+massaman curry paste
+panang curry paste
+rendang paste
+laksa paste
+satay sauce (peanut)
+peanut sauce
+tom yum paste
+tom kha paste
+Malaysian curry powder
+fish curry powder
+meat curry powder
+tamarind paste
+tamarind concentrate
+assam gelugor
+black vinegar
+rice vinegar
+coconut vinegar (sukang tuba)
+cane vinegar
+palm vinegar
+plum sauce
+XO sauce
+fermented soybean paste (tauco)
+fermented black beans
+yellow bean sauce
+nuoc cham (dipping sauce)
+pickled mustard greens
+pickled green mango
+pickled garlic
+pickled radish (chai poh)
+salted radish
+preserved cabbage
+preserved vegetable
+atchara (pickled papaya)
+do chua (pickled carrot daikon)
+salted plums
+preserved lemon
+fermented mustard
+nata de coco
+fermented soybean cake (tua nao)
+prawn crackers (krupuk)
+shrimp crackers (kropek)
+fish crackers (keropok)
+emping (melinjo crackers)
+rempeyek (peanut cracker)
+spring rolls (cha gio)
+fresh spring rolls (goi cuon)
+lumpia wrapper
+fried lumpia (lumpiang shanghai)
+popiah
+otak-otak
+fish ball skewers
+satay skewers
+chicken satay
+beef satay
+fish floss
+seaweed snack
+banana chips
+cassava chips
+taro chips
+jackfruit chips
+durian chips
+roasted peanuts
+boiled peanuts
+dried mango
+tamarind candy
+sticky rice with mango
+pad thai kit
+pho kit
+laksa kit
+rendang kit
+satay kit
+nasi goreng paste
+mee goreng paste
+char kway teow sauce
+hainanese chicken rice paste
+bak kut teh spice mix
+pho spice mix
+khao soi kit
+tom yum soup base
+bun bo hue base
+mohinga paste (Burmese)
+kuih (Malay cakes)
+kuih lapis
+ondeh-ondeh
+ang ku kueh
+pandan cake
+pandan chiffon
+banana cake
+mango pudding
+coconut pudding
+sago pudding
+tapioca pudding
+sticky rice cake (banh chung)
+banh tet
+che (sweet dessert)
+halo-halo mix
+ube (purple yam)
+ube halaya
+leche flan
+biko (sweet rice cake)
+kutsinta
+puto (steamed rice cake)
+bibingka
+suman
+cassava cake
+turon (banana spring roll)
+buko pandan
+red bean paste
+lotus seed paste
+mung bean paste
+grass jelly
+cincau
+agar agar
+jelly powder
+sago pearls
+tapioca pearls (boba)
+candied winter melon
+durian paste
+coconut candy
+peanut brittle
+sesame brittle
+mooncake
+pineapple tart
+Vietnamese coffee (ca phe)
+robusta coffee
+Thai tea (cha thai)
+Thai iced tea mix
+condensed milk
+evaporated milk
+soy milk
+soybean drink
+chrysanthemum tea
+lemongrass tea
+pandan drink
+roselle drink
+sugarcane juice
+coconut water drink
+calamansi juice
+barley drink
+grass jelly drink
+bandung (rose syrup milk)
+rose syrup
+sarsi (sarsaparilla soda)
+green bean drink
+ginger tea
+butterfly pea flower
+butterfly pea tea
+jasmine tea
+oolong tea
+lotus tea
+soursop juice
+guava juice
+lychee drink
+Milo (malt drink)
+whole mung bean
+split mung bean
+black-eyed peas
+dried soybeans
+raw peanuts
+split chickpeas
+red lentils
+dried lily flowers
+dried wood ear mushroom
+dried shiitake mushroom
+canned straw mushroom
+enoki mushroom
+oyster mushroom
+king oyster mushroom
+dried scallop (conpoy)
+dried fish maw
+dried seaweed (nori)
+kombu (kelp)
+star anise
+cassia cinnamon
+cloves
+green cardamom
+black cardamom
+coriander seed
+cumin seed
+fennel seed
+fenugreek
+mustard seed
+white sesame seed
+black sesame seed
+nutmeg
+mace
+Sichuan peppercorn
+five-spice powder
+annatto seeds (atsuete)
+annatto powder
+pandan extract
+rose water
+sago flour
+arrowroot starch
+potato starch
+corn starch
+wheat starch
+canned jackfruit
+canned lychee
+canned longan
+canned coconut milk
+baby corn
+canned water chestnut
+dried lotus seeds
+salted black beans
+dried red dates (jujube)
+goji berries
+dried longan
+dried persimmon
+preserved plum (li hing)
+chili oil
+garlic oil
+fried shallots
+fried garlic
+sesame oil
+peanut oil
+red palm oil
+ghee
+fermented tea leaves (laphet)
+Burmese chickpea tofu
+chickpea flour (besan)
+yellow split pea
+papaya salad kit (som tum)
+sticky rice (Lao)
+kroeung (Cambodian curry paste)
+prahok (Cambodian fish paste)
+amok paste (Cambodian)

@@ -1,0 +1,541 @@
+Penne
+Rigatoni
+Spaghetti
+Spaghettini
+Bucatini
+Fettuccine
+Tagliatelle
+Pappardelle
+Linguine
+Fusilli
+Farfalle (bow-tie)
+Conchiglie (shells)
+Orecchiette
+Cavatelli
+Cavatappi
+Macaroni
+Tortellini
+Tortelloni
+Ravioli
+Agnolotti
+Cappelletti
+Lasagne
+Cannelloni
+Manicotti
+Ziti
+Vermicelli
+Capellini (angel hair)
+Trofie
+Strozzapreti
+Garganelli
+Gemelli
+Radiatori
+Rotini
+Campanelle
+Ditalini
+Orzo
+Fregola
+Gnocchi
+Gnocchi sardi (malloreddus)
+Spaetzle
+Pierogi
+Gnudi
+Passatelli
+Polenta
+Arborio rice
+Carnaroli rice
+Vialone Nano rice
+Bomba rice (paella rice)
+Couscous
+Bulgur
+Farro
+Barley
+Pearl barley
+Buckwheat (kasha)
+Semolina
+Millet
+Rye berries
+Spelt
+Focaccia
+Ciabatta
+Grissini (breadsticks)
+Baguette
+Pain de campagne
+Brioche
+Fougasse
+Pretzel (Brezel)
+Pumpernickel
+Rye bread
+Sourdough
+Bauernbrot
+Vollkornbrot
+Pita
+Lavash
+Pide
+Bublik
+Borodinsky bread
+Pampushka
+Knackebrod (Swedish crispbread)
+Rugbrod (Danish rye)
+Lefse (potato flatbread)
+Pao (Portuguese bread)
+Broa (corn bread)
+Chleb (Polish bread)
+Bagel
+Bialy
+Roggenbrot
+Kaiser roll
+Pao de queijo (cheese bread)
+Pogacsa
+Parmesan (Parmigiano-Reggiano)
+Grana Padano
+Pecorino Romano
+Pecorino Toscano
+Mozzarella
+Mozzarella di bufala
+Burrata
+Stracciatella
+Ricotta
+Mascarpone
+Provolone
+Fontina
+Taleggio
+Gorgonzola
+Asiago
+Scamorza
+Caciocavallo
+Manchego
+Mahon
+Idiazabal
+Cabrales
+Tetilla
+Queso fresco
+Brie
+Camembert
+Gruyere
+Comte
+Emmental
+Roquefort
+Reblochon
+Munster
+Cantal
+Morbier
+Tomme de Savoie
+Chevre (goat cheese)
+Raclette
+Beaufort
+Gouda
+Edam
+Leyden
+Maasdam
+Halloumi
+Feta
+Kasseri
+Graviera
+Kefalotyri
+Mizithra
+Manouri
+Quark
+Limburger
+Tilsit
+Havarti
+Danish blue (Danablu)
+Jarlsberg
+Brunost (brown cheese)
+Vasterbotten
+Bryndza
+Oszczypek (smoked cheese)
+Twarog (curd cheese)
+Kajmak
+Prosciutto (cured ham)
+Prosciutto cotto
+Speck
+Pancetta
+Guanciale
+Bresaola
+Mortadella
+Salami
+Soppressata
+Coppa
+Capicola
+Nduja
+Finocchiona
+Salsiccia (Italian sausage)
+Jamon serrano
+Jamon iberico
+Chorizo
+Chorizo picante
+Lomo
+Salchichon
+Fuet
+Morcilla (blood sausage)
+Sobrasada
+Cecina
+Saucisson sec
+Andouille
+Boudin noir
+Rillettes
+Pate
+Jambon de Bayonne
+Merguez
+Bratwurst
+Weisswurst
+Bockwurst
+Knackwurst
+Currywurst
+Frankfurter
+Leberkase
+Landjager
+Blutwurst (blood sausage)
+Mettwurst
+Teewurst
+Kielbasa
+Kabanos
+Krakowska
+Kaszanka (blood sausage)
+Presunto (cured ham)
+Linguica
+Chourico
+Alheira
+Falukorv (Swedish sausage)
+Medisterpolse
+Salo (cured pork fat)
+Kolbasz (Hungarian sausage)
+Debreceni
+Anchovy
+White anchovy (boquerones)
+Sardine
+Herring
+Pickled herring
+Rollmops
+Matjes herring
+Bismarck herring
+Kipper
+Smoked salmon
+Gravlax
+Lox
+Salt cod (bacalao)
+Stockfish
+Cod
+Hake (merluza)
+Sea bass (branzino)
+Sea bream (orata)
+Turbot
+Sole
+Halibut
+Mackerel
+Tuna
+Bottarga (cured fish roe)
+Octopus (pulpo)
+Squid (calamari)
+Cuttlefish (sepia)
+Mussels (cozze)
+Clams (vongole)
+Razor clams (navajas)
+Cockles (berberechos)
+Oysters
+Scallops
+Prawns (gambas)
+Langoustine
+Crayfish (kraftor)
+Crab
+Lobster
+Eel (anguilla)
+Caviar
+Smoked eel
+Trout
+Snails (escargot)
+Tomato
+San Marzano tomato
+Cherry tomato
+Sun-dried tomato
+Eggplant (aubergine)
+Zucchini (courgette)
+Bell pepper (capsicum)
+Piquillo pepper
+Padron pepper
+Romano pepper
+Friggitelli
+Artichoke
+Fennel
+Radicchio
+Endive
+Escarole
+Cardoon
+Rapini (broccoli rabe)
+Cavolo nero (Tuscan kale)
+Savoy cabbage
+Red cabbage
+White cabbage
+Kohlrabi
+Celeriac
+Leek
+Shallot
+Garlic
+Red onion
+Cipollini onion
+Spring onion
+Beetroot
+Turnip
+Rutabaga (swede)
+Parsnip
+Carrot
+Potato
+Fingerling potato
+Jerusalem artichoke
+Pumpkin
+Butternut squash
+Cucumber
+Gherkin
+Cornichon
+Asparagus
+White asparagus
+Sorrel
+Watercress
+Swiss chard
+Spinach
+Arugula (rocket)
+Lamb's lettuce (mache)
+Frisee
+Porcini (wild mushroom)
+Chanterelle
+Morel
+Black truffle
+White truffle
+Lemon
+Meyer lemon
+Blood orange
+Clementine
+Bergamot
+Quince
+Fig
+Pear
+Apple
+Grape
+Pomegranate
+Persimmon
+Apricot
+Cherry
+Plum
+Damson
+Lingonberry
+Cloudberry
+Gooseberry
+Redcurrant
+Blackcurrant
+Elderberry
+Sour cherry (morello)
+Chickpea (garbanzo)
+Brown lentil
+Puy lentil
+Red lentil
+Cannellini bean
+Borlotti bean
+Fava bean (broad bean)
+White bean (haricot)
+Butter bean
+Lupini bean
+Yellow split pea
+Green pea
+Olive oil
+Extra virgin olive oil
+Sunflower oil
+Walnut oil
+Grapeseed oil
+Pumpkin seed oil
+Castelvetrano olive
+Kalamata olive
+Gaeta olive
+Cerignola olive
+Manzanilla olive
+Arbequina olive
+Gordal olive
+Nicoise olive
+Picholine olive
+Pesto (Genovese)
+Pesto rosso
+Aioli
+Romesco
+Tapenade
+Salsa verde
+Bagna cauda
+Sofrito
+Bechamel
+Hollandaise
+Dijon mustard
+Wholegrain mustard
+Dusseldorf mustard
+Bavarian sweet mustard
+Mostarda
+Horseradish
+Sauerkraut
+Capers
+Caperberries
+Giardiniera
+Piccalilli
+Ajvar
+Harissa
+Smetana (sour cream)
+Creme fraiche
+Mayonnaise
+Remoulade
+Worcestershire sauce
+Balsamic vinegar
+Sherry vinegar
+Red wine vinegar
+White wine vinegar
+Passata (tomato puree)
+Tomato paste
+Tahini
+Skordalia
+Tzatziki
+Basil
+Oregano
+Marjoram
+Thyme
+Rosemary
+Sage
+Parsley
+Flat-leaf parsley
+Chervil
+Tarragon
+Chives
+Dill
+Bay leaf
+Mint
+Fennel seed
+Caraway seed
+Dill seed
+Juniper berry
+Saffron
+Smoked paprika (pimenton)
+Sweet paprika
+Hot paprika
+Nutmeg
+Mace
+Cinnamon
+Clove
+Allspice
+Cardamom
+Anise (aniseed)
+Star anise
+Coriander seed
+Cumin
+Black pepper
+White pepper
+Pink peppercorn
+Sumac
+Nigella seed
+Poppy seed
+Sesame seed
+Vanilla
+Pine nut
+Almond
+Hazelnut
+Walnut
+Pistachio
+Chestnut
+Croissant
+Pain au chocolat
+Pain aux raisins
+Brioche bun
+Madeleine
+Macaron
+Eclair
+Profiterole
+Mille-feuille
+Tarte tatin
+Canele
+Palmier
+Stollen
+Lebkuchen
+Pfeffernusse
+Springerle
+Black Forest cake
+Sachertorte
+Linzer torte
+Apfelstrudel
+Berliner (jelly doughnut)
+Baumkuchen
+Tiramisu
+Panna cotta
+Cannoli
+Sfogliatella
+Panettone
+Pandoro
+Biscotti
+Amaretti
+Zeppole
+Cassata
+Baklava
+Galaktoboureko
+Loukoumades
+Kataifi
+Halva
+Loukoumi (Turkish delight)
+Pastel de nata
+Marzipan
+Nougat (torrone)
+Turron
+Polvoron
+Churros
+Ensaimada
+Babka
+Paczki
+Makowiec (poppy seed roll)
+Sernik (Polish cheesecake)
+Dobos torte
+Kurtoskalacs (chimney cake)
+Rugelach
+Kransekake
+Kanelbullar (cinnamon buns)
+Semla
+Aebleskiver
+Pavlova
+Speculaas
+Stroopwafel
+Medovik (honey cake)
+Pryanik (gingerbread)
+Syrniki
+Espresso
+Ristretto
+Cappuccino
+Macchiato
+Caffe latte
+Prosecco
+Champagne
+Cava
+Sangria
+Vermouth
+Aperol
+Campari
+Limoncello
+Grappa
+Amaretto
+Sambuca
+Port wine
+Madeira
+Sherry
+Rioja
+Chianti
+Riesling
+Ouzo
+Retsina
+Schnapps
+Kirsch
+Aquavit
+Gluhwein (mulled wine)
+Vodka
+Kvass
+Slivovitz
+Tokaji
+Palinka
+Genever (Dutch gin)
+Sparkling water
+Elderflower cordial
+Horchata
+Kefir
+Ayran
+Buttermilk
+Marsala wine
+Verjus

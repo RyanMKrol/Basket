@@ -213,6 +213,7 @@ RAW = r"""
 ("gurnard", "🐟"),("john dory", "🐟"),("dory", "🐟"),("brill", "🐟"),("megrim", "🐟"),
 ("coalfish", "🐟"),("ling", "🐟"),("cusk", "🐟"),("amberjack", "🐟"),("pompano", "🐟"),
 ("wahoo", "🐟"),("whitefish", "🐟"),("yellowtail", "🐟"),("bonito", "🐟"),("urchin", "🦪"),
+("bluefish", "🐟"),
 ("seaweed", "🍙"),("nori", "🍙"),
 ("grissini", "🥨"),("panko", "🍞"),("eclair", "🍩"),("teff", "🥣"),("sorghum", "🥣"),
 ("amaranth", "🥣"),("tapioca", "🥣"),("scone", "🥐"),("gateau", "🎂"),
@@ -220,10 +221,52 @@ RAW = r"""
 ("biscoff", "🍪"),("hobnob", "🍪"),("horlicks", "🥛"),("hash brown", "🥔"),
 ("hot dog", "🌭"),("enchilada", "🌯"),("fajita", "🌯"),
 ("raisin", "🍇"),("sultana", "🍇"),("licorice", "🍬"),("caramel", "🍬"),("sprinkle", "🍬"),
+# --- global staples & corrections (bare romanized names; win over auto-supplement) ---
+# corn dough / maize
+("masa", "🌽"),("masarepa", "🌽"),("nixtamal", "🌽"),("hominy", "🌽"),("harina", "🥣"),
+("nopal", "🥬"),("nopales", "🥬"),
+# pulses / dals
+("dal", "🫘"),("daal", "🫘"),("dhal", "🫘"),("toor", "🫘"),("urad", "🫘"),("moong", "🫘"),
+("masoor", "🫘"),("chana", "🫘"),("rajma", "🫘"),("besan", "🥣"),("lentil", "🫘"),
+# East Asian pastes / seasonings / stocks
+("gochujang", "🥫"),("gochugaru", "🌶️"),("doenjang", "🥫"),("ssamjang", "🥫"),
+("doubanjiang", "🥫"),("miso", "🥫"),("dashi", "🥫"),("mirin", "🥫"),("ponzu", "🥫"),
+("tamari", "🥫"),("furikake", "🍙"),("wasabi", "🌶️"),("teriyaki", "🥫"),("kewpie", "🥫"),
+# seaweed
+("kombu", "🥬"),("wakame", "🥬"),("kelp", "🥬"),("kaiso", "🥬"),
+# Korean dishes
+("tteok", "🍡"),("tteokbokki", "🍡"),("bulgogi", "🥩"),("bibimbap", "🍚"),("japchae", "🍜"),
+("kimbap", "🍙"),("banchan", "🥗"),("jjigae", "🍲"),("samgyeopsal", "🥓"),("bingsu", "🍧"),
+# Chinese / dim sum
+("bao", "🥟"),("baozi", "🥟"),("wonton", "🥟"),("mantou", "🥟"),("congee", "🍚"),
+("jook", "🍚"),("mapo", "🍲"),("chow mein", "🍜"),("lo mein", "🍜"),("char siu", "🍖"),
+# Japanese
+("onigiri", "🍙"),("takoyaki", "🍡"),("okonomiyaki", "🥞"),("katsu", "🍱"),("donburi", "🍚"),
+("yakitori", "🍢"),("sashimi", "🍣"),("nigiri", "🍣"),("maki", "🍣"),("edamame", "🫛"),
+# South / SE Asian
+("idli", "🍚"),("vada", "🍩"),("upma", "🥣"),("poha", "🍚"),("biryani", "🍚"),("pulao", "🍚"),
+("banh mi", "🥪"),("banh xeo", "🥞"),("pho", "🍜"),("congee", "🍚"),("roti", "🫓"),
+# Latin American / Caribbean
+("arepa", "🫓"),("pupusa", "🫓"),("tostada", "🫓"),("mole", "🥫"),("sofrito", "🥫"),
+("chimichurri", "🥫"),("plantain", "🍌"),("yuca", "🥔"),("cassava", "🥔"),("ackee", "🍐"),
+# African
+("injera", "🫓"),("berbere", "🌶️"),("mitmita", "🌶️"),("egusi", "🥜"),("garri", "🥣"),
+("fufu", "🥣"),("jollof", "🍚"),("suya", "🍢"),("biltong", "🥩"),("ugali", "🥣"),
+# Middle Eastern / Mediterranean
+("injera", "🫓"),("shawarma", "🥙"),("doner", "🥙"),("souvlaki", "🍢"),("dolma", "🥬"),
+("borek", "🥧"),("manti", "🥟"),("labneh", "🥛"),("ayran", "🥛"),("harira", "🍲"),
 """
 
 # Corrections to a few researched entries.
 FIX = {"dip": None}  # drop: bad mapping + too-generic 3-letter keyword
+
+# Supplement: bulk keyword→emoji mappings for global-corpus gaps (one tuple per
+# line), appended AFTER the curated RAW so curated entries win on any collision.
+import os
+_supp = os.path.join(os.path.dirname(__file__), "emoji_supplement.txt")
+if os.path.exists(_supp):
+    with open(_supp) as f:
+        RAW += "\n" + f.read()
 
 pairs = re.findall(r'\("([^"]+)",\s*"([^"]+)"\)', RAW)
 seen, table = set(), []

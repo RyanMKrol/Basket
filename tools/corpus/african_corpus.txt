@@ -1,0 +1,461 @@
+cassava
+fresh cassava root
+dried cassava
+cassava flour
+garri (cassava granules)
+yellow garri
+white garri
+ijebu garri
+fufu
+fufu flour
+cassava fufu
+plantain fufu
+cocoyam fufu
+pounded yam
+poundo yam flour
+yam (white yam)
+water yam
+yam flour (elubo)
+amala (yam flour swallow)
+eba (garri swallow)
+semolina swallow
+semovita
+wheat swallow flour
+tuwo (rice swallow)
+tuwo shinkafa
+tuwo masara
+plantain
+green plantain
+ripe plantain
+dodo (fried plantain)
+boli (roasted plantain)
+unripe plantain flour
+plantain flour
+cocoyam
+taro root
+sweet potato
+orange sweet potato
+white sweet potato
+irish potato
+matoke (green cooking banana)
+ensete (false banana)
+kocho (ensete starch)
+green banana
+cassava leaves (frozen)
+attieke (cassava couscous)
+gari foto
+acheke
+teff
+brown teff
+white teff
+teff flour
+sorghum
+sorghum flour
+red sorghum
+millet
+pearl millet
+finger millet
+millet flour
+fonio
+fonio grain
+acha (fonio)
+maize
+white maize
+yellow maize
+maize meal
+mealie meal
+super maize meal
+sifted maize meal
+samp
+samp and beans
+hominy
+ugali flour
+pap (ogi)
+akamu (corn pap)
+fermented corn dough
+banku mix
+kenkey
+sadza meal
+semolina
+fine semolina
+wheat flour
+rice (long grain)
+ofada rice
+local brown rice
+jollof rice (prepared)
+black-eyed pea
+cowpea
+brown cowpea
+white cowpea
+honey beans (oloyin)
+brown beans
+black-eyed beans
+bambara bean
+bambara groundnut
+okpa (bambara flour)
+moi moi (bean pudding)
+akara (bean fritters)
+beans flour
+peeled beans
+soybean
+lentils (red)
+pigeon pea
+chickpea
+mung bean
+groundnut (raw)
+roasted groundnut
+groundnut paste
+peanut butter (unsweetened)
+goat meat
+fresh goat meat
+mutton
+lamb
+beef
+beef shin
+shaki (tripe)
+cow tripe
+cow foot
+cow skin (ponmo)
+kpomo
+oxtail
+liver
+gizzard
+chicken (whole)
+hard chicken
+guinea fowl
+turkey wings
+smoked turkey
+suya (spiced beef skewers)
+kilishi (dried spiced beef)
+biltong
+droewors
+nyama choma (grilled meat)
+tilapia
+fresh tilapia
+whole tilapia
+mackerel (titus)
+frozen mackerel
+croaker fish
+catfish
+smoked catfish
+stockfish
+stockfish head
+dried stockfish
+panla (dried cod)
+dried fish
+smoked fish
+smoked herring (shawa)
+bonga fish
+crayfish (ground)
+dried crayfish
+prawns (dried)
+periwinkle
+snail (giant land snail)
+fresh snails
+kapenta (dried sardines)
+omena (dried sardines)
+egusi (melon seed)
+ground egusi
+egusi seeds
+ogbono (wild mango seed)
+ground ogbono
+bitter leaf
+dried bitter leaf
+ugu (fluted pumpkin leaf)
+pumpkin leaves
+ewedu (jute leaf)
+jute leaf (molokhia)
+soko (celosia)
+green amaranth
+efo tete
+waterleaf
+scent leaf (efirin)
+uziza leaf
+utazi leaf
+oha leaf
+kontomire (cocoyam leaf)
+ademe
+cassava leaf (saka saka)
+sukuma wiki (collard greens)
+collard greens
+spinach
+swiss chard (morogo)
+african spinach
+okra
+fresh okra
+dried okra
+ground okra
+scotch bonnet
+ata rodo (scotch bonnet)
+habanero pepper
+shombo (long red pepper)
+tatashe (red bell pepper)
+cameroon pepper
+dried chili pepper
+garden egg
+african eggplant
+garden egg leaf
+ackee
+ackee (canned)
+breadfruit
+ukwa (african breadfruit)
+plantain (for chips)
+african pear (ube)
+tomato
+tomato paste
+fresh tomatoes
+onion
+red onion
+ginger root
+fresh ginger
+locust bean (whole)
+tigernut
+tigernut (fresh)
+coconut
+fresh coconut
+african nutmeg (ehuru)
+palm oil
+red palm oil
+zomi (clarified palm oil)
+banga (palm fruit concentrate)
+palm fruit cream
+groundnut oil
+peanut oil
+vegetable oil
+shea butter
+nkui
+coconut oil
+sesame oil
+melon oil
+palm kernel oil
+suya spice (yaji)
+yaji
+berbere
+mitmita
+shiro powder
+awaze
+jollof seasoning
+suya pepper mix
+pepper soup spice
+curry powder
+thyme
+dried thyme
+grains of selim (uda)
+uda pods
+grains of paradise
+alligator pepper
+calabash nutmeg
+ehuru
+dawadawa
+iru (locust bean)
+ogiri
+ogiri okpei
+fermented locust bean
+maggi cube
+knorr cube
+seasoning cube
+bouillon cube
+ginger powder
+garlic
+garlic powder
+fresh garlic
+nutmeg
+cloves
+cardamom
+black pepper
+white pepper
+cinnamon
+fenugreek
+korarima (ethiopian cardamom)
+besobela (ethiopian basil)
+rue
+turmeric
+cumin
+coriander seed
+african basil
+selim seeds
+tamarind
+tamarind paste
+bay leaf
+egusi soup
+ogbono soup
+banga soup
+bitter leaf soup
+ofe nsala (white soup)
+oha soup
+afang soup
+edikang ikong soup
+okra soup
+ewedu soup
+pepper soup
+fisherman soup
+groundnut soup
+groundnut stew
+maafe (groundnut stew)
+domoda
+light soup (ghana)
+palm nut soup
+kontomire stew
+palaver sauce
+red red (bean stew)
+shito (pepper sauce)
+gravy
+tomato stew
+ata din din (fried stew)
+ayamase (ofada stew)
+gbegiri (bean soup)
+efo riro
+moin moin
+injera
+injera (teff flatbread)
+wat
+doro wat
+misir wat
+shiro wat
+kik alicha
+tibs
+gomen
+key wat
+zigni
+kachumbari
+pilau (spiced rice)
+biryani
+mandazi mix
+sukuma
+matoke stew
+muamba (congo chicken stew)
+poulet directeur general
+mafe sauce
+thieboudienne (jollof fish)
+yassa (onion sauce)
+chicken yassa
+mchuzi (curry stew)
+chapati
+roti
+chin chin
+puff puff
+buns (nigerian)
+puff puff mix
+plantain chips
+plantain chips (sweet)
+plantain chips (salted)
+kelewele (spiced plantain)
+yam chips
+cassava chips
+gari soakings
+shuku shuku
+kuli kuli (groundnut snack)
+kokoro
+dankwa
+nkate cake (peanut brittle)
+mandazi
+maandazi
+sambusa (samosa)
+ethiopian sambusa
+meat pie (nigerian)
+fish roll
+scotch egg
+boli with groundnut
+roasted corn
+abacha (african salad)
+groundnut snack
+coconut candy
+tanga snack
+zobo snack
+dabo (ethiopian bread)
+dabo kolo
+bofrot
+togbei
+atadwe milk drink
+agege bread
+chapati snack
+masa (rice cake)
+kokonte
+chicken floss
+plantain (snack)
+biscuit bones
+chinchin (sweet)
+groundnut sweet
+sesame snap
+coconut chips
+dried mango
+hibiscus (dried)
+zobo leaves
+sorrel (hibiscus)
+bissap
+sobolo
+zobo drink mix
+sobolo spice
+roselle calyx
+palm wine
+fresh palm wine
+emu (palm wine)
+ginger drink
+ginger beer
+african ginger drink
+gnamakoudji (ginger juice)
+tej (honey wine)
+tella (ethiopian beer)
+tamarind drink
+baobab fruit
+baobab powder
+bouye (baobab drink)
+kunu (millet drink)
+kunu zaki
+fura
+fura da nono
+tigernut milk (kunun aya)
+malta drink
+maltina
+chapman mix
+soursop juice
+mango juice
+guava juice
+pineapple
+plantain juice
+african tea
+ethiopian coffee
+ethiopian coffee beans
+buna (coffee)
+rooibos tea
+ginger tea
+moringa powder
+moringa leaf (dried)
+zaatar
+honey (raw)
+african honey
+data dawa
+ataiko (spice)
+gbafilo
+pebe
+prekese (aidan fruit)
+aidan fruit
+negro pepper
+yellow pepper (rodo)
+ata gungun (dried pepper)
+ground pepper mix
+locust bean powder
+crayfish powder
+ogiri igbo
+ukpaka (oil bean)
+ogiri saro
+ground tigernut
+date (dried)
+african star apple (agbalumo)
+udara
+soursop
+guava
+pawpaw (papaya)
+african mango
+velvet tamarind (awin)
+icheku
+walnut (african)
+ground melon seed
+white melon seed
+cashew nut
+bambara nut flour
+acha grain
+digil
+neri (njangsa)
+njangsa
+country onion (rondelle)

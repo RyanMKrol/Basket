@@ -1,0 +1,452 @@
+Okra (bhindi)
+Bitter gourd (karela)
+Bottle gourd (lauki)
+Ridge gourd (turai)
+Snake gourd (padwal)
+Ash gourd (petha)
+Ivy gourd (tindora)
+Pointed gourd (parwal)
+Drumstick (moringa)
+Curry leaf (kadi patta)
+Coriander leaf (cilantro)
+Mint leaf (pudina)
+Fenugreek leaf (methi)
+Spinach (palak)
+Amaranth leaf (chaulai)
+Mustard greens (sarson)
+Dill leaf (suva)
+Colocasia leaf (arbi patta)
+Sorrel leaf (gongura)
+Malabar spinach (poi saag)
+Eggplant (brinjal)
+Green chilli (hari mirch)
+Red chilli (lal mirch)
+Capsicum (shimla mirch)
+Tomato (tamatar)
+Onion (pyaaz)
+Shallot (sambar onion)
+Spring onion (hara pyaaz)
+Garlic (lehsun)
+Ginger (adrak)
+Turmeric root (kachi haldi)
+Potato (aloo)
+Sweet potato (shakarkandi)
+Yam (suran)
+Elephant foot yam (ol)
+Taro root (arbi)
+Tapioca (kappa)
+Colocasia (kachalu)
+Cauliflower (gobi)
+Cabbage (patta gobi)
+Broccoli
+Carrot (gajar)
+Radish (mooli)
+Beetroot (chukandar)
+Turnip (shalgam)
+Green peas (matar)
+Cluster beans (gawar)
+French beans (farasbi)
+Broad beans (sem)
+Long beans (lobia)
+Flat beans (papdi)
+Cucumber (kheera)
+Green plantain (kacha kela)
+Banana flower
+Banana stem
+Lotus root (kamal kakdi)
+Lotus stem (nadru)
+Pumpkin (kaddu)
+Green papaya (kacha papita)
+Jackfruit (kathal)
+Raw mango (kairi)
+Mango (aam)
+Tamarind (imli)
+Kokum
+Lime (nimbu)
+Lemon
+Coconut (nariyal)
+Tender coconut
+Grated coconut
+Water chestnut (singhara)
+Lemongrass
+Galangal
+Pandan leaf (rampe)
+Paneer
+Ghee
+Curd (dahi)
+Buttermilk (chaas)
+Khoya (mawa)
+Malai
+Chenna
+Butter (makhan)
+White butter
+Condensed milk
+Full cream milk (doodh)
+Buffalo milk
+Lassi
+Shrikhand
+Cheddar cheese
+Goat meat (mutton)
+Lamb (gosht)
+Chicken (murgh)
+Chicken liver (kaleji)
+Mutton keema
+Chicken keema
+Beef
+Trotters (paya)
+Brain (bheja)
+Tripe
+Bone marrow (nalli)
+Prawns (jhinga)
+King prawns
+Tiger prawns
+Shrimp (chingri)
+Crab (kekda)
+Pomfret (paplet)
+Rohu fish (rui)
+Catla fish
+Hilsa fish (ilish)
+Mackerel (bangda)
+Kingfish (surmai)
+Sardine (tarli)
+Anchovy (nethili)
+Tilapia
+Seer fish (vanjaram)
+Sole fish
+Bombay duck (bombil)
+Squid (koonthal)
+Mussels (kalva)
+Clams (tisrya)
+Dried fish
+Dried prawn
+Maldive fish
+Salted fish
+Egg (anda)
+Duck egg
+Quail egg
+Toor dal (pigeon pea)
+Arhar dal
+Chana dal (split chickpea)
+Urad dal (black gram)
+Whole urad (sabut urad)
+Moong dal (green gram)
+Yellow moong dal
+Whole moong (green gram)
+Masoor dal (red lentil)
+Whole masoor (brown lentil)
+Lobia (black-eyed peas)
+Rajma (kidney beans)
+Kabuli chana (white chickpeas)
+Kala chana (black chickpeas)
+Green chana
+Vatana (white peas)
+Green vatana
+Moth beans (matki)
+Horse gram (kulthi)
+Field beans (val dal)
+Soybean (soya)
+Panchmel dal
+Atta (whole wheat flour)
+Maida (refined flour)
+Besan (gram flour)
+Rice flour
+Sooji (semolina)
+Bajra flour (pearl millet)
+Jowar flour (sorghum)
+Ragi flour (finger millet)
+Makki ka atta (maize flour)
+Singhara atta (water chestnut flour)
+Kuttu atta (buckwheat flour)
+Rajgira atta (amaranth flour)
+Multigrain atta
+Idli rava
+Sattu (roasted gram flour)
+Tapioca flour
+Sago flour
+Cornflour
+Vermicelli (seviyan)
+Basmati rice
+Sona masoori rice
+Ponni rice
+Idli rice
+Parboiled rice (ukda chawal)
+Brown rice
+Red rice (matta rice)
+Gobindobhog rice
+Poha (flattened rice)
+Murmura (puffed rice)
+Aval (red poha)
+Sabudana (sago pearls)
+Broken wheat (dalia)
+Pearl millet (bajra)
+Sorghum (jowar)
+Finger millet (ragi)
+Foxtail millet (kangni)
+Barnyard millet (samak)
+Little millet (kutki)
+Kodo millet
+Barley (jau)
+Oats (jai)
+Corn kernels (makka)
+Wheat grain (gehu)
+Roti (chapati)
+Naan
+Garlic naan
+Butter naan
+Tandoori roti
+Paratha
+Aloo paratha
+Gobi paratha
+Paneer paratha
+Lachha paratha
+Methi paratha
+Puri (fried bread)
+Bhatura
+Kulcha
+Roomali roti
+Missi roti
+Makki di roti
+Bajra rotla
+Jowar bhakri
+Thepla
+Dosa
+Masala dosa
+Rava dosa
+Set dosa
+Uttapam
+Idli (steamed rice cake)
+Rava idli
+Appam
+Idiyappam (string hopper)
+Hopper (appa)
+Pol roti (coconut roti)
+Godhamba roti
+Kothu roti
+Pesarattu
+Adai
+Neer dosa
+Akki roti
+Sheermal
+Taftan
+Litti
+Sel roti
+Dhido
+Garam masala
+Chaat masala
+Tandoori masala
+Sambar powder
+Rasam powder
+Chana masala powder
+Pav bhaji masala
+Biryani masala
+Kitchen king masala
+Goda masala
+Chettinad masala
+Madras curry powder
+Vindaloo paste
+Kasuri methi (dried fenugreek)
+Asafoetida (hing)
+Amchur (dried mango powder)
+Anardana (dried pomegranate)
+Cumin seeds (jeera)
+Black cumin (shahi jeera)
+Coriander seeds (dhania)
+Coriander powder
+Cumin powder
+Turmeric powder (haldi)
+Red chilli powder
+Kashmiri chilli powder
+Deggi mirch
+Black pepper (kali mirch)
+White pepper
+Mustard seeds (rai)
+Black mustard seeds
+Yellow mustard seeds
+Fenugreek seeds (methi dana)
+Fennel seeds (saunf)
+Carom seeds (ajwain)
+Nigella seeds (kalonji)
+Sesame seeds (til)
+Poppy seeds (khus khus)
+Green cardamom (elaichi)
+Black cardamom
+Cloves (laung)
+Cinnamon (dalchini)
+Bay leaf (tej patta)
+Star anise
+Mace (javitri)
+Nutmeg (jaiphal)
+Stone flower (kalpasi)
+Saffron (kesar)
+Dried red chilli
+Tamarind paste
+Tamarind concentrate
+Ginger garlic paste
+Rock salt (sendha namak)
+Black salt (kala namak)
+Dried ginger (sonth)
+Long pepper (pippali)
+Mango pickle (aam achar)
+Lime pickle (nimbu achar)
+Chilli pickle
+Mixed vegetable pickle
+Garlic pickle
+Ginger pickle
+Gongura pickle
+Avakaya
+Mango chutney
+Coconut chutney
+Coriander chutney
+Mint chutney
+Tamarind chutney
+Tomato chutney
+Onion chutney
+Date chutney (khajur)
+Peanut chutney
+Garlic chutney
+Coconut milk
+Coconut cream
+Coconut milk powder
+Tandoori paste
+Tikka masala paste
+Korma paste
+Madras paste
+Balti paste
+Rogan josh paste
+Biryani paste
+Mango pulp (aam ras)
+Alphonso mango pulp
+Ginger paste
+Garlic paste
+Green chilli paste
+Sambar paste
+Samosa
+Vegetable samosa
+Keema samosa
+Onion bhaji
+Pakora (fritter)
+Aloo tikki
+Sev
+Papadum (papad)
+Bhujia
+Aloo bhujia
+Chivda
+Mathri
+Murukku
+Chakli
+Boondi
+Dahi vada
+Vada pav
+Medu vada
+Pani puri (golgappa)
+Bhel puri
+Sev puri
+Dabeli
+Kachori
+Khakhra
+Fafda
+Gathiya
+Namkeen mix
+Moong dal namkeen
+Masala peanuts
+Banana chips
+Tapioca chips
+Khandvi
+Dhokla
+Khaman
+Handvo
+Patra
+Vegetable cutlet
+Spring roll
+Momo (dumpling)
+Chicken momo
+Veg momo
+Gulab jamun
+Jalebi
+Barfi (milk fudge)
+Kaju katli
+Besan barfi
+Coconut barfi
+Laddu
+Boondi laddu
+Motichoor laddu
+Besan laddu
+Rava laddu
+Til laddu
+Rasgulla
+Rasmalai
+Sandesh
+Mishti doi
+Cham cham
+Kheer (rice pudding)
+Phirni
+Payasam
+Halwa (sooji)
+Gajar halwa (carrot)
+Moong dal halwa
+Karachi halwa
+Mysore pak
+Soan papdi
+Petha
+Imarti
+Balushahi
+Ghevar
+Malpua
+Modak
+Puran poli
+Peda
+Milk cake (kalakand)
+Chikki (brittle)
+Til chikki
+Gajak
+Rabri
+Basundi
+Kulfi
+Falooda
+Nankhatai
+Sheer khurma
+Masala chai
+Tea leaves (chai patti)
+Assam tea
+Darjeeling tea
+Cardamom tea
+Ginger tea
+Sweet lassi
+Mango lassi
+Salt lassi
+Buttermilk drink (chaas)
+Thandai
+Badam milk (almond)
+Rooh Afza (rose syrup)
+Khus syrup
+Nimbu pani (lemonade)
+Aam panna
+Sugarcane juice
+Coconut water
+Jaljeera
+Sol kadhi
+Filter coffee
+Coffee powder
+Jaggery (gud)
+Palm jaggery
+Coconut jaggery
+Mustard oil (sarson tel)
+Coconut oil
+Groundnut oil
+Sesame oil (gingelly)
+Vanaspati
+Cashew nuts (kaju)
+Almonds (badam)
+Pistachios (pista)
+Raisins (kishmish)
+Walnuts (akhrot)
+Dried dates (chuara)
+Fox nuts (makhana)
+Dried figs (anjeer)
+Charoli (chironji)
+Dried coconut (copra)
+Rose water (gulab jal)
+Kewra water
+Edible silver leaf (vark)
+Betel leaf (paan)
+Betel nut (supari)

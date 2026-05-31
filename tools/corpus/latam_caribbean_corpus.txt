@@ -1,0 +1,494 @@
+tomatillo (husk tomato)
+plantain
+yuca (cassava root)
+cassava flour
+chayote (mirliton squash)
+nopal (cactus paddle)
+nopalitos (sliced cactus)
+prickly pear (tuna fruit)
+aji amarillo (yellow chili)
+aji panca (Peruvian red chili)
+aji dulce (sweet pepper)
+jalapeño
+serrano chili
+habanero
+poblano pepper
+chile de arbol
+scotch bonnet pepper
+hearts of palm
+calabaza (West Indian pumpkin)
+huitlacoche (corn fungus)
+epazote (herb)
+hoja santa (root beer plant)
+culantro (recao)
+cilantro
+mexican oregano
+achiote seed
+annatto powder
+papalo (herb)
+verdolagas (purslane)
+malanga (taro root)
+ñame (yam)
+boniato (sweet potato)
+camote (sweet potato)
+jicama
+banana leaves
+corn husks (hojas para tamal)
+avocado (Hass)
+mamey sapote
+black sapote
+sapodilla (chicozapote)
+guava
+guava paste (goiabada)
+guanabana (soursop)
+cherimoya
+pitahaya (dragon fruit)
+maracuya (passion fruit)
+tamarind pod
+tamarind paste
+mango (ataulfo)
+papaya (maradol)
+star fruit (carambola)
+lulo (naranjilla)
+tomate de arbol (tree tomato)
+borojo
+acai berry
+acai pulp
+cupuacu
+aguaymanto (golden berry)
+nance fruit
+jocote (spanish plum)
+breadfruit
+ackee
+june plum
+mamoncillo (spanish lime)
+key lime
+sour orange (naranja agria)
+green papaya
+yautia (tannia)
+arracacha
+oca (andean tuber)
+ulluco
+maca root
+huacatay (black mint)
+muña (andean mint)
+ancho chili (dried)
+chipotle chili (dried)
+chipotle in adobo
+guajillo chili (dried)
+pasilla chili (dried)
+mulato chili (dried)
+cascabel chili (dried)
+morita chili (dried)
+piquin chili (dried)
+new mexico chili (dried)
+rocoto pepper
+rocoto paste
+aji amarillo paste
+aji panca paste
+malagueta pepper (Brazilian)
+dende oil (palm oil)
+coconut milk
+coconut cream
+coconut water
+grated coconut
+black beans (frijol negro)
+pinto beans
+refried beans (frijoles refritos)
+peruano beans (canary beans)
+red kidney beans
+white beans (frijol blanco)
+gandules (pigeon peas)
+habas (fava beans)
+chickpeas (garbanzo)
+black-eyed peas
+feijao (Brazilian beans)
+masa harina (corn masa flour)
+hominy (pozole corn)
+white corn
+purple corn (maiz morado)
+cancha (chulpe corn)
+choclo (andean corn)
+mote (hominy)
+arepa flour (masarepa)
+cornmeal (harina de maiz)
+quinoa (white)
+quinoa (red)
+kiwicha (amaranth)
+farofa (cassava meal)
+tapioca starch
+tapioca pearls
+chuño (freeze-dried potato)
+papa amarilla (yellow potato)
+purple potato
+corn tortillas
+flour tortillas
+blue corn tortillas
+tostadas
+totopos (tortilla chips)
+taco shells (hard)
+empanada discs (tapas)
+gordita shells
+sope bases
+huarache base
+pupusa masa
+hallaca dough kit
+queso fresco
+cotija cheese
+queso panela
+queso oaxaca (string cheese)
+queso chihuahua
+queso asadero
+requeson (ricotta-style)
+queso blanco
+queso de freir (frying cheese)
+queso llanero
+queso de mano
+queijo coalho (grill cheese)
+queijo minas
+catupiry (Brazilian cream cheese)
+crema mexicana
+crema salvadoreña
+cuajada
+salsa roja
+salsa verde
+salsa taquera
+pico de gallo
+salsa macha
+habanero salsa
+mole poblano paste
+mole negro paste
+mole verde paste
+adobo seasoning
+sazon seasoning
+sofrito
+recaito
+chimichurri
+salsa criolla
+aji verde (Peruvian green sauce)
+huancaina sauce
+ocopa sauce
+salsa golf
+guacamole
+guasacaca (Venezuelan avocado sauce)
+mojo criollo (garlic citrus)
+escabeche
+curtido (cabbage relish)
+chamoy
+tajin seasoning
+salsa lizano (Costa Rican)
+pique (Puerto Rican hot sauce)
+jerk seasoning (dry rub)
+jerk marinade (wet)
+browning sauce
+pickapeppa sauce
+scotch bonnet pepper sauce
+achiote paste (recado rojo)
+recado negro
+sazon con culantro y achiote
+caldo de pollo (chicken bouillon)
+caldo de res (beef bouillon)
+caldo de camaron (shrimp bouillon)
+vinagre de piña (pineapple vinegar)
+dulce de leche
+cajeta (goat caramel)
+arequipe (Colombian caramel)
+manjar blanco
+doce de leite (Brazilian)
+guava paste (bocadillo)
+membrillo (quince paste)
+panela (raw cane sugar)
+piloncillo (cone sugar)
+papelon
+condensed milk (leche condensada)
+evaporated milk
+media crema (table cream)
+horchata mix
+chicha morada mix
+agua de jamaica (hibiscus)
+hibiscus flowers (dried)
+tamarindo drink mix
+tepache
+champurrado mix
+atole mix
+abuelita chocolate
+ibarra chocolate
+cacao nibs
+chocolate de mesa
+yerba mate
+mate cocido
+guarana powder
+guarana soda
+inca kola
+jarritos soda
+malta (malt beverage)
+materva
+cola champagne
+coconut soda
+tamarind soda
+ginger beer
+mauby (mabi)
+sorrel drink mix
+rum (white)
+rum (dark)
+rum (spiced)
+cachaca
+pisco
+aguardiente
+tequila
+mezcal
+michelada mix
+clamato juice
+sangrita
+ponche crema (Venezuelan eggnog)
+coquito mix (Puerto Rican)
+rompope
+cafe de olla
+colombian coffee
+brazilian coffee
+peruvian coffee
+chorizo (Mexican)
+longaniza
+soyrizo (soy chorizo)
+linguica (Brazilian sausage)
+calabresa sausage
+morcilla (blood sausage)
+chistorra
+carnitas
+cochinita pibil
+al pastor marinated pork
+barbacoa
+lengua (beef tongue)
+tripa (tripe)
+chicharron (pork rinds)
+suadero
+cecina (thin beef)
+arrachera (skirt steak marinated)
+carne asada (marinated)
+picanha (Brazilian beef cut)
+churrasco steak
+matambre (flank)
+asado de tira (short rib)
+provoleta (grill cheese)
+pollo a la brasa marinade
+jerk chicken (marinated)
+oxtail (rabo)
+goat meat (cabrito)
+mondongo (tripe stew kit)
+bacalao (salt cod)
+bacalhau (salted cod)
+camarones secos (dried shrimp)
+shrimp (camaron)
+octopus (pulpo)
+squid (calamar)
+conch (caracol)
+mahi mahi (dorado)
+corvina (sea bass)
+red snapper (huachinango)
+tilapia
+flying fish
+smoked herring
+sardines (sardinas)
+paiche (pirarucu)
+trout (trucha)
+mussels (choros)
+clams (almejas)
+crab (cangrejo)
+ceviche mix
+leche de tigre (tiger's milk)
+tacos kit
+taco seasoning
+enchilada sauce
+enchilada kit
+tamale kit
+pozole kit
+menudo mix
+chiles rellenos kit
+flautas
+taquitos
+chilaquiles kit
+nachos
+quesadilla
+tlayuda
+mole kit
+feijoada kit
+moqueca base
+acaraje (black eyed pea fritter)
+pao de queijo mix (cheese bread)
+coxinha
+pastel (Brazilian fried pastry)
+brigadeiro mix
+empanada (beef)
+empanada (chicken)
+empanada (cheese)
+saltena (Bolivian empanada)
+arepa (precooked)
+cachapa (corn pancake)
+tequeños (cheese sticks)
+hallaca (Venezuelan tamale)
+pabellon criollo kit
+mofongo mix
+tostones (twice-fried plantain)
+maduros (sweet plantain)
+alcapurrias
+bacalaitos mix
+pasteles (Puerto Rican)
+sancocho mix
+ropa vieja kit
+picadillo
+cuban sandwich kit
+croquetas
+lomo saltado sauce kit
+aji de gallina paste
+causa rellena kit
+anticucho sauce
+papa rellena
+humita (corn tamale)
+choripan kit
+milanesa (breaded cutlet)
+locro mix (Argentine stew)
+bandeja paisa kit
+ajiaco kit (Colombian)
+sancocho colombiano
+lechona kit
+arepa colombiana
+pandebono mix
+patacones (fried plantain)
+jerk pork (marinated)
+jamaican patty (beef)
+jamaican patty (chicken)
+festival mix (fried dumpling)
+bammy (cassava flatbread)
+rice and peas mix
+callaloo (canned)
+ackee and saltfish kit
+jamaican curry powder
+curry goat kit
+escovitch fish kit
+plantain chips
+yuca chips (cassava chips)
+malanga chips
+tortilla chips
+chicharrones de harina (duritos)
+chifles (plantain chips)
+cancha (toasted corn snack)
+maiz tostado
+habas fritas (fried fava)
+churros
+churro mix
+buñuelos
+sopaipillas
+alfajores (dulce de leche cookies)
+polvorones
+marranitos (pig cookies)
+conchas (Mexican sweet bread)
+pan dulce
+mantecadas
+tres leches kit
+flan mix
+mazapan (peanut candy)
+pulparindo (tamarind candy)
+pelon pelo rico
+chamoy candy
+cocada (coconut candy)
+palanqueta (peanut brittle)
+obleas (wafers)
+paletas (Mexican popsicles)
+rosca de reyes
+pan de muerto
+bolillo (bread roll)
+telera roll
+pan sobao
+pao frances
+quindim (coconut custard)
+pudim (Brazilian flan)
+canjica (corn pudding)
+pamonha
+tapioca crepe
+acai bowl mix
+suspiro a la limeña
+mazamorra morada
+arroz con leche mix
+turron de doña pepa
+arroz (long grain rice)
+parboiled rice
+arroz amarillo (yellow rice mix)
+arroz con gandules kit
+gallo pinto kit
+white hominy (canned)
+chickpeas (canned)
+black beans (canned)
+refried beans (canned)
+frijoles charros (canned)
+sazon goya
+adobo goya
+recaito goya
+tomato paste (Mexican)
+chipotle paste
+green chili sauce
+nopalitos (jarred)
+jalapeños (pickled)
+chiles en escabeche
+chiles toreados
+chipotles adobados (canned)
+serranos (pickled)
+green olives (Manzanilla)
+capers (alcaparras)
+piquillo peppers
+mango pulp (canned)
+cream of coconut (Coco Lopez)
+tamarind concentrate
+passion fruit concentrate
+guanabana pulp (frozen)
+maracuya pulp (frozen)
+acai pulp (frozen)
+lulo pulp (frozen)
+yuca (frozen)
+tostones (frozen)
+empanada discs (frozen)
+arepas (frozen)
+pao de queijo (frozen)
+tamales (frozen)
+pupusas (frozen)
+achiote oil
+lime juice (jugo de limon)
+key lime juice
+huacatay paste
+cochayuyo (seaweed)
+merken (Chilean smoked chili)
+charqui (jerky)
+machaca (dried shredded beef)
+tasajo (salted beef)
+cumin (comino)
+mexican cinnamon (canela)
+allspice (pimienta dulce)
+bay leaf (laurel)
+star anise (anis estrella)
+sesame seeds (ajonjoli)
+pumpkin seeds (pepitas)
+peanuts (cacahuate)
+brazil nuts
+cashews (caju)
+adobo all-purpose
+green seasoning (Caribbean)
+allspice berries (pimento)
+nutmeg (Caribbean)
+pigeon peas (canned)
+dasheen (taro)
+eddoes
+cho cho (chayote)
+green banana
+coconut drops
+gizzada (coconut tart)
+tamarind balls
+guava cheese
+sorrel (dried hibiscus)
+breadfruit chips
+cassava bread
+demerara sugar
+molasses (Caribbean)
+thyme (fresh)
+ginger root
+turmeric root
+sugarcane
+green coconut

@@ -1,0 +1,467 @@
+pita bread
+khubz (Arabic flatbread)
+lavash
+markook (saj bread)
+taboon bread
+manakish (za'atar flatbread)
+barbari bread
+sangak bread
+taftoon bread
+msemen (Moroccan pancake)
+khobz (Moroccan bread)
+batbout
+harcha (semolina bread)
+baghrir (thousand-hole pancake)
+yufka (thin dough)
+pide bread
+simit (sesame bread ring)
+bazlama
+gozleme
+samoon (Iraqi bread)
+matzo
+fatir
+aish baladi
+kaak (sesame ring)
+phyllo dough (filo)
+warqa pastry
+bulgur (cracked wheat)
+fine bulgur
+coarse bulgur
+freekeh (roasted green wheat)
+couscous
+fine couscous
+giant couscous (moghrabieh)
+maftoul
+semolina
+durum wheat
+basmati rice
+Persian rice
+Egyptian short-grain rice
+vermicelli
+roasted vermicelli
+jereesh (crushed wheat)
+wheat berries
+pearl barley
+red lentils
+brown lentils
+green lentils
+yellow split peas
+black-eyed peas (lubia)
+dried chickpeas
+canned chickpeas
+fava beans (ful)
+dried fava beans
+split fava beans
+ful medames
+white kidney beans
+broad beans
+mung beans
+black lentils
+lamb
+lamb shoulder
+lamb leg
+lamb shanks
+lamb chops
+ground lamb
+lamb ribs
+lamb liver
+lamb kidney
+mutton
+goat meat
+ground beef
+beef shank
+beef brisket
+veal
+kofta
+kofta kebab
+shish kebab
+shawarma meat
+whole chicken
+chicken thighs
+chicken breast
+chicken wings
+chicken drumsticks
+ground chicken
+chicken shawarma
+poussin
+quail
+turkey
+pastirma (cured beef)
+sujuk (spiced sausage)
+basturma
+merguez sausage
+camel meat
+sea bass
+red mullet
+sardines
+mackerel
+sea bream
+grouper (hammour)
+kingfish
+tilapia
+mullet (bouri)
+fesikh (fermented mullet)
+shrimp
+calamari
+octopus
+crab
+mussels
+salt cod
+anchovies
+tuna
+canned tuna
+chickpea flour (besan)
+fava bean flour
+semolina flour
+all-purpose flour
+whole wheat flour
+cornflour
+rice flour
+tomatoes
+vine tomatoes
+cherry tomatoes
+cucumbers
+Persian cucumbers
+eggplant (aubergine)
+baby eggplant
+zucchini (courgette)
+kousa (pale zucchini)
+bell peppers
+green peppers
+red peppers
+chili peppers
+green chilies
+Aleppo pepper
+onions
+red onions
+white onions
+shallots
+spring onions
+garlic
+potatoes
+sweet potatoes
+carrots
+turnips
+beetroot
+radishes
+white radish (daikon)
+okra (bamia)
+green beans (lubia)
+fresh fava pods
+peas
+cauliflower
+cabbage
+swiss chard
+spinach
+purslane (baqle)
+molokhia (jute leaves)
+vine leaves (grape leaves)
+artichokes
+artichoke hearts
+celery
+celeriac
+fennel
+leeks
+kohlrabi
+butternut squash
+pumpkin
+bottle gourd
+corn
+mushrooms
+fresh mint
+flat-leaf parsley
+coriander leaves
+dill
+fresh thyme
+fresh oregano
+fresh basil
+tarragon
+fenugreek leaves
+chives
+watercress
+rocket (arugula)
+sorrel
+rosemary
+sage
+bay leaves
+green almonds
+lemons
+limes
+oranges
+blood oranges
+mandarins
+clementines
+bitter oranges (Seville)
+grapefruit
+pomegranate
+quince
+fresh figs
+dried figs
+dates
+medjool dates
+deglet noor dates
+ajwa dates
+grapes
+apricots
+peaches
+plums
+melon
+watermelon
+cantaloupe
+mulberries
+cherries
+sour cherries
+persimmon
+prickly pear
+loquat
+sumac
+za'atar (blend)
+baharat (seven-spice)
+ras el hanout
+dukkah
+harissa paste
+harissa powder
+advieh (Persian blend)
+hawaij (Yemeni blend)
+bzar (Gulf blend)
+kabsa spice mix
+tabil (Tunisian blend)
+chermoula
+loomi (dried lime)
+black lime powder
+ground cumin
+cumin seeds
+coriander seeds
+ground coriander
+caraway seeds
+fennel seeds
+nigella seeds (black seed)
+sesame seeds
+white sesame
+black sesame
+turmeric
+sweet paprika
+smoked paprika
+Aleppo pepper flakes
+Urfa pepper (isot)
+pul biber (Turkish chili flakes)
+cayenne pepper
+ground cinnamon
+cinnamon sticks
+green cardamom
+black cardamom
+cloves
+nutmeg
+mace
+allspice
+black pepper
+white pepper
+ground ginger
+saffron
+dried rose petals
+rose buds
+mahleb (cherry kernel)
+mastic
+fenugreek seeds
+star anise
+dried mint
+dried oregano
+dried thyme
+galangal
+chili flakes
+vanilla pod
+tahini (sesame paste)
+black tahini
+pomegranate molasses (dibs rumman)
+date molasses (dibs)
+grape molasses (pekmez)
+carob molasses
+tomato paste
+red pepper paste (biber salcasi)
+ajvar (pepper relish)
+muhammara
+tamarind paste
+orange blossom water
+rose water
+kashk (fermented whey)
+labneh (strained yogurt)
+labneh balls in oil
+yogurt (laban)
+ayran (yogurt drink)
+doogh (Persian yogurt drink)
+feta cheese
+Bulgarian feta
+halloumi
+nabulsi cheese
+akkawi cheese
+shanklish
+jameed (dried yogurt)
+kashkaval cheese
+beyaz peynir (Turkish white cheese)
+mozzarella
+ricotta
+cream cheese
+qeshta (clotted cream)
+kaymak (clotted cream)
+ashta
+ghee (samneh)
+clarified butter
+butter
+buttermilk
+fresh cream
+milk
+goat cheese
+braided string cheese
+olive oil
+extra virgin olive oil
+sesame oil
+sunflower oil
+corn oil
+argan oil
+nigella seed oil
+green olives
+black olives
+kalamata olives
+cracked green olives
+oil-cured olives
+stuffed olives
+preserved lemons
+pickled turnips (torshi)
+mixed pickles
+pickled cucumbers
+pickled eggplant (makdous)
+pickled chilies
+amba (mango pickle)
+caper berries
+capers
+pickled garlic
+sun-dried tomatoes
+dried apricots
+dried mulberries
+dried limes
+sun-dried okra
+qamar al-din (apricot leather)
+raisins
+golden raisins
+sultanas
+zereshk (barberries)
+dried cranberries
+almonds
+blanched almonds
+slivered almonds
+ground almonds
+pistachios
+shelled pistachios
+ground pistachios
+walnuts
+pine nuts
+cashews
+hazelnuts
+peanuts
+pecans
+chestnuts
+melon seeds
+pumpkin seeds
+sunflower seeds
+roasted chickpeas (leblebi)
+apricot kernels
+flaxseed
+chia seeds
+poppy seeds
+baklava
+kunafa (knafeh)
+basbousa (semolina cake)
+namoura
+maamoul (date cookies)
+barazek (sesame cookies)
+ghraybeh (shortbread)
+halva (sesame)
+pistachio halva
+tahini halva
+Turkish delight (lokum)
+rose lokum
+qatayef (stuffed pancakes)
+luqaimat (sweet dumplings)
+awameh
+balah el sham
+zalabia
+mahalabia (milk pudding)
+sahlab (sahlep pudding)
+umm ali (bread pudding)
+roz bel laban (rice pudding)
+sholeh zard (saffron rice pudding)
+faloodeh (Persian dessert)
+bastani (Persian ice cream)
+booza (Arabic ice cream)
+gaz (Persian nougat)
+sohan (Persian brittle)
+pashmak (fairy floss)
+revani (semolina cake)
+sutlac (Turkish rice pudding)
+kazandibi
+lokma
+nougat
+kahk (Eid cookies)
+makroudh (date semolina pastry)
+kaab el ghazal (gazelle horns)
+chebakia (sesame pastry)
+ghriba (Moroccan cookie)
+briouat
+samsa (almond pastry)
+black tea
+ceylon tea
+Persian black tea
+Moroccan mint tea
+gunpowder green tea
+Turkish black tea (cay)
+Turkish coffee
+Arabic coffee (qahwa)
+cardamom coffee
+green coffee beans
+instant coffee
+sahlab powder
+jallab syrup
+tamarind drink
+rosewater syrup
+mint syrup
+pomegranate juice
+sour cherry syrup
+ayran drink
+karkadeh (hibiscus tea)
+hibiscus dried flowers
+sobia (Egyptian drink)
+erk sous (licorice drink)
+licorice root
+sage tea
+chamomile
+verbena (luiza)
+saffron tea
+falafel mix
+kofta spice mix
+shawarma seasoning
+kabsa rice mix
+dolma rice mix
+kibbeh dough mix
+fig jam
+quince jam
+rose petal jam
+date paste
+date syrup
+carob syrup
+honey
+sidr honey
+black seed honey
+sesame crackers
+date bars
+za'atar manakish
+spinach fatayer
+cheese sambousek
+meat sambousek
+kibbeh
+falafel
+vine leaf rolls
+hummus
+baba ganoush
+toum (garlic sauce)
+chili sauce (shatta)
+tarator sauce

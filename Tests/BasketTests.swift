@@ -64,6 +64,17 @@ final class EmojiTests: XCTestCase {
         XCTAssertEqual(Emoji.forName("Frozen peas"), Emoji.forName("Peas"))
         XCTAssertEqual(Emoji.forName("Smoked haddock"), Emoji.forName("Haddock"))
     }
+
+    func testGlobalCuisineItemsAreMapped() {
+        // A spread of items from the global corpus — none should hit the basket.
+        let items = ["Gochujang", "Kimchi", "Injera", "Berbere", "Jollof rice",
+                     "Garri", "Banh mi", "Toor dal", "Paneer", "Halloumi",
+                     "Falafel", "Tahini", "Gnocchi", "Chorizo", "Tempeh",
+                     "Mochi", "Matcha", "Kombu", "Masa harina", "Plantain"]
+        for item in items {
+            XCTAssertNotEqual(Emoji.forName(item), Emoji.fallback, "\(item) should map to a real emoji")
+        }
+    }
 }
 
 final class SuggestionsTests: XCTestCase {
