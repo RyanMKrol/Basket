@@ -7,6 +7,7 @@ struct ItemRow: View {
     let name: String
     let emoji: String
     let isChecked: Bool
+    var isFlashing: Bool = false
     let onToggle: () -> Void
 
     var body: some View {
@@ -27,6 +28,13 @@ struct ItemRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .basketCard()
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous)
+                .stroke(Theme.leaf, lineWidth: 2)
+                .opacity(isFlashing ? 1 : 0)
+        )
+        .scaleEffect(isFlashing ? 1.03 : 1)
+        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isFlashing)
         .contentShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
         .onTapGesture(perform: onToggle)
     }

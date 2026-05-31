@@ -1,0 +1,60 @@
+# Basket 🧺
+
+A soft, friendly iOS shopping list. Adding is frictionless (a pinned bottom bar
+with history-backed suggestions); checking an item off slides it into a faded
+"Got it" section that clears itself after an hour.
+
+Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
+
+## Features
+
+- **Quick add** — always-visible bottom bar; as you type, things you've bought in
+  the last month float up as one-tap suggestions, ranked by frequency + recency.
+- **Tap anywhere on a row** to check it off — it strikes through and slides into a
+  dimmed **"Got it"** section (tap again to restore it).
+- **1-hour TTL** on the "Got it" section, so it tidies itself between shops.
+- **Duplicate-aware** — re-adding something already listed bumps + flashes the
+  existing row instead of creating a copy.
+- **Playful auto-emoji** per item, and a warm tri-colour (green/yellow/tomato)
+  background bloom.
+
+## Build & run (CLI, no Xcode GUI)
+
+Requires Xcode's command-line tools and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+(`brew install xcodegen`).
+
+```sh
+./build_run.sh                 # generate → build → install → launch → screenshot
+./build_run.sh "iPhone 17"     # target a different simulator
+```
+
+`build_run.sh` builds by `-target` with an explicit `SUPPORTED_PLATFORMS` because
+this machine's Xcode generates a scheme whose supported-platforms list is empty.
+
+## Tests
+
+Pure logic (emoji mapping, suggestion ranking) is covered two ways:
+
+- `Tests/BasketTests.swift` — XCTest, for any Xcode that can run a simulator test
+  destination.
+- `tools/main.swift` — the **same source files** run natively on macOS:
+
+  ```sh
+  swiftc Sources/Services/Emoji.swift Sources/Services/Suggestions.swift \
+         Sources/Models/Suggestion.swift tools/main.swift -o /tmp/basket_check && /tmp/basket_check
+  ```
+
+## Known environment limitation
+
+This machine has the **iOS 26.5 SDK** but only the **iOS 26.2 simulator runtime**.
+With no runtime matching the SDK:
+
+- `xcodebuild test` can't synthesise a simulator test destination (hence the
+  native `swiftc` harness above).
+- `actool` can't compile **any** asset catalog, so the **app icon and accent
+  colour are temporarily excluded from the build** (the assets are committed in
+  `Sources/Assets.xcassets`, ready to re-enable).
+
+**Fix:** install a matching runtime — `xcodebuild -downloadPlatform iOS` — then
+in `project.yml` remove the `Assets.xcassets` exclude and restore
+`ASSETCATALOG_COMPILER_APPICON_NAME` / `…_GLOBAL_ACCENT_COLOR_NAME`.

@@ -16,7 +16,14 @@ targets:
     type: application
     platform: iOS
     sources:
-      - Sources
+      - path: Sources
+        # Assets.xcassets is excluded from the build for now: this machine has no
+        # iOS simulator runtime matching the 26.5 SDK, so actool can't compile any
+        # asset catalog ("No simulator runtime version … available"). The icon +
+        # accent assets are kept in the repo, ready to re-enable once the matching
+        # runtime is installed (remove this exclude + restore the settings below).
+        excludes:
+          - "Assets.xcassets"
     info:
       path: Sources/Info.plist
       properties:
@@ -28,7 +35,9 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.basket
         GENERATE_INFOPLIST_FILE: NO
-        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # Re-add once a matching iOS simulator runtime is installed:
+        #   ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        #   ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
   BasketTests:
     type: bundle.unit-test
     platform: iOS

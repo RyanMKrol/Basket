@@ -10,6 +10,7 @@ struct ShoppingListView: View {
 
     @State private var draft: String = ""
     @State private var now: Date = .now
+    @State private var flashID: PersistentIdentifier?
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -36,41 +37,46 @@ struct ShoppingListView: View {
             VStack(spacing: 0) {
                 header
 
-                ScrollView {
-                    VStack(spacing: 12) {
-                        // To-get section.
-                        ForEach(toGet) { item in
-                            ItemRow(
-                                name: item.name,
-                                emoji: Emoji.forName(item.name),
-                                isChecked: false,
-                                onToggle: { toggle(item) }
-                            )
-                            .transition(.asymmetric(
-                                insertion: .scale(scale: 0.92).combined(with: .opacity),
-                                removal: .opacity
-                            ))
-                        }
-
-                        // Faded "Got it" section.
-                        if !recentlyGot.isEmpty {
-                            gotHeader
-                            ForEach(recentlyGot) { item in
+                if toGet.isEmpty && recentlyGot.isEmpty {
+                    EmptyStateView()
+                } else {
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            // To-get section.
+                            ForEach(toGet) { item in
                                 ItemRow(
                                     name: item.name,
                                     emoji: Emoji.forName(item.name),
-                                    isChecked: true,
+                                    isChecked: false,
+                                    isFlashing: item.persistentModelID == flashID,
                                     onToggle: { toggle(item) }
                                 )
-                                .opacity(0.5)
-                                .transition(.opacity)
+                                .transition(.asymmetric(
+                                    insertion: .scale(scale: 0.92).combined(with: .opacity),
+                                    removal: .opacity
+                                ))
+                            }
+
+                            // Faded "Got it" section.
+                            if !recentlyGot.isEmpty {
+                                gotHeader
+                                ForEach(recentlyGot) { item in
+                                    ItemRow(
+                                        name: item.name,
+                                        emoji: Emoji.forName(item.name),
+                                        isChecked: true,
+                                        onToggle: { toggle(item) }
+                                    )
+                                    .opacity(0.5)
+                                    .transition(.opacity)
+                                }
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 4)
+                        .padding(.bottom, 12)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.82), value: items.map(\.isChecked))
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 4)
-                    .padding(.bottom, 12)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.82), value: items.map(\.isChecked))
                 }
             }
         }
@@ -158,12 +164,37 @@ struct ShoppingListView: View {
     private func add(_ rawName: String) {
         let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-            context.insert(GroceryItem(name: name))
+        let key = name.lowercased()
+
+        // Duplicate: if it's already known to the list, don't create a second row.
+        // Bump it back to the top of the to-get list (un-checking it if it was in
+        // the "Got it" section) and give it a little flash instead.
+        if let existing = items.first(where: { $0.name.lowercased() == key }) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                existing.isChecked = false
+                existing.checkedAt = nil
+                existing.createdAt = .now
+            }
+            flash(existing)
+        } else {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                context.insert(GroceryItem(name: name))
+            }
         }
+
         rememberAdd(name)
         Haptics.soft()
         draft = ""
+    }
+
+    /// Briefly highlight a row (used when an add resolves to an existing item).
+    private func flash(_ item: GroceryItem) {
+        flashID = item.persistentModelID
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+            if flashID == item.persistentModelID {
+                withAnimation(.easeOut(duration: 0.3)) { flashID = nil }
+            }
+        }
     }
 
     /// Upsert into the long-term memory that powers suggestions.
