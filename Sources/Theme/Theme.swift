@@ -56,8 +56,9 @@ struct ThemeStyle {
 }
 
 enum Theme {
-    /// The active theme. Set once at launch from the BASKET_THEME env var.
-    static var current: ThemeStyle = .soft
+    /// The active theme. Defaults to the finalised Pastel Dots look; can be
+    /// overridden at launch via the BASKET_THEME env var (for experimentation).
+    static var current: ThemeStyle = .pastelDots
 
     static let all: [ThemeStyle] = [.soft, .pixelPantry, .deepDive, .cozyCabin, .nightArcade] + ThemeStyle.fresh
 

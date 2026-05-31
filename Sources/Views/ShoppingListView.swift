@@ -11,6 +11,7 @@ struct ShoppingListView: View {
     @State private var draft: String = ""
     @State private var now: Date = .now
     @State private var flashID: PersistentIdentifier?
+    @State private var checkingID: PersistentIdentifier?
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -48,6 +49,7 @@ struct ShoppingListView: View {
                                     name: item.name,
                                     emoji: Emoji.forName(item.name),
                                     isChecked: false,
+                                    isChecking: item.persistentModelID == checkingID,
                                     isFlashing: item.persistentModelID == flashID,
                                     onToggle: { toggle(item) }
                                 )
@@ -153,17 +155,25 @@ struct ShoppingListView: View {
 
     /// Toggle an item between the to-get list and the faded "Got it" section.
     private func toggle(_ item: GroceryItem) {
-        let checkingOff = !item.isChecked
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
-            if item.isChecked {
+        if item.isChecked {
+            // Un-check from the "Got it" section → straight back to the list.
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
                 item.isChecked = false
                 item.checkedAt = nil
-            } else {
+            }
+            return
+        }
+        // Checking off: pop a spark burst in place, then glide it into "Got it".
+        guard checkingID == nil else { return }
+        checkingID = item.persistentModelID
+        Haptics.success()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
                 item.isChecked = true
                 item.checkedAt = .now
             }
+            checkingID = nil
         }
-        if checkingOff { Haptics.success() }
     }
 
     /// Clear the whole "Got it" section now (manual tidy-up).

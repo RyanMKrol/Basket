@@ -30,6 +30,11 @@ extension ThemeStyle {
             background: background)
     }
 
+    /// The finalised look: Cozy-pixel with a soft green pastel-dot backdrop.
+    static let pastelDots = cozyFresh("fresh7", "Pastel Dots",
+                                      paper: rgb(0.992, 0.985, 0.96),
+                                      background: .dotted(freshGreen.opacity(0.18)))
+
     static let fresh: [ThemeStyle] = [
         .cozyFresh("fresh1", "Cream Blooms", paper: rgb(0.992, 0.984, 0.957),
                    background: .freshBlooms([mint, lemon, coral, sky])),
@@ -43,8 +48,7 @@ extension ThemeStyle {
                    background: .freshBlooms([coral, pink, lemon])),
         .cozyFresh("fresh6", "Garden Grid", paper: rgb(0.97, 0.985, 0.94),
                    background: .softGrid(freshGreen.opacity(0.14))),
-        .cozyFresh("fresh7", "Pastel Dots", paper: rgb(0.992, 0.985, 0.96),
-                   background: .dotted(freshGreen.opacity(0.18))),
+        .pastelDots,
         .cozyFresh("fresh8", "Seafoam Bands", paper: rgb(0.95, 0.98, 0.96),
                    background: .stripes(rgb(0.90, 0.96, 0.92), rgb(0.985, 0.99, 0.96))),
         .cozyFresh("fresh9", "Fruit Punch", paper: rgb(0.992, 0.975, 0.95),
