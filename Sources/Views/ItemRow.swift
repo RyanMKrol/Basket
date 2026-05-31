@@ -17,7 +17,7 @@ struct ItemRow: View {
                 .frame(width: 34, height: 34)
 
             Text(name)
-                .font(.system(.body, design: .rounded).weight(.medium))
+                .font(Theme.body(17, weight: .medium))
                 .foregroundStyle(isChecked ? Theme.inkSoft : Theme.ink)
                 .strikethrough(isChecked, color: Theme.inkSoft)
 

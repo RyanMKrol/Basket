@@ -24,7 +24,7 @@ struct AddBar: View {
                             HStack(spacing: 12) {
                                 Text(s.emoji).font(.system(size: 20))
                                 Text(s.name)
-                                    .font(.system(.body, design: .rounded).weight(.medium))
+                                    .font(Theme.body(17, weight: .medium))
                                     .foregroundStyle(Theme.ink)
                                 Spacer()
                                 Image(systemName: "arrow.up.left")
@@ -47,7 +47,9 @@ struct AddBar: View {
             // when empty. It turns from grey to green once there's something to add.
             HStack(spacing: 12) {
                 TextField("Add an item…", text: $text)
-                    .font(.system(.body, design: .rounded))
+                    .font(Theme.body(17))
+                    .foregroundStyle(Theme.ink)
+                    .tint(Theme.leaf)
                     .textInputAutocapitalization(.sentences)
                     .autocorrectionDisabled(false)
                     .submitLabel(.done)

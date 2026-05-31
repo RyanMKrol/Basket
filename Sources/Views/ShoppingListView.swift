@@ -95,12 +95,12 @@ struct ShoppingListView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             Text("Basket")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundStyle(Theme.ink)
+                .font(Theme.title(34, weight: .bold))
+                .foregroundStyle(Theme.onPaper)
             Spacer()
             Text(toGet.count == 1 ? "1 to get" : "\(toGet.count) to get")
-                .font(.system(.subheadline, design: .rounded).weight(.medium))
-                .foregroundStyle(Theme.inkSoft)
+                .font(Theme.body(15, weight: .medium))
+                .foregroundStyle(Theme.onPaperSoft)
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
@@ -110,19 +110,19 @@ struct ShoppingListView: View {
     private var gotHeader: some View {
         HStack(spacing: 8) {
             Text("Got it")
-                .font(.system(.footnote, design: .rounded).weight(.semibold))
-                .foregroundStyle(Theme.inkSoft)
+                .font(Theme.body(13, weight: .semibold))
+                .foregroundStyle(Theme.onPaperSoft)
             Rectangle()
-                .fill(Theme.inkSoft.opacity(0.2))
+                .fill(Theme.onPaperSoft.opacity(0.25))
                 .frame(height: 1)
             Button(action: clearGot) {
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 12, weight: .semibold))
                     Text("Clear all")
-                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                        .font(Theme.body(13, weight: .semibold))
                 }
-                .foregroundStyle(Theme.inkSoft)
+                .foregroundStyle(Theme.onPaperSoft)
             }
             .buttonStyle(.plain)
         }
