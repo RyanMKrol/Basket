@@ -11,6 +11,7 @@ struct ShoppingListView: View {
     @State private var draft: String = ""
     @State private var now: Date = .now
     @State private var flashID: PersistentIdentifier?
+    @State private var checkingID: PersistentIdentifier?
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -48,6 +49,7 @@ struct ShoppingListView: View {
                                     name: item.name,
                                     emoji: Emoji.forName(item.name),
                                     isChecked: false,
+                                    isChecking: item.persistentModelID == checkingID,
                                     isFlashing: item.persistentModelID == flashID,
                                     onToggle: { toggle(item) }
                                 )
@@ -95,12 +97,12 @@ struct ShoppingListView: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
             Text("Basket")
-                .font(.system(size: 34, weight: .bold, design: .rounded))
-                .foregroundStyle(Theme.ink)
+                .font(Theme.title(34, weight: .bold))
+                .foregroundStyle(Theme.onPaper)
             Spacer()
             Text(toGet.count == 1 ? "1 to get" : "\(toGet.count) to get")
-                .font(.system(.subheadline, design: .rounded).weight(.medium))
-                .foregroundStyle(Theme.inkSoft)
+                .font(Theme.body(15, weight: .medium))
+                .foregroundStyle(Theme.onPaperSoft)
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
@@ -110,19 +112,19 @@ struct ShoppingListView: View {
     private var gotHeader: some View {
         HStack(spacing: 8) {
             Text("Got it")
-                .font(.system(.footnote, design: .rounded).weight(.semibold))
-                .foregroundStyle(Theme.inkSoft)
+                .font(Theme.body(13, weight: .semibold))
+                .foregroundStyle(Theme.onPaperSoft)
             Rectangle()
-                .fill(Theme.inkSoft.opacity(0.2))
+                .fill(Theme.onPaperSoft.opacity(0.25))
                 .frame(height: 1)
             Button(action: clearGot) {
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 12, weight: .semibold))
                     Text("Clear all")
-                        .font(.system(.footnote, design: .rounded).weight(.semibold))
+                        .font(Theme.body(13, weight: .semibold))
                 }
-                .foregroundStyle(Theme.inkSoft)
+                .foregroundStyle(Theme.onPaperSoft)
             }
             .buttonStyle(.plain)
         }
@@ -153,17 +155,25 @@ struct ShoppingListView: View {
 
     /// Toggle an item between the to-get list and the faded "Got it" section.
     private func toggle(_ item: GroceryItem) {
-        let checkingOff = !item.isChecked
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
-            if item.isChecked {
+        if item.isChecked {
+            // Un-check from the "Got it" section → straight back to the list.
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
                 item.isChecked = false
                 item.checkedAt = nil
-            } else {
+            }
+            return
+        }
+        // Checking off: pop a spark burst in place, then glide it into "Got it".
+        guard checkingID == nil else { return }
+        checkingID = item.persistentModelID
+        Haptics.success()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
                 item.isChecked = true
                 item.checkedAt = .now
             }
+            checkingID = nil
         }
-        if checkingOff { Haptics.success() }
     }
 
     /// Clear the whole "Got it" section now (manual tidy-up).

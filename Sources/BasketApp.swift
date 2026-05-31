@@ -1,11 +1,15 @@
 import SwiftUI
 import SwiftData
+import CoreText
 
 @main
 struct BasketApp: App {
     let container: ModelContainer
 
     init() {
+        Self.registerFonts()
+        // Pick a theme: BASKET_THEME env var (soft | pixel | dive | cozy | arcade).
+        Theme.select(id: ProcessInfo.processInfo.environment["BASKET_THEME"])
         do {
             container = try ModelContainer(for: GroceryItem.self, KnownItem.self)
         } catch {
@@ -17,8 +21,18 @@ struct BasketApp: App {
     var body: some Scene {
         WindowGroup {
             ShoppingListView()
+                .preferredColorScheme(Theme.current.isDark ? .dark : .light)
         }
         .modelContainer(container)
+    }
+
+    /// Register the bundled pixel fonts so `Font.custom` can find them.
+    private static func registerFonts() {
+        for name in ["VT323-Regular", "PressStart2P-Regular", "Silkscreen-Regular"] {
+            if let url = Bundle.main.url(forResource: name, withExtension: "ttf") {
+                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+            }
+        }
     }
 
     /// On a brand-new install, drop in a few friendly starter items so the list

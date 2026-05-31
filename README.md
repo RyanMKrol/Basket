@@ -1,10 +1,17 @@
 # Basket 🧺
 
-A soft, friendly iOS shopping list. Adding is frictionless (a pinned bottom bar
-with history-backed suggestions); checking an item off slides it into a faded
-"Got it" section that clears itself after an hour.
+A friendly, whimsical pixel-art iOS shopping list. Adding is frictionless (a
+pinned bottom bar with history-backed suggestions); checking an item off pops a
+spark burst and an animated strikethrough, then slides it into a faded "Got it"
+section that clears itself after an hour.
 
 Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
+
+The look is a **theme** (`Theme` / `ThemeStyle`): the default is **Pastel Dots**
+— creamy cards on a soft green pixel-dot backdrop, with pixel fonts (VT323 +
+Silkscreen) and fresh fruity accents. Other themes ship in code and can be tried
+via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
+`fresh1`…`fresh10`).
 
 ## Features
 
@@ -13,7 +20,8 @@ Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
   you've bought in the last month, ranked by frequency + recency), then a built-in
   food dictionary (`SuggestionDictionary`) for instant autocomplete. Items already
   on the list are filtered out.
-- **Tap anywhere on a row** to check it off — it strikes through and slides into a
+- **Tap anywhere on a row** to check it off — the check pops with a burst of gold
+  sparks while a strikethrough draws left-to-right, then the row glides into a
   dimmed **"Got it"** section (tap again to restore it).
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
   tap **Clear all** in the section header to empty it immediately.
