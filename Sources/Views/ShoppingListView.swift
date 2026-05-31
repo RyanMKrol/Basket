@@ -162,7 +162,7 @@ struct ShoppingListView: View {
     private func addDraft() { add(draft) }
 
     private func add(_ rawName: String) {
-        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines).capitalisedFirstLetter
         guard !name.isEmpty else { return }
         let key = name.lowercased()
 

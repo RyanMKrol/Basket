@@ -50,7 +50,7 @@ struct AddBar: View {
 
                 TextField("Add an item…", text: $text)
                     .font(.system(.body, design: .rounded))
-                    .textInputAutocapitalization(.never)
+                    .textInputAutocapitalization(.sentences)
                     .autocorrectionDisabled(false)
                     .submitLabel(.done)
                     .focused($focused)

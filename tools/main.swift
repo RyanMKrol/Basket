@@ -75,5 +75,11 @@ check(Suggestions.rank(query: "t", candidates: [cand("Tortillas", times: 1, days
 check(Suggestions.rank(query: "thing", candidates: (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }, onList: [], now: now).count == Suggestions.maxResults,
       "caps at maxResults")
 
+print("Capitalisation:")
+check("milk".capitalisedFirstLetter == "Milk", "milk → Milk")
+check("olive oil".capitalisedFirstLetter == "Olive oil", "olive oil → Olive oil (only first)")
+check("BBQ sauce".capitalisedFirstLetter == "BBQ sauce", "BBQ sauce unchanged")
+check("".capitalisedFirstLetter == "", "empty stays empty")
+
 print(failures == 0 ? "\nALL PASSED" : "\n\(failures) FAILED")
 exit(failures == 0 ? 0 : 1)
