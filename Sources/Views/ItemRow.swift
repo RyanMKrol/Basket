@@ -29,6 +29,7 @@ struct ItemRow: View {
                     Capsule()
                         .fill(Theme.inkSoft)
                         .frame(height: 1.5)
+                        .offset(y: 2)   // nudge to the glyphs' visual middle (pixel fonts sit low)
                         .scaleEffect(x: showChecked ? 1 : 0, anchor: .leading)
                         .animation(.easeInOut(duration: 0.45), value: showChecked)
                 }
