@@ -13,10 +13,25 @@ final class GroceryItem {
     /// nil while the item is still on the to-get list.
     var checkedAt: Date?
 
-    init(name: String, isChecked: Bool = false, createdAt: Date = .now, checkedAt: Date? = nil) {
+    /// Optional amount + unit. Both nil means "no quantity set" (the row shows a
+    /// faint "+ Qty" chip). Stored as primitives — a Double and the unit's raw
+    /// string — so adding them is a purely-additive, migration-safe change.
+    var quantity: Double?
+    var unitRaw: String?
+
+    /// Typed accessor over `unitRaw` (not persisted itself).
+    var unit: MeasureUnit? {
+        get { unitRaw.flatMap(MeasureUnit.init(rawValue:)) }
+        set { unitRaw = newValue?.rawValue }
+    }
+
+    init(name: String, isChecked: Bool = false, createdAt: Date = .now, checkedAt: Date? = nil,
+         quantity: Double? = nil, unitRaw: String? = nil) {
         self.name = name
         self.isChecked = isChecked
         self.createdAt = createdAt
         self.checkedAt = checkedAt
+        self.quantity = quantity
+        self.unitRaw = unitRaw
     }
 }

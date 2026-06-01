@@ -1,8 +1,13 @@
 import SwiftUI
 
-/// A single shopping-list row: a soft white card with an emoji, the item name,
-/// and a tappable check circle. Checking fills the circle green and strikes the
-/// text through; the parent then animates the row out of the list.
+/// A single shopping-list row: a soft white card with an emoji, the item name, an
+/// optional quantity chip, and a tappable check circle.
+///
+/// Tap targets differ by section. On the to-get list the **check circle** checks
+/// the item off, while tapping the **rest of the row** (or the "+ Qty" chip)
+/// opens an inline quantity editor that slides down inside the card. In the faded
+/// "Got it" section there's no quantity affordance, so tapping anywhere restores
+/// the item.
 struct ItemRow: View {
     let name: String
     let emoji: String
@@ -11,33 +16,62 @@ struct ItemRow: View {
     /// plus a spark burst, briefly, before it moves to the "Got it" section.
     var isChecking: Bool = false
     var isFlashing: Bool = false
+    /// The formatted quantity ("500 ml"); nil shows the faint "+ Qty" affordance.
+    var quantityText: String? = nil
+    /// Whether this row offers quantity editing at all (to-get rows only).
+    var showsQuantity: Bool = false
+    var isExpanded: Bool = false
     let onToggle: () -> Void
+    var onTapQuantity: () -> Void = {}
+    /// The quantity editor, supplied by the parent when this row is expanded.
+    var quantityEditor: AnyView? = nil
 
     private var showChecked: Bool { isChecked || isChecking }
 
     var body: some View {
-        HStack(spacing: 14) {
-            Text(emoji)
-                .font(.system(size: 24))
-                .frame(width: 34, height: 34)
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Text(emoji)
+                    .font(.system(size: 24))
+                    .frame(width: 34, height: 34)
 
-            Text(name)
-                .font(Theme.body(17, weight: .medium))
-                .foregroundStyle(showChecked ? Theme.inkSoft : Theme.ink)
-                // Strikethrough that draws left → right, in sync with the check.
-                .overlay(alignment: .leading) {
-                    Capsule()
-                        .fill(Theme.inkSoft)
-                        .frame(height: 1.5)
-                        .offset(y: 2)   // nudge to the glyphs' visual middle (pixel fonts sit low)
-                        .scaleEffect(x: showChecked ? 1 : 0, anchor: .leading)
-                        .animation(.easeInOut(duration: 0.45), value: showChecked)
+                Text(name)
+                    .font(Theme.body(17, weight: .medium))
+                    .foregroundStyle(showChecked ? Theme.inkSoft : Theme.ink)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    // Strikethrough that draws left → right, in sync with the check.
+                    .overlay(alignment: .leading) {
+                        Capsule()
+                            .fill(Theme.inkSoft)
+                            .frame(height: 1.5)
+                            .offset(y: 2)   // nudge to the glyphs' visual middle (pixel fonts sit low)
+                            .scaleEffect(x: showChecked ? 1 : 0, anchor: .leading)
+                            .animation(.easeInOut(duration: 0.45), value: showChecked)
+                    }
+
+                Spacer(minLength: 8)
+
+                if showsQuantity {
+                    quantityChip
+                        .fixedSize()
                 }
 
-            Spacer(minLength: 8)
+                CheckCircle(isChecked: showChecked)
+                    .overlay { if isChecking { SparkleBurst() } }
+                    .frame(width: 40, height: 40)   // comfortable tap target around the 26pt ring
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: onToggle)
+            }
+            .contentShape(Rectangle())
+            // To-get rows open the quantity editor on a body tap; got-it rows
+            // (no quantity affordance) restore the item instead.
+            .onTapGesture { showsQuantity ? onTapQuantity() : onToggle() }
 
-            CheckCircle(isChecked: showChecked)
-                .overlay { if isChecking { SparkleBurst() } }
+            if isExpanded, let quantityEditor {
+                quantityEditor
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
@@ -49,8 +83,30 @@ struct ItemRow: View {
         )
         .scaleEffect(isFlashing ? 1.03 : 1)
         .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isFlashing)
-        .contentShape(RoundedRectangle(cornerRadius: Theme.cardRadius, style: .continuous))
-        .onTapGesture(perform: onToggle)
+    }
+
+    /// The quantity affordance: a faint, tappable "+ Qty" when unset, or the
+    /// value in a leaf-tinted capsule once set.
+    private var quantityChip: some View {
+        Group {
+            if let quantityText {
+                Text(quantityText)
+                    .font(Theme.body(13, weight: .semibold))
+                    .foregroundStyle(Theme.leaf)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Theme.leaf.opacity(0.14), in: Capsule())
+            } else {
+                HStack(spacing: 3) {
+                    Image(systemName: "plus").font(.system(size: 10, weight: .bold))
+                    Text("Qty").font(Theme.body(13, weight: .medium))
+                }
+                .foregroundStyle(Theme.inkSoft.opacity(0.6))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Theme.inkSoft.opacity(0.08), in: Capsule())
+            }
+        }
     }
 }
 

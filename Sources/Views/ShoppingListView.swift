@@ -12,6 +12,8 @@ struct ShoppingListView: View {
     @State private var now: Date = .now
     @State private var flashID: PersistentIdentifier?
     @State private var checkingIDs: Set<PersistentIdentifier> = []
+    /// The one row whose quantity editor is currently open (only one at a time).
+    @State private var expandedID: PersistentIdentifier?
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -51,7 +53,12 @@ struct ShoppingListView: View {
                                     isChecked: false,
                                     isChecking: checkingIDs.contains(item.persistentModelID),
                                     isFlashing: item.persistentModelID == flashID,
-                                    onToggle: { toggle(item) }
+                                    quantityText: quantityText(for: item),
+                                    showsQuantity: true,
+                                    isExpanded: expandedID == item.persistentModelID,
+                                    onToggle: { toggle(item) },
+                                    onTapQuantity: { toggleQuantityEditor(item) },
+                                    quantityEditor: editor(for: item)
                                 )
                                 .transition(.asymmetric(
                                     insertion: .scale(scale: 0.92).combined(with: .opacity),
@@ -151,10 +158,80 @@ struct ShoppingListView: View {
                                     now: now)
     }
 
+    // MARK: - Quantity
+
+    /// Formatted quantity for a row, or nil when none is set (shows "+ Qty").
+    private func quantityText(for item: GroceryItem) -> String? {
+        guard let q = item.quantity, let u = item.unit else { return nil }
+        return Measure.format(q, unit: u)
+    }
+
+    /// The inline editor for a row, supplied only while it's expanded.
+    private func editor(for item: GroceryItem) -> AnyView? {
+        guard expandedID == item.persistentModelID,
+              let u = item.unit, let q = item.quantity else { return nil }
+        return AnyView(
+            QuantityEditor(
+                value: q,
+                unit: u,
+                onStep: { up in stepQuantity(item, up: up) },
+                onToggleUnit: { toggleQuantityUnit(item) },
+                onClear: { clearQuantity(item) }
+            )
+        )
+    }
+
+    /// Open/close a row's quantity editor. Opening for the first time seeds a
+    /// smart default (e.g. milk → 500 ml) inferred from the item name.
+    private func toggleQuantityEditor(_ item: GroceryItem) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            if expandedID == item.persistentModelID {
+                expandedID = nil
+            } else {
+                if item.quantity == nil || item.unit == nil {
+                    let u = Measure.defaultUnit(for: item.name)
+                    item.unit = u
+                    item.quantity = Measure.defaultValue(for: u)
+                }
+                expandedID = item.persistentModelID
+            }
+        }
+        Haptics.soft()
+    }
+
+    private func stepQuantity(_ item: GroceryItem, up: Bool) {
+        guard let u = item.unit else { return }
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+            item.quantity = Measure.step(item.quantity ?? Measure.defaultValue(for: u), unit: u, up: up)
+        }
+        Haptics.soft()
+    }
+
+    private func toggleQuantityUnit(_ item: GroceryItem) {
+        guard let u = item.unit, let q = item.quantity else { return }
+        let (value, unit) = Measure.toggleScale(q, unit: u)
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+            item.quantity = value
+            item.unit = unit
+        }
+        Haptics.soft()
+    }
+
+    private func clearQuantity(_ item: GroceryItem) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            item.quantity = nil
+            item.unitRaw = nil
+            expandedID = nil
+        }
+        Haptics.soft()
+    }
+
     // MARK: - Actions
 
     /// Toggle an item between the to-get list and the faded "Got it" section.
     private func toggle(_ item: GroceryItem) {
+        // Checking off (or restoring) closes this row's quantity editor.
+        if expandedID == item.persistentModelID { expandedID = nil }
         if item.isChecked {
             // Un-check from the "Got it" section → straight back to the list.
             withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
