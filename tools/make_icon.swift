@@ -1,10 +1,9 @@
 // Renders Basket's 1024×1024 app icon natively on macOS (AppKit): a soft
-// grocery-coloured gradient with a mini shopping-list card (a ticked first row).
+// grocery-coloured gradient behind a pixel-art basket of fruit. The art is
+// composed procedurally on an N×N pixel grid (raise N for finer pixels), then
+// each cell is drawn as a crisp square.
 // Run: swift tools/make_icon.swift <output.png>
 import AppKit
-
-let leaf = NSColor(srgbRed: 0.42, green: 0.66, blue: 0.40, alpha: 1)
-let inkSoft = NSColor(srgbRed: 0.62, green: 0.60, blue: 0.57, alpha: 1)
 
 let side: CGFloat = 1024
 let image = NSImage(size: NSSize(width: side, height: side))
@@ -17,51 +16,61 @@ NSGradient(colors: [
     NSColor(srgbRed: 0.98, green: 0.88, blue: 0.85, alpha: 1),
 ])!.draw(in: NSRect(x: 0, y: 0, width: side, height: side), angle: -90)
 
-func rounded(_ r: NSRect, _ radius: CGFloat) -> NSBezierPath {
-    NSBezierPath(roundedRect: r, xRadius: radius, yRadius: radius)
+// Palette.
+let tomato    = NSColor(srgbRed: 0.91, green: 0.42, blue: 0.40, alpha: 1)
+let apple     = NSColor(srgbRed: 0.55, green: 0.73, blue: 0.38, alpha: 1)
+let orange    = NSColor(srgbRed: 0.96, green: 0.66, blue: 0.30, alpha: 1)
+let stem      = NSColor(srgbRed: 0.44, green: 0.57, blue: 0.32, alpha: 1)
+let weaveLite = NSColor(srgbRed: 0.85, green: 0.67, blue: 0.45, alpha: 1)
+let weaveDark = NSColor(srgbRed: 0.73, green: 0.55, blue: 0.35, alpha: 1)
+let rim       = NSColor(srgbRed: 0.65, green: 0.47, blue: 0.29, alpha: 1)
+
+// N×N pixel grid (row 0 at the top). 22 reads finer than a chunky 13.
+let N = 22
+let center = Double(N - 1) / 2.0            // 10.5
+
+// Three plump fruits sitting in the basket.
+let fruitR = 3.6
+let fruits: [(cx: Double, cy: Double, color: NSColor)] = [
+    (center - 5.0, 8.5, tomato),
+    (center,       7.3, apple),
+    (center + 5.0, 8.5, orange),
+]
+
+// Basket bowl: rim at rows 11–12, tapered body to row 19 (smaller than the
+// fruits are big, per the brief).
+let rimRows = 11...12
+let bodyTop = 13, bodyBot = 19
+func halfWidth(_ row: Int) -> Double {
+    let t = Double(row - rimRows.lowerBound) / Double(bodyBot - rimRows.lowerBound)
+    return 7.3 * (1 - t) + 4.3 * t          // 7.3 at the rim → 4.3 at the base
 }
 
-func checkPath(in box: NSRect) -> NSBezierPath {
-    let p = NSBezierPath()
-    p.move(to: NSPoint(x: box.minX + box.width * 0.22, y: box.minY + box.height * 0.52))
-    p.line(to: NSPoint(x: box.minX + box.width * 0.42, y: box.minY + box.height * 0.30))
-    p.line(to: NSPoint(x: box.minX + box.width * 0.78, y: box.minY + box.height * 0.72))
-    p.lineWidth = box.width * 0.14
-    p.lineCapStyle = .round
-    p.lineJoinStyle = .round
-    return p
-}
-
-// The white list card with a soft shadow.
-let card = NSRect(x: 0, y: 0, width: side, height: side).insetBy(dx: side * 0.22, dy: side * 0.20)
-let shadow = NSShadow()
-shadow.shadowColor = NSColor.black.withAlphaComponent(0.10)
-shadow.shadowBlurRadius = side * 0.03
-shadow.shadowOffset = NSSize(width: 0, height: -side * 0.012)
-NSGraphicsContext.saveGraphicsState()
-shadow.set()
-NSColor.white.setFill()
-rounded(card, card.width * 0.12).fill()
-NSGraphicsContext.restoreGraphicsState()
-
-// Three rows: first ticked (green), the rest empty.
-let rows = 3
-let rowH = card.height / CGFloat(rows + 1)
-for i in 0..<rows {
-    let y = card.maxY - rowH * CGFloat(i + 1)
-    let box = NSRect(x: card.minX + card.width * 0.13, y: y - rowH * 0.24,
-                     width: rowH * 0.48, height: rowH * 0.48)
-    if i == 0 {
-        leaf.setFill(); NSBezierPath(ovalIn: box).fill()
-        NSColor.white.setStroke(); checkPath(in: box).stroke()
-    } else {
-        inkSoft.withAlphaComponent(0.5).setStroke()
-        let ring = NSBezierPath(ovalIn: box); ring.lineWidth = box.width * 0.11; ring.stroke()
+func cellColor(_ col: Int, _ row: Int) -> NSColor? {
+    let x = Double(col), y = Double(row)
+    // Fruit (drawn in front of the basket) + a little stem on top of each.
+    for f in fruits {
+        let dx = x - f.cx, dy = y - f.cy
+        if dx * dx + dy * dy <= fruitR * fruitR { return f.color }
+        if col == Int(f.cx.rounded()) && row == Int((f.cy - fruitR - 1).rounded()) { return stem }
     }
-    let line = NSRect(x: box.maxX + card.width * 0.10, y: box.midY - rowH * 0.075,
-                      width: card.width * 0.52, height: rowH * 0.15)
-    (i == 0 ? inkSoft.withAlphaComponent(0.55) : inkSoft.withAlphaComponent(0.85)).setFill()
-    rounded(line, line.height / 2).fill()
+    // Basket.
+    if rimRows.contains(row), abs(x - center) <= halfWidth(rimRows.lowerBound) { return rim }
+    if (bodyTop...bodyBot).contains(row), abs(x - center) <= halfWidth(row) {
+        return (col + row).isMultiple(of: 2) ? weaveLite : weaveDark
+    }
+    return nil
+}
+
+let cell = side / CGFloat(N)
+for row in 0..<N {
+    for col in 0..<N {
+        guard let c = cellColor(col, row) else { continue }
+        c.setFill()
+        let x = CGFloat(col) * cell
+        let yTop = side - CGFloat(row + 1) * cell   // flip: row 0 at the top
+        NSRect(x: x, y: yTop, width: cell + 0.5, height: cell + 0.5).fill()
+    }
 }
 
 image.unlockFocus()
