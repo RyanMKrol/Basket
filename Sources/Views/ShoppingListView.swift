@@ -11,7 +11,11 @@ struct ShoppingListView: View {
     @State private var draft: String = ""
     @State private var now: Date = .now
     @State private var flashID: PersistentIdentifier?
+    /// Items mid spark-burst (the first ~0.55s after a tap).
     @State private var checkingIDs: Set<PersistentIdentifier> = []
+    /// Items whose burst finished but whose move into "Got it" is held until no
+    /// other check is still animating — so the list doesn't shuffle under taps.
+    @State private var pendingCommit: Set<PersistentIdentifier> = []
     /// The one row whose quantity editor is currently open (only one at a time).
     @State private var expandedID: PersistentIdentifier?
     @State private var showingAbout = false
@@ -57,7 +61,8 @@ struct ShoppingListView: View {
                                     name: item.name,
                                     emoji: Emoji.forName(item.name),
                                     isChecked: false,
-                                    isChecking: checkingIDs.contains(item.persistentModelID),
+                                    isChecking: checkingIDs.contains(item.persistentModelID)
+                                        || pendingCommit.contains(item.persistentModelID),
                                     isFlashing: item.persistentModelID == flashID,
                                     quantityText: quantityText(for: item),
                                     showsQuantity: true,
@@ -270,22 +275,35 @@ struct ShoppingListView: View {
             }
             return
         }
-        // Checking off: pop a spark burst in place, then glide it into "Got it".
-        // Each check-off runs on its own timer, so you can tap several items in
-        // quick succession and their animations overlap instead of queuing up.
+        // Checking off: pop a spark burst in place. The row shows checked but
+        // stays put — it only glides into "Got it" once *every* in-flight check
+        // animation has finished, so the list never reorders under your taps
+        // when you're checking several things off at once.
         let id = item.persistentModelID
-        guard !checkingIDs.contains(id) else { return }
+        guard !checkingIDs.contains(id), !pendingCommit.contains(id) else { return }
         checkingIDs.insert(id)
         Haptics.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            checkingIDs.remove(id)
+            pendingCommit.insert(id)
+            // Nothing else still animating? Move everything that's waiting at once.
+            if checkingIDs.isEmpty { commitChecked() }
+        }
+    }
+
+    /// Glide every finished-but-waiting item into the "Got it" section together.
+    private func commitChecked() {
+        let ids = pendingCommit
+        guard !ids.isEmpty else { return }
+        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+            for item in items where ids.contains(item.persistentModelID) {
                 item.isChecked = true
                 item.checkedAt = .now
             }
-            checkingIDs.remove(id)
-            // Just cleared the last thing to get? Celebrate the finished shop.
-            if toGet.isEmpty { celebrateCleared() }
+            pendingCommit.removeAll()
         }
+        // Just cleared the last thing to get? Celebrate the finished shop.
+        if toGet.isEmpty { celebrateCleared() }
     }
 
     /// Play the one-shot "you got everything" celebration.
