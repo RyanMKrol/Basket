@@ -11,7 +11,7 @@ struct ShoppingListView: View {
     @State private var draft: String = ""
     @State private var now: Date = .now
     @State private var flashID: PersistentIdentifier?
-    @State private var checkingID: PersistentIdentifier?
+    @State private var checkingIDs: Set<PersistentIdentifier> = []
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -49,7 +49,7 @@ struct ShoppingListView: View {
                                     name: item.name,
                                     emoji: Emoji.forName(item.name),
                                     isChecked: false,
-                                    isChecking: item.persistentModelID == checkingID,
+                                    isChecking: checkingIDs.contains(item.persistentModelID),
                                     isFlashing: item.persistentModelID == flashID,
                                     onToggle: { toggle(item) }
                                 )
@@ -164,15 +164,18 @@ struct ShoppingListView: View {
             return
         }
         // Checking off: pop a spark burst in place, then glide it into "Got it".
-        guard checkingID == nil else { return }
-        checkingID = item.persistentModelID
+        // Each check-off runs on its own timer, so you can tap several items in
+        // quick succession and their animations overlap instead of queuing up.
+        let id = item.persistentModelID
+        guard !checkingIDs.contains(id) else { return }
+        checkingIDs.insert(id)
         Haptics.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
                 item.isChecked = true
                 item.checkedAt = .now
             }
-            checkingID = nil
+            checkingIDs.remove(id)
         }
     }
 
