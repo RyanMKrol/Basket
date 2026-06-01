@@ -24,7 +24,9 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
   "cord" → Cordial). Items already on the list are filtered out.
 - **Tap the check circle** to check an item off — the check pops with a burst of
   gold sparks while a strikethrough draws left-to-right, then the row glides into
-  a dimmed **"Got it"** section (tap it to restore it).
+  a dimmed **"Got it"** section (tap it to restore it). Check several off at once
+  and they hold their place until the last spark finishes, then glide down
+  together — so the list never shuffles under your taps.
 - **Tap the row** (or its faint **"+ Qty"** chip) to set a quantity. An inline
   stepper slides down with a **smart default unit** guessed from the item — pour-y
   things start in ml, weighed things in g, everything else as a plain count. You
