@@ -21,7 +21,18 @@ git push origin --delete <branch>            # 7b. remove the remote branch
 ```
 
 You end back on a clean, current `main`, ready for the next task. We don't use
-pull requests — merge it yourself once it's green and the user has asked for it.
+pull requests — merge it yourself.
+
+### Commit proactively — don't wait to be asked
+
+Whenever you make a real change, **commit it to the branch without waiting for
+permission**. Don't leave finished work sitting uncommitted in the working tree.
+The repo is always rollback-able, so an extra commit is cheap and a lost change
+is not. Commit in logical chunks as work reaches a green state (see "Definition
+of done"); once a change is green, push the branch and merge it to `main` per the
+flow above. The only things to still confirm first are destructive or
+hard-to-undo actions (e.g. `push --force`, history rewrites, deleting remote
+branches that aren't yours, anything outward-facing beyond the normal merge).
 
 ### Use a git worktree for concurrent work
 
