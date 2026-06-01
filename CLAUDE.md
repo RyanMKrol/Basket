@@ -73,14 +73,16 @@ A change is done when, on the branch:
   - `Models/` — `GroceryItem`, `KnownItem` (history), `Suggestion`.
   - `Views/` — `ShoppingListView`, `ItemRow`, `AddBar`, `EmptyStateView`.
   - `Services/` — `Emoji` (3-stage cascade), `SemanticEmoji` (NLEmbedding),
-    `Suggestions`, `Formatting`, `Haptics`; **generated:** `EmojiTable.swift`,
-    `SuggestionDictionary.swift`.
+    `Suggestions`, `Formatting`, `Haptics`, `Measure` (smart units); **generated:**
+    `EmojiTable.swift`, `SuggestionDictionary.swift`, `MeasureTable.swift`.
 - `Tests/BasketTests.swift` — XCTest (logic).
 - `tools/` — generators & audits (run from the repo root):
   - `gen_emoji.py` → `Sources/Services/EmojiTable.swift` (curated keyword→emoji
     table, from inline data + `emoji_supplement.txt`).
-  - `gen_suggestions.py` → `Sources/Services/SuggestionDictionary.swift` (from
-    `corpus/grocery_corpus.txt`).
+  - `gen_suggestions.py` → `Sources/Services/SuggestionDictionary.swift` (unifies
+    `corpus/*.txt` with the emoji table's keyword vocabulary).
+  - `gen_measure.py` → `Sources/Services/MeasureTable.swift` (curated keyword→
+    measure-type table for smart quantity units; mirrors `gen_emoji.py`).
   - `audit_coverage.swift` — audits emoji coverage over `corpus/*.txt`.
   - `make_icon.swift` / `make_icon_options.swift` — render the app icon.
   - `main.swift` — the native logic test harness.
