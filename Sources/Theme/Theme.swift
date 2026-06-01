@@ -129,8 +129,23 @@ struct BasketBackground: View {
                 case .stripes(let a, let b): stripes(a, b, h)
                 }
             }
+            // A whisper of time-of-day colour over light themes — cool in the
+            // morning, golden in the evening. Kept very faint so it never fights
+            // the theme, and skipped entirely on dark themes.
+            timeTint
         }
         .ignoresSafeArea()
+    }
+
+    @ViewBuilder private var timeTint: some View {
+        if !Theme.current.isDark {
+            switch Seasonality.timeOfDay(.now) {
+            case .morning:   Color(red: 0.50, green: 0.62, blue: 0.85).opacity(0.05)
+            case .afternoon: Color.clear
+            case .evening:   Color(red: 0.96, green: 0.64, blue: 0.34).opacity(0.06)
+            case .night:     Color(red: 0.32, green: 0.34, blue: 0.56).opacity(0.05)
+            }
+        }
     }
 
     private func blooms(_ w: CGFloat, _ h: CGFloat) -> some View {

@@ -9,12 +9,13 @@
 //          Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
 //          Sources/Services/Formatting.swift \
 //          Sources/Services/Measure.swift Sources/Services/MeasureTable.swift \
+//          Sources/Services/Seasonality.swift \
 //          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
 //
 // (Emoji's cascade pulls in EmojiTable + SemanticEmoji; the dictionary checks
 // pull in SuggestionDictionary; the capitalisation checks pull in Formatting;
-// the smart-units checks pull in Measure + MeasureTable — all must be on the
-// swiftc line or it won't link.)
+// the smart-units checks pull in Measure + MeasureTable; the date flourishes
+// pull in Seasonality — all must be on the swiftc line or it won't link.)
 //
 import Foundation
 
@@ -146,6 +147,22 @@ check(tv == 0.5 && tu == .liter, "500 ml ↔ 0.5 L")
 check(Measure.format(500, unit: .milliliter) == "500 ml", "format → 500 ml")
 check(Measure.format(1.5, unit: .kilogram) == "1.5 kg", "format → 1.5 kg")
 check(Measure.format(2, unit: .count) == "2", "format count → 2 (no unit)")
+
+print("Seasonality:")
+var utc = Calendar(identifier: .gregorian); utc.timeZone = TimeZone(identifier: "UTC")!
+func seasonDate(_ y: Int, _ m: Int, _ day: Int, _ h: Int = 12) -> Date {
+    utc.date(from: DateComponents(year: y, month: m, day: day, hour: h))!
+}
+check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 8), calendar: utc) == .morning, "8am → morning")
+check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 19), calendar: utc) == .evening, "7pm → evening")
+check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 2), calendar: utc) == .night, "2am → night")
+check(Seasonality.season(seasonDate(2026, 12, 15), calendar: utc) == .winter, "December → winter")
+check(Seasonality.season(seasonDate(2026, 7, 4), calendar: utc) == .summer, "July → summer")
+check(Seasonality.holidayAccent(seasonDate(2026, 10, 31), calendar: utc) == "🎃", "Oct 31 → 🎃")
+check(Seasonality.holidayAccent(seasonDate(2026, 12, 20), calendar: utc) == "🎄", "mid-December → 🎄")
+check(Seasonality.holidayAccent(seasonDate(2026, 7, 4), calendar: utc) == nil, "ordinary July day → no accent")
+check(Seasonality.emptyStateLine(seasonDate(2026, 3, 10), calendar: utc)
+      == Seasonality.emptyStateLine(seasonDate(2026, 3, 10), calendar: utc), "empty-state line stable within a day")
 
 print(failures == 0 ? "\nALL PASSED" : "\n\(failures) FAILED")
 exit(failures == 0 ? 0 : 1)

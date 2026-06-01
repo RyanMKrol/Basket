@@ -73,8 +73,9 @@ A change is done when, on the branch:
   - `Models/` — `GroceryItem`, `KnownItem` (history), `Suggestion`.
   - `Views/` — `ShoppingListView`, `ItemRow`, `AddBar`, `EmptyStateView`.
   - `Services/` — `Emoji` (3-stage cascade), `SemanticEmoji` (NLEmbedding),
-    `Suggestions`, `Formatting`, `Haptics`, `Measure` (smart units); **generated:**
-    `EmojiTable.swift`, `SuggestionDictionary.swift`, `MeasureTable.swift`.
+    `Suggestions`, `Formatting`, `Haptics`, `Measure` (smart units), `Seasonality`
+    (time-of-day / holiday flourishes); **generated:** `EmojiTable.swift`,
+    `SuggestionDictionary.swift`, `MeasureTable.swift`.
 - `Tests/BasketTests.swift` — XCTest (logic).
 - `tools/` — generators & audits (run from the repo root):
   - `gen_emoji.py` → `Sources/Services/EmojiTable.swift` (curated keyword→emoji
