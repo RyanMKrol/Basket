@@ -56,6 +56,23 @@ struct AddBar: View {
                     .focused($focused)
                     .onSubmit(submit)
 
+                // While the keyboard is up, offer a way to put it away. Adding
+                // is the common case — submit and suggestion-pick keep focus —
+                // but there was no escape hatch, so the keyboard felt stuck. This
+                // tucks it down without touching the rapid-add flow.
+                if focused {
+                    Button {
+                        focused = false
+                        Haptics.soft()
+                    } label: {
+                        Image(systemName: "keyboard.chevron.compact.down")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Theme.inkSoft.opacity(0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.scale.combined(with: .opacity))
+                }
+
                 Button {
                     if text.trimmingCharacters(in: .whitespaces).isEmpty {
                         focused = true
@@ -80,6 +97,7 @@ struct AddBar: View {
         }
         .animation(.spring(response: 0.32, dampingFraction: 0.8), value: suggestions)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: text.isEmpty)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: focused)
     }
 
     /// Submit the current text, then keep focus so the keyboard stays up — adding
