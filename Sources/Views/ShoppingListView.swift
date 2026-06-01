@@ -17,6 +17,8 @@ struct ShoppingListView: View {
     @State private var showingAbout = false
     /// True briefly while the "you got everything" celebration plays.
     @State private var celebrating = false
+    /// Cold-start launch flourish — fires once per process, not on resume.
+    @State private var showFlourish = LaunchOnce.consume()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// How long a checked-off item lingers in the faded section before it clears.
@@ -109,6 +111,15 @@ struct ShoppingListView: View {
         .onAppear { now = .now; purgeExpired() }
         .onReceive(ticker) { now = $0; purgeExpired() }
         .sheet(isPresented: $showingAbout) { AboutView() }
+        // Full-screen so it covers the add bar too; only on a cold launch.
+        .overlay {
+            if showFlourish {
+                LaunchFlourish(reduceMotion: reduceMotion) {
+                    withAnimation(.easeOut(duration: 0.4)) { showFlourish = false }
+                }
+                .transition(.opacity)
+            }
+        }
     }
 
     private var header: some View {
