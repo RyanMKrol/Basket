@@ -62,6 +62,19 @@ Requires Xcode's command-line tools and [XcodeGen](https://github.com/yonaskolb/
 `build_run.sh` builds by `-target` with an explicit `SUPPORTED_PLATFORMS` because
 this machine's Xcode generates a scheme whose supported-platforms list is empty.
 
+### Signing for a device
+
+Simulator builds need no signing. To run on a physical device, drop your Apple
+Team ID into a git-ignored override (the committed project stays team-agnostic):
+
+```sh
+echo 'DEVELOPMENT_TEAM = ABCDE12345' > Signing.local.xcconfig
+xcodegen generate
+```
+
+`Signing.xcconfig` (committed) optionally includes `Signing.local.xcconfig`, so
+without the local file the build still works for the simulator.
+
 ## Tests
 
 Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
