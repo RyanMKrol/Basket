@@ -97,6 +97,7 @@ Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
          Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
          Sources/Services/Formatting.swift \
+         Sources/Services/Measure.swift Sources/Services/MeasureTable.swift \
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
 

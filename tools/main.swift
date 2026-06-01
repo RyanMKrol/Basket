@@ -8,11 +8,13 @@
 //          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
 //          Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
 //          Sources/Services/Formatting.swift \
+//          Sources/Services/Measure.swift Sources/Services/MeasureTable.swift \
 //          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
 //
 // (Emoji's cascade pulls in EmojiTable + SemanticEmoji; the dictionary checks
-// pull in SuggestionDictionary; the capitalisation checks pull in Formatting —
-// all must be on the swiftc line or it won't link.)
+// pull in SuggestionDictionary; the capitalisation checks pull in Formatting;
+// the smart-units checks pull in Measure + MeasureTable — all must be on the
+// swiftc line or it won't link.)
 //
 import Foundation
 
@@ -117,6 +119,33 @@ check("milk".capitalisedFirstLetter == "Milk", "milk → Milk")
 check("olive oil".capitalisedFirstLetter == "Olive oil", "olive oil → Olive oil (only first)")
 check("BBQ sauce".capitalisedFirstLetter == "BBQ sauce", "BBQ sauce unchanged")
 check("".capitalisedFirstLetter == "", "empty stays empty")
+
+print("Measure — smart units:")
+check(Measure.typeForName("Milk") == .volume, "Milk → volume")
+check(Measure.typeForName("Almond milk") == .volume, "Almond milk → volume (not weight via 'almond')")
+check(Measure.typeForName("Orange juice") == .volume, "Orange juice → volume")
+check(Measure.typeForName("Olive oil") == .volume, "Olive oil → volume")
+check(Measure.typeForName("Cordial") == .volume, "Cordial → volume")
+check(Measure.typeForName("Chicken breast") == .weight, "Chicken breast → weight")
+check(Measure.typeForName("Plain flour") == .weight, "Flour → weight")
+check(Measure.typeForName("Cheddar") == .weight, "Cheddar → weight")
+check(Measure.typeForName("Cream cheese") == .weight, "Cream cheese → weight (override, not volume)")
+check(Measure.typeForName("Potatoes") == .weight, "Potatoes → weight")
+check(Measure.typeForName("Eggs") == .count, "Eggs → count (default)")
+check(Measure.typeForName("Toilet roll") == .count, "Toilet roll → count")
+check(Measure.typeForName("Sourdough bread") == .count, "Bread → count")
+check(Measure.defaultUnit(for: "Milk") == .milliliter, "Milk starts in ml")
+check(Measure.defaultUnit(for: "Beef mince") == .gram, "Beef starts in g")
+check(Measure.defaultUnit(for: "Eggs") == .count, "Eggs start as a count")
+check(Measure.step(500, unit: .milliliter, up: true) == 550, "500 ml +50 = 550")
+check(Measure.step(1000, unit: .gram, up: true) == 1100, "1000 g +100 = 1100 (bigger step ≥1kg)")
+check(Measure.step(50, unit: .gram, up: false) == 50, "50 g floored, won't go to 0")
+check(Measure.step(1, unit: .count, up: false) == 1, "count floored at 1")
+let (tv, tu) = Measure.toggleScale(500, unit: .milliliter)
+check(tv == 0.5 && tu == .liter, "500 ml ↔ 0.5 L")
+check(Measure.format(500, unit: .milliliter) == "500 ml", "format → 500 ml")
+check(Measure.format(1.5, unit: .kilogram) == "1.5 kg", "format → 1.5 kg")
+check(Measure.format(2, unit: .count) == "2", "format count → 2 (no unit)")
 
 print(failures == 0 ? "\nALL PASSED" : "\n\(failures) FAILED")
 exit(failures == 0 ? 0 : 1)
