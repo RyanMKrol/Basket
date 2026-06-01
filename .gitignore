@@ -1,6 +1,9 @@
 # XcodeGen output — regenerated from project.yml
 *.xcodeproj/
 
+# Local, machine-specific signing identity (DEVELOPMENT_TEAM)
+Signing.local.xcconfig
+
 # Build artifacts
 build/
 DerivedData/

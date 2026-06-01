@@ -1,0 +1,12 @@
+// Signing configuration (committed, team-agnostic).
+//
+// The development team is machine-specific, so it isn't committed. Put your
+// Apple Team ID in Signing.local.xcconfig (git-ignored) like so:
+//
+//     DEVELOPMENT_TEAM = ABCDE12345
+//
+// Without it, simulator builds still work (they don't need a team); on-device
+// builds need a team set here.
+DEVELOPMENT_TEAM =
+
+#include? "Signing.local.xcconfig"

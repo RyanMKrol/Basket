@@ -4,11 +4,16 @@ options:
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
+# DEVELOPMENT_TEAM is intentionally not set here. It's machine-specific and
+# comes from Signing.local.xcconfig (git-ignored) via Signing.xcconfig, so the
+# committed project stays team-agnostic. See README → "Signing for a device".
+configFiles:
+  Debug: Signing.xcconfig
+  Release: Signing.xcconfig
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    DEVELOPMENT_TEAM: ""
-    CODE_SIGNING_ALLOWED: NO
+    CODE_SIGN_STYLE: Automatic
     SUPPORTED_PLATFORMS: "iphoneos iphonesimulator"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
