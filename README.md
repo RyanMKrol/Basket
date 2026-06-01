@@ -22,9 +22,14 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
   dictionary unifies the grocery + regional corpora with the emoji table's whole
   vocabulary, so anything the app can put an emoji on it can also suggest (e.g.
   "cord" → Cordial). Items already on the list are filtered out.
-- **Tap anywhere on a row** to check it off — the check pops with a burst of gold
-  sparks while a strikethrough draws left-to-right, then the row glides into a
-  dimmed **"Got it"** section (tap again to restore it).
+- **Tap the check circle** to check an item off — the check pops with a burst of
+  gold sparks while a strikethrough draws left-to-right, then the row glides into
+  a dimmed **"Got it"** section (tap it to restore it).
+- **Tap the row** (or its faint **"+ Qty"** chip) to set a quantity. An inline
+  stepper slides down with a **smart default unit** guessed from the item — pour-y
+  things start in ml, weighed things in g, everything else as a plain count — and
+  you can toggle g↔kg / ml↔L or clear it. The amount shows as a small chip on the
+  row; long names truncate so the chip keeps its place.
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
   tap **Clear all** in the section header to empty it immediately.
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the
