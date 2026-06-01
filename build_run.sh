@@ -19,14 +19,23 @@ cd "$PROJECT_DIR"
 APP_NAME="Basket"
 BUNDLE_ID="com.ryankrol.basket"
 SIM_NAME="${1:-iPhone 17 Pro}"
-# A device name can be ambiguous (the same model exists per installed runtime),
-# so resolve to a concrete UDID — preferring an already-booted one, else the
-# last (newest-runtime) match. If a UDID was passed in, this leaves it as-is.
-SIM_ID="$(xcrun simctl list devices booted | grep -F "$SIM_NAME (" | grep -Eo '[0-9A-Fa-f-]{36}' | head -1)"
-if [ -z "$SIM_ID" ]; then
-  SIM_ID="$(xcrun simctl list devices available | grep -F "$SIM_NAME (" | grep -Eo '[0-9A-Fa-f-]{36}' | tail -1)"
+# Resolve the argument to a concrete UDID. A device *name* can be ambiguous (the
+# same model exists per installed runtime), so prefer an already-booted match,
+# else the last (newest-runtime) available one. Pass a UDID to pin a specific
+# simulator (e.g. to avoid clashing with another agent on a shared machine) —
+# it's detected by shape and used as-is.
+# The `|| true` on each pipeline matters: under `set -euo pipefail`, a grep that
+# finds nothing returns non-zero and would otherwise abort the whole script
+# *silently* (before the first echo) whenever the named device isn't booted.
+if [[ "$SIM_NAME" =~ ^[0-9A-Fa-f]{8}-[0-9A-Fa-f-]{27}$ ]]; then
+  SIM="$SIM_NAME"
+else
+  SIM_ID="$(xcrun simctl list devices booted | grep -F "$SIM_NAME (" | grep -Eo '[0-9A-Fa-f-]{36}' | head -1 || true)"
+  if [ -z "$SIM_ID" ]; then
+    SIM_ID="$(xcrun simctl list devices available | grep -F "$SIM_NAME (" | grep -Eo '[0-9A-Fa-f-]{36}' | tail -1 || true)"
+  fi
+  SIM="${SIM_ID:-$SIM_NAME}"
 fi
-SIM="${SIM_ID:-$SIM_NAME}"
 BUILD_DIR="$PROJECT_DIR/build"
 APP_PATH="$BUILD_DIR/Debug-iphonesimulator/$APP_NAME.app"
 SHOT_DIR="$PROJECT_DIR/screenshots"
