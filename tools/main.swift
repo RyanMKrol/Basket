@@ -8,14 +8,14 @@
 //          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
 //          Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
 //          Sources/Services/Formatting.swift \
-//          Sources/Services/Measure.swift Sources/Services/MeasureTable.swift \
-//          Sources/Services/Seasonality.swift \
+//          Sources/Services/Measure.swift Sources/Services/Seasonality.swift \
 //          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
 //
 // (Emoji's cascade pulls in EmojiTable + SemanticEmoji; the dictionary checks
 // pull in SuggestionDictionary; the capitalisation checks pull in Formatting;
-// the smart-units checks pull in Measure + MeasureTable; the date flourishes
-// pull in Seasonality — all must be on the swiftc line or it won't link.)
+// the smart-units checks pull in Measure — which now classifies by the emoji
+// glyph, so it leans on Emoji too; the date flourishes pull in Seasonality —
+// all must be on the swiftc line or it won't link.)
 //
 import Foundation
 
@@ -130,11 +130,15 @@ check(Measure.typeForName("Cordial") == .volume, "Cordial → volume")
 check(Measure.typeForName("Chicken breast") == .weight, "Chicken breast → weight")
 check(Measure.typeForName("Plain flour") == .weight, "Flour → weight")
 check(Measure.typeForName("Cheddar") == .weight, "Cheddar → weight")
-check(Measure.typeForName("Cream cheese") == .weight, "Cream cheese → weight (override, not volume)")
+check(Measure.typeForName("Cream cheese") == .weight, "Cream cheese → weight (cheese glyph)")
 check(Measure.typeForName("Potatoes") == .weight, "Potatoes → weight")
-check(Measure.typeForName("Eggs") == .count, "Eggs → count (default)")
+check(Measure.typeForName("Fresh basil") == .weight, "Fresh basil → weight (herb, not ml)")
+check(Measure.typeForName("Habanero pepper") == .weight, "Habanero → weight (pepper, not ml)")
+check(Measure.typeForName("Yoghurt drink") == .volume, "Yoghurt drink → volume (not grams)")
+check(Measure.typeForName("Eggs") == .count, "Eggs → count")
 check(Measure.typeForName("Toilet roll") == .count, "Toilet roll → count")
 check(Measure.typeForName("Sourdough bread") == .count, "Bread → count")
+check(Measure.typeForName("zzxqwflumph") == nil, "unrecognised item → nil")
 check(Measure.defaultUnit(for: "Milk") == .milliliter, "Milk starts in ml")
 check(Measure.defaultUnit(for: "Beef mince") == .gram, "Beef starts in g")
 check(Measure.defaultUnit(for: "Eggs") == .count, "Eggs start as a count")
@@ -147,9 +151,12 @@ check(Measure.changeUnit(0.5, from: .liter, to: .milliliter) == 500, "0.5 L → 
 check(Measure.changeUnit(500, from: .milliliter, to: .count) == 1, "500 ml → units starts at 1 (not 500)")
 check(Measure.changeUnit(2, from: .count, to: .milliliter) == 500, "units → ml uses the 500 default")
 check(Measure.units(for: .volume) == [.milliliter, .liter, .count], "volume offers ml/L/units")
-check(Measure.units(for: .weight).contains(.count), "weight still offers units")
-check(Measure.units(for: .count) == [.milliliter, .liter, .gram, .kilogram, .count],
-      "unrecognised offers every unit")
+check(Measure.units(for: .weight) == [.gram, .kilogram, .count], "weight → g/kg/units (no ml)")
+check(Measure.units(for: .count) == [.count], "counted things → units only")
+check(Measure.units(for: nil) == [.milliliter, .liter, .gram, .kilogram, .count],
+      "unrecognised → every unit")
+check(Measure.units(for: Measure.typeForName("Fresh basil")) == [.gram, .kilogram, .count],
+      "basil offers only g/kg/units")
 check(Measure.format(500, unit: .milliliter) == "500 ml", "format → 500 ml")
 check(Measure.format(1.5, unit: .kilogram) == "1.5 kg", "format → 1.5 kg")
 check(Measure.format(2, unit: .count) == "2", "format count → 2 (no unit)")
