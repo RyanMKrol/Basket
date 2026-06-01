@@ -27,8 +27,12 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
   a dimmed **"Got it"** section (tap it to restore it).
 - **Tap the row** (or its faint **"+ Qty"** chip) to set a quantity. An inline
   stepper slides down with a **smart default unit** guessed from the item — pour-y
-  things start in ml, weighed things in g, everything else as a plain count — and
-  you can toggle g↔kg / ml↔L or clear it. The amount shows as a small chip on the
+  things start in ml, weighed things in g, everything else as a plain count. You
+  can switch units freely from a pill row: **every item can be counted in plain
+  "units"**, and unrecognised items offer the full set (ml/L/g/kg/units), since we
+  can't always know what you mean ("300 ml of milk" vs "1 bottle"). Switching
+  ml↔L or g↔kg keeps the amount; switching to a different kind of unit starts
+  fresh (so it never shows "500 units"). The amount shows as a small chip on the
   row; long names truncate so the chip keeps its place.
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
   tap **Clear all** in the section header to empty it immediately.

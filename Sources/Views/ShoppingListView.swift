@@ -202,8 +202,9 @@ struct ShoppingListView: View {
             QuantityEditor(
                 value: q,
                 unit: u,
+                units: Measure.units(for: Measure.typeForName(item.name)),
                 onStep: { up in stepQuantity(item, up: up) },
-                onToggleUnit: { toggleQuantityUnit(item) },
+                onPickUnit: { newUnit in pickQuantityUnit(item, newUnit) },
                 onClear: { clearQuantity(item) }
             )
         )
@@ -235,12 +236,13 @@ struct ShoppingListView: View {
         Haptics.soft()
     }
 
-    private func toggleQuantityUnit(_ item: GroceryItem) {
-        guard let u = item.unit, let q = item.quantity else { return }
-        let (value, unit) = Measure.toggleScale(q, unit: u)
+    private func pickQuantityUnit(_ item: GroceryItem, _ newUnit: MeasureUnit) {
+        guard let u = item.unit else { return }
+        let newValue = Measure.changeUnit(item.quantity ?? Measure.defaultValue(for: u),
+                                          from: u, to: newUnit)
         withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
-            item.quantity = value
-            item.unit = unit
+            item.quantity = newValue
+            item.unit = newUnit
         }
         Haptics.soft()
     }

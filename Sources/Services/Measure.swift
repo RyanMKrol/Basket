@@ -69,17 +69,28 @@ enum Measure {
         return max(floor, value + (up ? delta : -delta))
     }
 
-    /// Whether this unit has a larger/smaller sibling to toggle to (g↔kg, ml↔L).
-    static func hasAlternateScale(_ unit: MeasureUnit) -> Bool { unit != .count }
+    /// The units a user can pick from for an item. Every item can be counted in
+    /// plain "units"; a recognised liquid/solid also offers its scale pair; and
+    /// an unrecognised item offers everything, since we can't be sure what they
+    /// mean ("300 ml of milk" vs "1 bottle").
+    static func units(for type: MeasureType) -> [MeasureUnit] {
+        switch type {
+        case .volume: return [.milliliter, .liter, .count]
+        case .weight: return [.gram, .kilogram, .count]
+        case .count:  return [.milliliter, .liter, .gram, .kilogram, .count]
+        }
+    }
 
-    /// Toggle to the sibling scale, preserving the real amount (500 ml → 0.5 L).
-    static func toggleScale(_ value: Double, unit: MeasureUnit) -> (Double, MeasureUnit) {
-        switch unit {
-        case .gram:       return (value / 1000, .kilogram)
-        case .kilogram:   return (value * 1000, .gram)
-        case .milliliter: return (value / 1000, .liter)
-        case .liter:      return (value * 1000, .milliliter)
-        case .count:      return (value, .count)
+    /// Convert a value when the user picks a different unit. Within a scale pair
+    /// (ml↔L, g↔kg) the real amount is preserved (500 ml → 0.5 L); switching to a
+    /// different *kind* of unit resets to that unit's sensible default, so the
+    /// number can never carry over wrongly (500 ml → "units" starts at 1).
+    static func changeUnit(_ value: Double, from: MeasureUnit, to: MeasureUnit) -> Double {
+        if from == to { return value }
+        switch (from, to) {
+        case (.milliliter, .liter), (.gram, .kilogram):   return value / 1000
+        case (.liter, .milliliter), (.kilogram, .gram):   return value * 1000
+        default:                                          return defaultValue(for: to)
         }
     }
 
