@@ -15,6 +15,9 @@ struct ShoppingListView: View {
     /// The one row whose quantity editor is currently open (only one at a time).
     @State private var expandedID: PersistentIdentifier?
     @State private var showingAbout = false
+    /// True briefly while the "you got everything" celebration plays.
+    @State private var celebrating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -88,6 +91,11 @@ struct ShoppingListView: View {
                         .animation(.spring(response: 0.4, dampingFraction: 0.82), value: items.map(\.isChecked))
                     }
                 }
+            }
+
+            if celebrating {
+                ClearedCelebration(reduceMotion: reduceMotion)
+                    .transition(.opacity)
             }
         }
         .safeAreaInset(edge: .bottom) {
@@ -262,6 +270,17 @@ struct ShoppingListView: View {
                 item.checkedAt = .now
             }
             checkingIDs.remove(id)
+            // Just cleared the last thing to get? Celebrate the finished shop.
+            if toGet.isEmpty { celebrateCleared() }
+        }
+    }
+
+    /// Play the one-shot "you got everything" celebration.
+    private func celebrateCleared() {
+        guard !celebrating else { return }
+        withAnimation(.easeOut(duration: 0.3)) { celebrating = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+            withAnimation(.easeIn(duration: 0.4)) { celebrating = false }
         }
     }
 
