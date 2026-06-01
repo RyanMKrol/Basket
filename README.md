@@ -18,8 +18,10 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
 - **Quick add** — always-visible bottom bar with a green **＋** add button; as you
   type, suggestions float up as one-tap chips: your personal history first (things
   you've bought in the last month, ranked by frequency + recency), then a built-in
-  food dictionary (`SuggestionDictionary`) for instant autocomplete. Items already
-  on the list are filtered out.
+  food dictionary (`SuggestionDictionary`) for instant autocomplete. That
+  dictionary unifies the grocery + regional corpora with the emoji table's whole
+  vocabulary, so anything the app can put an emoji on it can also suggest (e.g.
+  "cord" → Cordial). Items already on the list are filtered out.
 - **Tap anywhere on a row** to check it off — the check pops with a burst of gold
   sparks while a strikethrough draws left-to-right, then the row glides into a
   dimmed **"Got it"** section (tap again to restore it).
@@ -93,7 +95,8 @@ Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
   ```sh
   swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
-         Sources/Models/Suggestion.swift Sources/Services/Formatting.swift \
+         Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
+         Sources/Services/Formatting.swift \
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
 

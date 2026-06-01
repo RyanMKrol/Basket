@@ -6,11 +6,13 @@
 //
 //   swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
 //          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
-//          Sources/Models/Suggestion.swift Sources/Services/Formatting.swift \
+//          Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
+//          Sources/Services/Formatting.swift \
 //          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
 //
-// (Emoji's cascade pulls in EmojiTable + SemanticEmoji; the capitalisation
-// checks pull in Formatting — all must be on the swiftc line or it won't link.)
+// (Emoji's cascade pulls in EmojiTable + SemanticEmoji; the dictionary checks
+// pull in SuggestionDictionary; the capitalisation checks pull in Formatting —
+// all must be on the swiftc line or it won't link.)
 //
 import Foundation
 
@@ -100,6 +102,15 @@ let r3 = Suggestions.combined(query: "har", history: hist, dictionary: dict, onL
 check(r3.first?.name == "Harissa", "personal history ranks first")
 check(Suggestions.combined(query: "  ", history: hist, dictionary: dict, onList: [], now: now).isEmpty,
       "empty query → nothing")
+
+print("Real dictionary (unified corpora + emoji vocabulary):")
+check(SuggestionDictionary.items.contains("Cordial"),
+      "Cordial is in the dictionary (emoji-known; was missing from typeahead)")
+check(Suggestions.combined(query: "cord", history: [], dictionary: SuggestionDictionary.items,
+                           onList: [], now: now).map(\.name).contains("Cordial"),
+      "typing 'cord' now suggests Cordial")
+check(SuggestionDictionary.items.allSatisfy { $0 == ($0.prefix(1).uppercased() + $0.dropFirst()) },
+      "every dictionary entry is capitalised-first")
 
 print("Capitalisation:")
 check("milk".capitalisedFirstLetter == "Milk", "milk → Milk")
