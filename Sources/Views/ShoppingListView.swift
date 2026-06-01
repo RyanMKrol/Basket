@@ -14,6 +14,7 @@ struct ShoppingListView: View {
     @State private var checkingIDs: Set<PersistentIdentifier> = []
     /// The one row whose quantity editor is currently open (only one at a time).
     @State private var expandedID: PersistentIdentifier?
+    @State private var showingAbout = false
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -99,6 +100,7 @@ struct ShoppingListView: View {
         }
         .onAppear { now = .now; purgeExpired() }
         .onReceive(ticker) { now = $0; purgeExpired() }
+        .sheet(isPresented: $showingAbout) { AboutView() }
     }
 
     private var header: some View {
@@ -110,6 +112,13 @@ struct ShoppingListView: View {
             Text(toGet.count == 1 ? "1 to get" : "\(toGet.count) to get")
                 .font(Theme.body(15, weight: .medium))
                 .foregroundStyle(Theme.onPaperSoft)
+            Button { showingAbout = true } label: {
+                Image(systemName: "info.circle")
+                    .font(.system(size: 17))
+                    .foregroundStyle(Theme.onPaperSoft)
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 4)
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
