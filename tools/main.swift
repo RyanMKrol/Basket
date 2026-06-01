@@ -4,8 +4,13 @@
 // synthesise a simulator *test* destination. The XCTest suite in Tests/ covers
 // the same cases for anyone whose Xcode can run it.
 //
-//   swiftc Sources/Services/Emoji.swift Sources/Services/Suggestions.swift \
-//          Sources/Models/Suggestion.swift tools/main.swift -o /tmp/basket_check
+//   swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
+//          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
+//          Sources/Models/Suggestion.swift Sources/Services/Formatting.swift \
+//          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
+//
+// (Emoji's cascade pulls in EmojiTable + SemanticEmoji; the capitalisation
+// checks pull in Formatting — all must be on the swiftc line or it won't link.)
 //
 import Foundation
 

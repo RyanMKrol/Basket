@@ -91,7 +91,8 @@ Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
   simulator needed):
 
   ```sh
-  swiftc Sources/Services/Emoji.swift Sources/Services/Suggestions.swift \
+  swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
+         Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
          Sources/Models/Suggestion.swift Sources/Services/Formatting.swift \
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
