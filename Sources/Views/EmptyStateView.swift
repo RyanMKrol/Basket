@@ -7,7 +7,14 @@ struct EmptyStateView: View {
             Spacer()
             Text("🧺")
                 .font(.system(size: 76))
-            Text("Your basket's empty")
+                .overlay(alignment: .topTrailing) {
+                    if let accent = Seasonality.holidayAccent(.now) {
+                        Text(accent)
+                            .font(.system(size: 30))
+                            .offset(x: 16, y: -4)
+                    }
+                }
+            Text(Seasonality.emptyStateLine(.now))
                 .font(Theme.title(22, weight: .bold))
                 .foregroundStyle(Theme.onPaper)
             Text("Add something below to get started.")
