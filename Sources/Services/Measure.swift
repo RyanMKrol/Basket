@@ -32,18 +32,51 @@ enum MeasureUnit: String, CaseIterable {
 /// the pure stepping/formatting logic the quantity editor leans on. All of this
 /// is deterministic and unit-tested (no UI, no SwiftData) in tools/main.swift.
 enum Measure {
-    /// Best-guess measure type for an item name. Falls back to `.count` — the
-    /// least-surprising default, and the user can change the unit anyway.
-    static func typeForName(_ name: String) -> MeasureType {
-        MeasureTable.match(name) ?? .count
+    // We classify an item by the emoji the app already gives it — the glyph
+    // encodes *what the thing is*, and reusing the emoji cascade means we get
+    // its careful collision handling (eggplant≠egg) and offline semantic
+    // fallback for free, instead of a parallel keyword table.
+    //
+    // Liquids you pour are volume; loose / weighed goods (produce, meat, fish,
+    // cheese, grains, nuts) are weight; everything else the app recognises
+    // (eggs, bread, packaged goods, household items…) is counted.
+    private static let volumeGlyphs: Set<String> = [
+        "🥛", "🧃", "🥤", "🍷", "🥂", "🍾", "🥃", "🍸", "🍹", "💧", "🧋", "🍶",
+    ]
+    private static let weightGlyphs: Set<String> = [
+        // produce, fungi, herbs, nuts
+        "🍎", "🍏", "🍐", "🍊", "🍋", "🍌", "🍓", "🫐", "🍒", "🍇", "🍑", "🍈", "🍉",
+        "🥭", "🍍", "🥝", "🥥", "🥑", "🫒", "🍅", "🥔", "🥕", "🧅", "🧄", "🥬", "🥦",
+        "🎃", "🥒", "🍆", "🫑", "🌶️", "🫛", "🫘", "🌽", "🍄", "🌿", "🌰", "🥜",
+        // meat, fish, seafood
+        "🥩", "🍖", "🥓", "🍗", "🐟", "🐠", "🐡", "🦐", "🦀", "🦞", "🦪", "🦑", "🦴",
+        // dairy solids, grains, sugar
+        "🧀", "🧈", "🥣", "🍚", "🍝", "🍜", "🍬",
+    ]
+    // Liquids whose emoji is an ambiguous container glyph (oils & vinegars map to
+    // 🥫 / 🫒), so catch them by keyword before the glyph lookup.
+    private static let liquidWords: Set<String> = ["oil", "vinegar"]
+
+    /// The item's measure type, or nil when we don't recognise it at all — then
+    /// every unit is offered, since we can't be sure what it is.
+    static func typeForName(_ name: String) -> MeasureType? {
+        let words = name.lowercased().split { !$0.isLetter }.map(String.init)
+        if words.contains(where: { w in liquidWords.contains(where: { w.hasPrefix($0) }) }) {
+            return .volume
+        }
+        let glyph = Emoji.forName(name)
+        if glyph == Emoji.fallback { return nil }
+        if volumeGlyphs.contains(glyph) { return .volume }
+        if weightGlyphs.contains(glyph) { return .weight }
+        return .count
     }
 
     /// The unit an item starts in the first time its quantity is set.
     static func defaultUnit(for name: String) -> MeasureUnit {
         switch typeForName(name) {
-        case .count:  return .count
-        case .weight: return .gram
-        case .volume: return .milliliter
+        case .volume:      return .milliliter
+        case .weight:      return .gram
+        case .count, nil:  return .count
         }
     }
 
@@ -73,11 +106,12 @@ enum Measure {
     /// plain "units"; a recognised liquid/solid also offers its scale pair; and
     /// an unrecognised item offers everything, since we can't be sure what they
     /// mean ("300 ml of milk" vs "1 bottle").
-    static func units(for type: MeasureType) -> [MeasureUnit] {
+    static func units(for type: MeasureType?) -> [MeasureUnit] {
         switch type {
         case .volume: return [.milliliter, .liter, .count]
         case .weight: return [.gram, .kilogram, .count]
-        case .count:  return [.milliliter, .liter, .gram, .kilogram, .count]
+        case .count:  return [.count]
+        case nil:     return [.milliliter, .liter, .gram, .kilogram, .count]   // unknown → offer all
         }
     }
 
