@@ -43,6 +43,9 @@ struct ShoppingListView: View {
             .sorted { ($0.checkedAt ?? .distantPast) > ($1.checkedAt ?? .distantPast) }
     }
 
+    /// Nothing to get and nothing recently got — the empty state is showing.
+    private var listIsEmpty: Bool { toGet.isEmpty && recentlyGot.isEmpty }
+
     var body: some View {
         ZStack {
             BasketBackground()
@@ -50,7 +53,7 @@ struct ShoppingListView: View {
             VStack(spacing: 0) {
                 header
 
-                if toGet.isEmpty && recentlyGot.isEmpty {
+                if listIsEmpty {
                     EmptyStateView()
                 } else {
                     ScrollView {
@@ -100,7 +103,9 @@ struct ShoppingListView: View {
                 }
             }
 
-            if celebrating {
+            // Skip the celebration once the screen is fully empty — the empty
+            // state is the payoff then, and otherwise the two overlap centred.
+            if celebrating && !listIsEmpty {
                 ClearedCelebration(reduceMotion: reduceMotion)
                     .transition(.opacity)
             }
