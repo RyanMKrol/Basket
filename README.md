@@ -41,7 +41,8 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the
   existing row instead of creating a copy.
 - **About sheet** — the ⓘ in the header opens a small sheet with the app version
-  and an optional "buy the developer a coffee" Ko-fi link. Basket is free.
+  and an optional **tip jar** (☕ / 🥪 / 🎁, in-app purchases via StoreKit). Basket
+  is free; tipping unlocks nothing.
 - **Little touches** — a sub-second basket flourish on cold launch (never on
   resume), a full-screen "All done!" celebration when you check off the last
   item, and quiet living details: a faint time-of-day tint and the occasional

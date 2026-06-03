@@ -1,15 +1,12 @@
 import SwiftUI
-
-/// App metadata kept in one place.
-enum AppInfo {
-    /// "Tip the developer" link. Free app; tipping is entirely optional.
-    static let koFiURL = "https://ko-fi.com/ryankrol"
-}
+import StoreKit
 
 /// A small "about" sheet reached from the ⓘ in the list header: app name,
-/// version and a Ko-fi tip link. The natural future home for a sound toggle or
-/// theme picker.
+/// version, and an in-app tip jar. The natural future home for a sound toggle or
+/// theme picker. Basket is free; tipping is entirely optional and unlocks nothing.
 struct AboutView: View {
+    @Environment(TipJar.self) private var tipJar
+
     private var version: String {
         let info = Bundle.main.infoDictionary
         let v = info?["CFBundleShortVersionString"] as? String ?? "1.0"
@@ -35,20 +32,8 @@ struct AboutView: View {
                     .foregroundStyle(Theme.onPaperSoft)
                     .multilineTextAlignment(.center)
 
-                if let url = URL(string: AppInfo.koFiURL) {
-                    Link(destination: url) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "cup.and.saucer.fill")
-                            Text("Buy the developer a coffee")
-                                .font(Theme.body(16, weight: .semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 22)
-                        .padding(.vertical, 14)
-                        .background(Theme.leaf, in: Capsule())
-                    }
-                    .padding(.top, 8)
-                }
+                tipSection
+                    .padding(.top, 6)
 
                 Spacer()
 
@@ -60,7 +45,68 @@ struct AboutView: View {
             .padding(.horizontal, 28)
             .padding(.top, 24)
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .task { await tipJar.load() }
+    }
+
+    @ViewBuilder private var tipSection: some View {
+        VStack(spacing: 10) {
+            Text("Enjoying Basket? Leave a tip ☕")
+                .font(Theme.body(14, weight: .medium))
+                .foregroundStyle(Theme.onPaperSoft)
+
+            switch tipJar.state {
+            case .idle, .loading:
+                ProgressView().tint(Theme.leaf).frame(height: 86)
+            case .unavailable:
+                Text("Tips aren't available right now.")
+                    .font(Theme.body(13))
+                    .foregroundStyle(Theme.onPaperSoft)
+                    .frame(height: 86)
+            case .loaded:
+                HStack(spacing: 12) {
+                    ForEach(tipJar.products, id: \.id, content: tipButton)
+                }
+            }
+
+            if tipJar.thanked {
+                Text("Thank you! 💚")
+                    .font(Theme.body(14, weight: .semibold))
+                    .foregroundStyle(Theme.leaf)
+            } else if tipJar.hasTipped {
+                Text("Thanks for supporting Basket ♥")
+                    .font(Theme.body(12))
+                    .foregroundStyle(Theme.onPaperSoft.opacity(0.85))
+            }
+        }
+    }
+
+    private func tipButton(_ product: Product) -> some View {
+        let badge = TipJar.badge(for: product.id)
+        let busy = tipJar.purchasingID == product.id
+        return Button {
+            Task { await tipJar.tip(product) }
+        } label: {
+            VStack(spacing: 3) {
+                Text(badge.emoji).font(.system(size: 24))
+                Text(badge.label).font(Theme.body(13, weight: .semibold))
+                Text(product.displayPrice).font(Theme.body(11)).opacity(0.9)
+            }
+            .foregroundStyle(.white)
+            .frame(width: 82, height: 86)
+            .background(Theme.leaf, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay {
+                if busy {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.black.opacity(0.25))
+                        ProgressView().tint(.white)
+                    }
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(tipJar.purchasingID != nil)
+        .opacity(tipJar.purchasingID != nil && !busy ? 0.5 : 1)
     }
 }
