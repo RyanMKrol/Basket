@@ -65,8 +65,16 @@ struct QuantityEditor: View {
                     .monospacedDigit()
                     .fixedSize(horizontal: true, vertical: false)
                     .frame(minWidth: 40)
-                    .onSubmit(commit)
                     .onAppear { fieldFocused = true }
+                    // Keep the field in step with the − / + buttons while the
+                    // keyboard is up: tapping them changes `value`, so mirror the
+                    // new amount into the buffer rather than leaving stale text.
+                    .onChange(of: value) { _, newValue in
+                        if editing { editText = Measure.numberString(newValue) }
+                    }
+                    // Commit when focus leaves — tapping the X, the row, another
+                    // row, or anywhere outside the field. There's deliberately no
+                    // on-keyboard Done button (it overlapped the list).
                     .onChange(of: fieldFocused) { _, focused in
                         if !focused { commit() }
                     }
@@ -77,12 +85,6 @@ struct QuantityEditor: View {
                 }
             }
             .frame(minWidth: 84)
-            .toolbar {
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done", action: commit)
-                }
-            }
         } else {
             Text(Measure.format(value, unit: unit))
                 .font(Theme.body(16, weight: .semibold))
