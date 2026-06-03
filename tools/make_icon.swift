@@ -72,7 +72,7 @@ for row in 0..<7 { for col in 0..<8 {
 } }
 box(R, 0, 0.70, 1.0, 0.30, 0, shelf)
 
-let cx: CGFloat = 0.5, cy: CGFloat = 0.55, w: CGFloat = 0.57, h = w * 0.72
+let cx: CGFloat = 0.5, cy: CGFloat = 0.55, w: CGFloat = 0.63, h = w * 0.72   // another ~10%
 // Soft shadow grounding the basket on the shelf.
 NSColor.black.withAlphaComponent(0.18).setFill()
 let sp = P(R, cx, cy + h * 0.57), sw = S(R, w * 0.44), sh = S(R, w * 0.07)
