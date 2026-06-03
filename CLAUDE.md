@@ -4,24 +4,45 @@ Basket is a soft, friendly iOS shopping-list app (SwiftUI + SwiftData, on-device
 only). This file is the source of truth for **how to work in this repo**. Follow
 it on every task unless the user says otherwise.
 
-## Golden rule: never work directly on `main`
+## Golden rule: every task gets its own git worktree + branch
 
-Every change happens on a branch, created from an up-to-date `main`.
+**Never work in the shared/primary checkout, and never commit to `main`.** Other
+Claudes (and humans) may be working in this same repo at the same time — sharing
+one working tree clashes over the checked-out branch, the generated
+`Basket.xcodeproj`, the `build/` directory and the simulator. So **every** task —
+a feature, a fix, even a one-line doc tweak — happens in its **own** git worktree,
+on its **own** branch, cut from an up-to-date `main`:
 
 ```sh
-git checkout main && git pull --ff-only      # 1. sync main to the remote first
-git checkout -b <type>/<short-slug>          # 2. branch (e.g. fix/ws-reconnect)
-# … do the work, keep it green (see "Definition of done") …
-git add -A && git commit -m "…"              # 3. commit on the branch
-git push -u origin <branch>                  # 4. publish the branch
-git checkout main && git pull --ff-only      # 5. resync main
-git merge --no-ff <branch> && git push       # 6. integrate + publish
-git branch -d <branch>                       # 7. clean up (also delete remote)
-git push origin --delete <branch>            # 7b. remove the remote branch
+# 0. sync main (in the primary checkout) and see who's already where
+git -C <primary-checkout> checkout main && git -C <primary-checkout> pull --ff-only
+git worktree list && git branch                       # avoid name/dir clashes
+
+# 1. create YOUR isolated worktree on a UNIQUE branch, off main
+git worktree add ../basket-<slug> -b <type>/<slug> main
+cd ../basket-<slug>
+
+# 2. do the work here, commit as it goes green (see "Definition of done")
+git add -A && git commit -m "…"
+
+# 3. integrate: resync main, merge your branch, publish
+git checkout main && git pull --ff-only
+git merge --no-ff <type>/<slug> && git push
+
+# 4. clean up the worktree + branch
+git worktree remove ../basket-<slug> && git branch -d <type>/<slug>
 ```
 
-You end back on a clean, current `main`, ready for the next task. We don't use
-pull requests — merge it yourself.
+Notes:
+- **Pick a unique slug/branch.** Another agent may already own `feat/<x>` — check
+  `git branch` and `git worktree list` first, and never reuse, move, or delete a
+  branch or worktree that isn't yours.
+- The **primary checkout stays on a clean, current `main`** as the shared
+  integration point — don't park a feature branch in it.
+- **Build and test inside your worktree** (it has its own `Basket.xcodeproj` and
+  `build/`); pin a dedicated simulator so you don't fight over one.
+- We don't use pull requests — merge it yourself. **One worktree = one branch =
+  one task.**
 
 ### Commit proactively — don't wait to be asked
 
@@ -33,20 +54,6 @@ of done"); once a change is green, push the branch and merge it to `main` per th
 flow above. The only things to still confirm first are destructive or
 hard-to-undo actions (e.g. `push --force`, history rewrites, deleting remote
 branches that aren't yours, anything outward-facing beyond the normal merge).
-
-### Use a git worktree for concurrent work
-
-If more than one task may be in flight at once, isolate each in its own **git
-worktree** so they never clash over the working tree or branch:
-
-```sh
-git worktree add ../basket-<slug> -b <type>/<slug> main   # new isolated checkout
-# work in ../basket-<slug>, follow the branch flow above
-git worktree remove ../basket-<slug>                       # when merged & done
-```
-
-Build/test inside the worktree; merge to `main` from there or from the primary
-checkout. One worktree = one branch = one task.
 
 ## Definition of done
 
