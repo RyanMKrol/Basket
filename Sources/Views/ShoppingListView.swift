@@ -25,8 +25,9 @@ struct ShoppingListView: View {
     @State private var showFlourish = LaunchOnce.consume()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(TipJar.self) private var tipJar
-    /// Supporters tap the title to cycle colour themes (0 = classic); remembered.
-    @AppStorage("basket.titleTheme") private var titleTheme = 1
+    /// Supporters tap the title to toggle the rainbow look. Defaults on after a
+    /// tip and persists (UserDefaults) — even across relaunches — until toggled.
+    @AppStorage("basket.titleRainbow") private var titleRainbow = true
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -135,44 +136,14 @@ struct ShoppingListView: View {
         }
     }
 
-    /// Once you've tipped, the title takes on a colourful theme with a solid red
-    /// heart. Tap it to cycle themes (0 = classic); the choice is remembered. The
-    /// little number by the heart is a temporary aid for picking favourites.
-    private static let titleThemeCount = 8
+    /// Once you've tipped, the title becomes a per-letter rainbow with a solid
+    /// red heart — a small "you're appreciated". Tap it to toggle between the
+    /// rainbow and classic looks; the choice persists. No tip → no rainbow, no
+    /// heart, no toggle.
     private var supporter: Bool { tipJar.hasTipped }
 
-    private static let gradRainbow = LinearGradient(
-        colors: [Color(red: 0.93, green: 0.26, blue: 0.30), Color(red: 0.97, green: 0.58, blue: 0.20),
-                 Color(red: 0.96, green: 0.82, blue: 0.25), Color(red: 0.30, green: 0.75, blue: 0.42),
-                 Color(red: 0.20, green: 0.55, blue: 0.92), Color(red: 0.62, green: 0.40, blue: 0.85)],
-        startPoint: .leading, endPoint: .trailing)
-    private static let gradSunset = LinearGradient(
-        colors: [Color(red: 0.98, green: 0.56, blue: 0.24), Color(red: 0.96, green: 0.40, blue: 0.55),
-                 Color(red: 0.62, green: 0.35, blue: 0.82)], startPoint: .leading, endPoint: .trailing)
-    private static let gradOcean = LinearGradient(
-        colors: [Color(red: 0.16, green: 0.78, blue: 0.72), Color(red: 0.20, green: 0.55, blue: 0.92),
-                 Color(red: 0.40, green: 0.40, blue: 0.88)], startPoint: .leading, endPoint: .trailing)
-    private static let gradCandy = LinearGradient(
-        colors: [Color(red: 0.98, green: 0.45, blue: 0.70), Color(red: 0.86, green: 0.34, blue: 0.78),
-                 Color(red: 0.55, green: 0.40, blue: 0.90)], startPoint: .leading, endPoint: .trailing)
-
-    /// "Basket" in theme `i` (0 = classic ink).
-    @ViewBuilder private func titleText(_ i: Int) -> some View {
-        let f = Theme.title(34, weight: .bold)
-        switch i {
-        case 1: Text("Basket").font(f).foregroundStyle(Self.gradRainbow)
-        case 2: perLetterRainbow.font(f)
-        case 3: Text("Basket").font(f).foregroundStyle(Theme.leaf)
-        case 4: Text("Basket").font(f).foregroundStyle(Color(red: 0.90, green: 0.28, blue: 0.32))
-        case 5: Text("Basket").font(f).foregroundStyle(Self.gradSunset)
-        case 6: Text("Basket").font(f).foregroundStyle(Self.gradOcean)
-        case 7: Text("Basket").font(f).foregroundStyle(Self.gradCandy)
-        default: Text("Basket").font(f).foregroundStyle(Theme.onPaper)
-        }
-    }
-
-    /// Each letter its own vibrant colour.
-    private var perLetterRainbow: Text {
+    /// "Basket" with each letter its own vibrant colour.
+    private var rainbowTitle: Text {
         let cols: [Color] = [Color(red: 0.93, green: 0.26, blue: 0.30), Color(red: 0.97, green: 0.58, blue: 0.20),
                              Color(red: 0.92, green: 0.76, blue: 0.22), Color(red: 0.30, green: 0.75, blue: 0.42),
                              Color(red: 0.20, green: 0.55, blue: 0.92), Color(red: 0.62, green: 0.40, blue: 0.85)]
@@ -185,22 +156,21 @@ struct ShoppingListView: View {
 
     @ViewBuilder private var titleView: some View {
         HStack(alignment: .firstTextBaseline, spacing: 7) {
-            titleText(supporter ? titleTheme : 0)
+            if supporter && titleRainbow {
+                rainbowTitle.font(Theme.title(34, weight: .bold))
+            } else {
+                Text("Basket").font(Theme.title(34, weight: .bold)).foregroundStyle(Theme.onPaper)
+            }
             if supporter {
                 Image(systemName: "heart.fill")
                     .font(.system(size: 17))
                     .foregroundStyle(.red)
-                Text("\(titleTheme + 1)")
-                    .font(Theme.body(13, weight: .semibold))
-                    .foregroundStyle(Theme.onPaperSoft)
             }
         }
         .contentShape(Rectangle())
         .onTapGesture {
             guard supporter else { return }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-                titleTheme = (titleTheme + 1) % Self.titleThemeCount
-            }
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { titleRainbow.toggle() }
             Haptics.soft()
         }
     }

@@ -43,8 +43,8 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
 - **About sheet** — the ⓘ in the header opens a small sheet with the app version
   and an optional **tip jar** (☕ / 🥪 / 🎁, in-app purchases via StoreKit). Basket
   is free; tipping unlocks nothing — but once you've tipped, the **Basket** title
-  takes on a colourful theme with a solid red heart; tap it to cycle through the
-  themes, as a small thank-you.
+  turns into a per-letter rainbow with a solid red heart; tap it to toggle between
+  the rainbow and classic looks (your choice persists), as a small thank-you.
 - **Little touches** — a sub-second basket flourish on cold launch (never on
   resume), a full-screen "All done!" celebration when you check off the last
   item, and quiet living details: a faint time-of-day tint and the occasional
