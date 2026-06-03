@@ -3,24 +3,30 @@ import SwiftUI
 /// The inline quantity editor that slides down inside a row's card when you tap
 /// it: a − / value / + stepper on top, and a row of unit pills below (every item
 /// can be counted in plain "units"; unrecognised items offer all of ml/L/g/kg).
-/// Purely presentational — all the maths lives in `Measure`.
+/// Tap the value itself to type an exact amount on the keyboard, so a big
+/// quantity doesn't mean tapping + a hundred times. All the maths lives in
+/// `Measure`.
 struct QuantityEditor: View {
     let value: Double
     let unit: MeasureUnit
     let units: [MeasureUnit]
     let onStep: (_ up: Bool) -> Void
     let onPickUnit: (MeasureUnit) -> Void
+    /// Apply an exact value typed into the field (keyboard entry).
+    let onSetValue: (Double) -> Void
     let onClear: () -> Void
+
+    /// While true the value is an editable text field rather than a tappable
+    /// label; the buffer holds the in-progress text.
+    @State private var editing = false
+    @State private var editText = ""
+    @FocusState private var fieldFocused: Bool
 
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 stepButton("minus", up: false)
-                Text(Measure.format(value, unit: unit))
-                    .font(Theme.body(16, weight: .semibold))
-                    .foregroundStyle(Theme.ink)
-                    .monospacedDigit()
-                    .frame(minWidth: 84)
+                valueDisplay
                 stepButton("plus", up: true)
 
                 Spacer(minLength: 8)
@@ -43,6 +49,66 @@ struct QuantityEditor: View {
             }
         }
         .padding(.top, 12)
+    }
+
+    /// The number between the − / + buttons: a tappable label normally, swapping
+    /// to a focused keyboard field while editing so an exact amount can be typed.
+    @ViewBuilder private var valueDisplay: some View {
+        if editing {
+            HStack(spacing: 4) {
+                TextField("", text: $editText)
+                    .keyboardType(unit == .count ? .numberPad : .decimalPad)
+                    .multilineTextAlignment(.center)
+                    .focused($fieldFocused)
+                    .font(Theme.body(16, weight: .semibold))
+                    .foregroundStyle(Theme.ink)
+                    .monospacedDigit()
+                    .fixedSize(horizontal: true, vertical: false)
+                    .frame(minWidth: 40)
+                    .onSubmit(commit)
+                    .onAppear { fieldFocused = true }
+                    .onChange(of: fieldFocused) { _, focused in
+                        if !focused { commit() }
+                    }
+                if !unit.symbol.isEmpty {
+                    Text(unit.symbol)
+                        .font(Theme.body(16, weight: .semibold))
+                        .foregroundStyle(Theme.inkSoft)
+                }
+            }
+            .frame(minWidth: 84)
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done", action: commit)
+                }
+            }
+        } else {
+            Text(Measure.format(value, unit: unit))
+                .font(Theme.body(16, weight: .semibold))
+                .foregroundStyle(Theme.ink)
+                .monospacedDigit()
+                .frame(minWidth: 84)
+                .contentShape(Rectangle())
+                .onTapGesture(perform: beginEditing)
+        }
+    }
+
+    /// Seed the field with the bare number and switch into edit mode (the field's
+    /// `onAppear` takes focus and raises the keyboard).
+    private func beginEditing() {
+        editText = Measure.numberString(value)
+        editing = true
+        Haptics.soft()
+    }
+
+    /// Leave edit mode, applying the typed value when it parses to something sane
+    /// (otherwise the previous amount stands).
+    private func commit() {
+        guard editing else { return }
+        editing = false
+        fieldFocused = false
+        if let v = Measure.parse(editText, unit: unit) { onSetValue(v) }
     }
 
     private func unitPill(_ u: MeasureUnit) -> some View {

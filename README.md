@@ -34,8 +34,13 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
   "units"**, and unrecognised items offer the full set (ml/L/g/kg/units), since we
   can't always know what you mean ("300 ml of milk" vs "1 bottle"). Switching
   ml↔L or g↔kg keeps the amount; switching to a different kind of unit starts
-  fresh (so it never shows "500 units"). The amount shows as a small chip on the
-  row; long names truncate so the chip keeps its place.
+  fresh (so it never shows "500 units"). **Tap the number itself** (between the −
+  and +) to type an exact amount on the keyboard — so a big quantity doesn't mean
+  tapping + over and over. The field is forgiving: it ignores the unit letters
+  ("750 ml" → 750), takes a comma or dot decimal, rounds plain counts to whole
+  numbers, and quietly keeps the old amount if you clear it or type nonsense. The
+  amount shows as a small chip on the row; long names truncate so the chip keeps
+  its place.
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
   tap **Clear all** in the section header to empty it immediately.
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the

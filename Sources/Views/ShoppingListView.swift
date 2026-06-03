@@ -256,6 +256,7 @@ struct ShoppingListView: View {
                 units: Measure.units(for: Measure.typeForName(item.name)),
                 onStep: { up in stepQuantity(item, up: up) },
                 onPickUnit: { newUnit in pickQuantityUnit(item, newUnit) },
+                onSetValue: { value in setQuantity(item, value) },
                 onClear: { clearQuantity(item) }
             )
         )
@@ -294,6 +295,16 @@ struct ShoppingListView: View {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
             item.quantity = newValue
             item.unit = newUnit
+        }
+        Haptics.soft()
+    }
+
+    /// Apply an exact amount typed straight into the editor's value field — the
+    /// keyboard shortcut past tapping +/- many times for a large quantity. The
+    /// field only hands back values that already parsed sanely (see Measure.parse).
+    private func setQuantity(_ item: GroceryItem, _ value: Double) {
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+            item.quantity = value
         }
         Haptics.soft()
     }
