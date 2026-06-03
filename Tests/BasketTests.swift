@@ -86,52 +86,44 @@ final class SuggestionsTests: XCTestCase {
                             lastAddedAt: now.addingTimeInterval(-daysAgo * 86_400))
     }
 
+    // History ranking is exercised through `combined` (the only path the app
+    // uses); these pass an empty dictionary to isolate the history behaviour.
+    private func ranked(_ query: String, _ candidates: [SuggestionCandidate],
+                        onList: Set<String> = []) -> [Suggestion] {
+        Suggestions.combined(query: query, history: candidates, dictionary: [],
+                             onList: onList, now: now)
+    }
+
     func testEmptyQueryReturnsNothing() {
-        let result = Suggestions.rank(query: "  ",
-                                      candidates: [cand("Milk", times: 5, daysAgo: 1)],
-                                      onList: [],
-                                      now: now)
-        XCTAssertTrue(result.isEmpty)
+        XCTAssertTrue(ranked("  ", [cand("Milk", times: 5, daysAgo: 1)]).isEmpty)
     }
 
     func testMatchesBySubstringCaseInsensitive() {
-        let result = Suggestions.rank(query: "TOM",
-                                      candidates: [cand("Tomatoes", times: 1, daysAgo: 1),
-                                                   cand("Milk", times: 1, daysAgo: 1)],
-                                      onList: [],
-                                      now: now)
+        let result = ranked("TOM", [cand("Tomatoes", times: 1, daysAgo: 1),
+                                    cand("Milk", times: 1, daysAgo: 1)])
         XCTAssertEqual(result.map(\.name), ["Tomatoes"])
     }
 
     func testExcludesItemsAlreadyOnList() {
-        let result = Suggestions.rank(query: "to",
-                                      candidates: [cand("Tomatoes", times: 9, daysAgo: 0)],
-                                      onList: ["tomatoes"],
-                                      now: now)
+        let result = ranked("to", [cand("Tomatoes", times: 9, daysAgo: 0)],
+                            onList: ["tomatoes"])
         XCTAssertTrue(result.isEmpty)
     }
 
     func testForgetsThingsOlderThanAMonth() {
-        let result = Suggestions.rank(query: "te",
-                                      candidates: [cand("Tea", times: 9, daysAgo: 40)],
-                                      onList: [],
-                                      now: now)
+        let result = ranked("te", [cand("Tea", times: 9, daysAgo: 40)])
         XCTAssertTrue(result.isEmpty, "items older than the 30-day window should be forgotten")
     }
 
     func testFrequentAndRecentRanksHigher() {
-        let result = Suggestions.rank(query: "t",
-                                      candidates: [cand("Tortillas", times: 1, daysAgo: 20),
-                                                   cand("Tea", times: 8, daysAgo: 0)],
-                                      onList: [],
-                                      now: now)
+        let result = ranked("t", [cand("Tortillas", times: 1, daysAgo: 20),
+                                  cand("Tea", times: 8, daysAgo: 0)])
         XCTAssertEqual(result.first?.name, "Tea")
     }
 
-    func testCapsAtMaxResults() {
+    func testCapsAtCombinedMax() {
         let many = (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }
-        let result = Suggestions.rank(query: "thing", candidates: many, onList: [], now: now)
-        XCTAssertEqual(result.count, Suggestions.maxResults)
+        XCTAssertEqual(ranked("thing", many).count, Suggestions.combinedMax)
     }
 
     private let dict = ["Tomatoes", "Tomato Soup", "Tomato Ketchup", "Milk", "Bananas"]
