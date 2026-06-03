@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates Sources/Services/Emoji.swift from the researched food->emoji data.
+"""Generates Sources/Services/EmojiTable.swift from the researched food->emoji data.
 
 Dedupes by keyword (first occurrence wins, in category order: produce, proteins,
 dairy/bakery/grains, pantry, snacks/drinks/non-food). The matcher (in Swift)
@@ -180,7 +180,8 @@ RAW = r"""
 ("white wine", "🍷"),("rose wine", "🍷"),("wine", "🍷"),("prosecco", "🥂"),("champagne", "🍾"),("vodka", "🥃"),
 ("gin", "🍸"),("whisky", "🥃"),("rum", "🥃"),("brandy", "🥃"),("tequila", "🥃"),("sherry", "🍷"),
 ("port", "🍷"),("liqueur", "🥃"),("cocktail", "🍹"),("frozen pizza", "🍕"),("pizza", "🍕"),
-("fish finger", "🍱"),("chicken nugget", "🍱"),("oven chip", "🍟"),
+# NB: "fish finger" is mapped to 🐟 in the proteins block above (first match wins).
+("chicken nugget", "🍱"),("oven chip", "🍟"),
 ("sandwich", "🥪"),("sub", "🥪"),("taco", "🌮"),("burrito", "🌯"),("tamale", "🫔"),
 ("gyro", "🥙"),("falafel", "🧆"),("ready meal", "🍱"),("bento", "🍱"),("curry", "🍛"),("stir fry", "🥘"),
 ("paella", "🥘"),("casserole", "🥘"),("pad thai", "🍜"),("pot noodle", "🍜"),("soup", "🍲"),("stew", "🍲"),

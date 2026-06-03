@@ -1,7 +1,7 @@
 import Foundation
 
 /// Maps a grocery item name to a playful emoji via a three-stage cascade:
-///   1. `EmojiTable` — the curated ~960-entry keyword table (fast, exact).
+///   1. `EmojiTable` — the curated ~1750-entry keyword table (fast, exact).
 ///   2. `SemanticEmoji` — offline word-embedding nearest-anchor (handles novel
 ///      items and collapses variants like "frozen peas" → 🫛).
 ///   3. `fallback` — a neutral basket when nothing else fits.

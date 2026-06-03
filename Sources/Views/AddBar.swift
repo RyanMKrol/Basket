@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// The always-visible bottom add bar plus its live suggestion stack.
-/// In M1 this is wired to plain bindings/closures; suggestions are passed in by
-/// the parent (real history-backed suggestions arrive in a later milestone).
+/// Presentational: the parent owns the text binding and computes the live
+/// suggestions (personal history + the food dictionary, via `Suggestions`),
+/// passing them in here purely to render and tap.
 struct AddBar: View {
     @Binding var text: String
     var suggestions: [Suggestion]
