@@ -18,6 +18,9 @@ struct ShoppingListView: View {
     @State private var pendingCommit: Set<PersistentIdentifier> = []
     /// The one row whose quantity editor is currently open (only one at a time).
     @State private var expandedID: PersistentIdentifier?
+    /// Focus of the bottom add-bar field, lifted here so opening a quantity
+    /// editor can drop its keyboard along with its draft.
+    @FocusState private var addBarFocused: Bool
     @State private var showingAbout = false
     /// True briefly while the "you got everything" celebration plays.
     @State private var celebrating = false
@@ -119,7 +122,8 @@ struct ShoppingListView: View {
                 text: $draft,
                 suggestions: liveSuggestions,
                 onSubmit: addDraft,
-                onPickSuggestion: { add($0.name) }
+                onPickSuggestion: { add($0.name) },
+                focused: $addBarFocused
             )
         }
         .onAppear { now = .now; purgeExpired() }
@@ -269,6 +273,11 @@ struct ShoppingListView: View {
             if expandedID == item.persistentModelID {
                 expandedID = nil
             } else {
+                // Clear any half-typed add-bar entry and drop its keyboard so the
+                // leftover text + suggestion stack don't linger behind the
+                // quantity editor.
+                draft = ""
+                addBarFocused = false
                 if item.quantity == nil || item.unit == nil {
                     let u = Measure.defaultUnit(for: item.name)
                     item.unit = u
