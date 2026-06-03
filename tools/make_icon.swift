@@ -1,12 +1,13 @@
-// Renders Basket's 1024×1024 app icon natively on macOS (AppKit): the "B1"
-// direction — a deep-green field with a warm woven basket (cream cloth, kraft
-// weave) and a small lime leaf. Edge-to-edge (iOS rounds the corners itself).
+// Renders Basket's 1024×1024 app icon natively on macOS (AppKit): a warm woven
+// basket (cream cloth, kraft weave, lime leaf) sitting on a darker "shelf",
+// against a polka-dot green "wall". Edge-to-edge (iOS rounds the corners).
 // Run: swift tools/make_icon.swift <output.png>
 import AppKit
 
-// Palette (matches the B1 variation).
-let bg     = NSColor(srgbRed: 0.16, green: 0.32, blue: 0.24, alpha: 1)
-let bgDeep = NSColor(srgbRed: 0.12, green: 0.26, blue: 0.19, alpha: 1)
+// Palette.
+let wallTop = NSColor(srgbRed: 0.22, green: 0.40, blue: 0.30, alpha: 1)   // lighter wall (top)
+let wallBot = NSColor(srgbRed: 0.17, green: 0.34, blue: 0.26, alpha: 1)
+let shelf   = NSColor(srgbRed: 0.10, green: 0.22, blue: 0.16, alpha: 1)   // darker shelf band
 let kraft  = NSColor(srgbRed: 0.82, green: 0.61, blue: 0.39, alpha: 1)
 let kraftD = NSColor(srgbRed: 0.58, green: 0.41, blue: 0.24, alpha: 1)
 let cream  = NSColor(srgbRed: 0.98, green: 0.96, blue: 0.90, alpha: 1)
@@ -63,11 +64,21 @@ let side: CGFloat = 1024
 let image = NSImage(size: NSSize(width: side, height: side))
 image.lockFocus()
 let R = NSRect(x: 0, y: 0, width: side, height: side)
-// Background: deep green with a gentle vertical lift.
-NSGradient(colors: [bg, bgDeep])!.draw(in: R, angle: -90)
-let cx: CGFloat = 0.5, cy: CGFloat = 0.54, w: CGFloat = 0.57, h = w * 0.72   // ~10% larger
+// Background: a polka-dot "wall" (lighter green) above a darker "shelf".
+NSGradient(colors: [wallTop, wallBot])!.draw(in: R, angle: -90)
+for row in 0..<7 { for col in 0..<8 {
+    let dx = 0.06 + CGFloat(col) * 0.125, dy = 0.05 + CGFloat(row) * 0.105
+    if dy < 0.66 { disc(R, dx, dy, 0.016, NSColor.white.withAlphaComponent(0.10)) }   // dots on the wall only
+} }
+box(R, 0, 0.70, 1.0, 0.30, 0, shelf)
+
+let cx: CGFloat = 0.5, cy: CGFloat = 0.55, w: CGFloat = 0.57, h = w * 0.72
+// Soft shadow grounding the basket on the shelf.
+NSColor.black.withAlphaComponent(0.18).setFill()
+let sp = P(R, cx, cy + h * 0.57), sw = S(R, w * 0.44), sh = S(R, w * 0.07)
+NSBezierPath(ovalIn: NSRect(x: sp.x - sw, y: sp.y - sh, width: sw * 2, height: sh * 2)).fill()
 basket(R, cx, cy, w)
-leafShape(R, cx + 0.20, cy - h * 0.42 - 0.04, 0.10, lime)
+leafShape(R, cx + 0.20, cy - h * 0.42 - 0.04, 0.11, lime)
 image.unlockFocus()
 
 let out = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "icon-1024.png"
