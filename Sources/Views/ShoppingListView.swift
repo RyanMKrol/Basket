@@ -24,6 +24,9 @@ struct ShoppingListView: View {
     /// Cold-start launch flourish — fires once per process, not on resume.
     @State private var showFlourish = LaunchOnce.consume()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(TipJar.self) private var tipJar
+    /// Supporters can tap the title to flip back to the plain version; remembered.
+    @AppStorage("basket.classicTitle") private var classicTitle = false
 
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
@@ -132,11 +135,46 @@ struct ShoppingListView: View {
         }
     }
 
+    /// Once you've tipped, the title blooms into a gently-shimmering rainbow with
+    /// a heart — a little "you're appreciated". Tap it to toggle back to classic.
+    private var showsRainbow: Bool { tipJar.hasTipped && !classicTitle }
+
+    private static let rainbow = LinearGradient(
+        colors: [Color(red: 0.95, green: 0.35, blue: 0.42), Color(red: 0.97, green: 0.62, blue: 0.30),
+                 Color(red: 0.95, green: 0.83, blue: 0.35), Color(red: 0.45, green: 0.76, blue: 0.45),
+                 Color(red: 0.40, green: 0.66, blue: 0.90), Color(red: 0.66, green: 0.45, blue: 0.82)],
+        startPoint: .leading, endPoint: .trailing)
+
+    @ViewBuilder private var titleView: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !(showsRainbow && !reduceMotion))) { tl in
+            let phase = showsRainbow && !reduceMotion
+                ? CGFloat(tl.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 5) / 5) * 360
+                : 0
+            HStack(alignment: .firstTextBaseline, spacing: 7) {
+                Text("Basket")
+                    .font(Theme.title(34, weight: .bold))
+                    .foregroundStyle(showsRainbow ? AnyShapeStyle(Self.rainbow) : AnyShapeStyle(Theme.onPaper))
+                if showsRainbow {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 18))
+                        .foregroundStyle(Self.rainbow)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
+            .hueRotation(.degrees(phase))
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard tipJar.hasTipped else { return }
+            withAnimation(.spring(response: 0.45, dampingFraction: 0.7)) { classicTitle.toggle() }
+            Haptics.soft()
+        }
+        .animation(.spring(response: 0.4, dampingFraction: 0.85), value: showsRainbow)
+    }
+
     private var header: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text("Basket")
-                .font(Theme.title(34, weight: .bold))
-                .foregroundStyle(Theme.onPaper)
+            titleView
             Spacer()
             Text(toGet.count == 1 ? "1 to get" : "\(toGet.count) to get")
                 .font(Theme.body(15, weight: .medium))
