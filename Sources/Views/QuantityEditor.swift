@@ -126,8 +126,21 @@ struct QuantityEditor: View {
         .buttonStyle(.plain)
     }
 
+    /// Plus / minus. While the keyboard is up, step from the *typed* amount — so a
+    /// typed 100 + goes to 150, not 550 — snapping to the bucket via `Measure.step`;
+    /// the field then follows the new value through `onChange(of: value)`. When not
+    /// editing, defer to the parent's stepper as before.
+    private func step(_ up: Bool) {
+        if editing {
+            let base = Measure.parse(editText, unit: unit) ?? value
+            onSetValue(Measure.step(base, unit: unit, up: up))
+        } else {
+            onStep(up)
+        }
+    }
+
     private func stepButton(_ systemName: String, up: Bool) -> some View {
-        Button { onStep(up) } label: {
+        Button { step(up) } label: {
             Image(systemName: systemName)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(.white)

@@ -89,8 +89,10 @@ enum Measure {
         }
     }
 
-    /// Step a value up or down with unit-appropriate increments and a floor so
-    /// it never goes to zero or negative.
+    /// Step a value up or down to the next/previous bucket boundary, with
+    /// unit-appropriate increments and a floor so it never reaches zero. Snapping
+    /// onto the grid (rather than just adding the delta) keeps an off-grid amount
+    /// tidy: a typed 501 steps up to a round 550 — not 551 — and down to 500.
     static func step(_ value: Double, unit: MeasureUnit, up: Bool) -> Double {
         let delta: Double
         switch unit {
@@ -98,8 +100,11 @@ enum Measure {
         case .gram, .milliliter:   delta = value >= 1000 ? 100 : 50
         case .kilogram, .liter:    delta = 0.25
         }
-        let floor: Double = (unit == .count) ? 1 : delta
-        return max(floor, value + (up ? delta : -delta))
+        let buckets = value / delta
+        let target = up ? (floor(buckets) + 1) * delta    // next bucket above
+                        : (ceil(buckets) - 1) * delta      // first bucket below
+        let minimum: Double = (unit == .count) ? 1 : delta
+        return max(minimum, target)
     }
 
     /// The units a user can pick from for an item. Every item can be counted in

@@ -9,8 +9,9 @@ struct AddBar: View {
     var suggestions: [Suggestion]
     var onSubmit: () -> Void
     var onPickSuggestion: (Suggestion) -> Void
-
-    @FocusState private var focused: Bool
+    /// Focus is owned by the parent so it can drop the keyboard when another
+    /// surface (e.g. the quantity editor) takes over.
+    var focused: FocusState<Bool>.Binding
 
     var body: some View {
         VStack(spacing: 8) {
@@ -20,7 +21,7 @@ struct AddBar: View {
                     ForEach(suggestions) { s in
                         Button {
                             onPickSuggestion(s)
-                            focused = true   // keep the keyboard up for rapid adding
+                            focused.wrappedValue = true   // keep the keyboard up for rapid adding
                         } label: {
                             HStack(spacing: 12) {
                                 Text(s.emoji).font(.system(size: 20))
@@ -54,16 +55,16 @@ struct AddBar: View {
                     .textInputAutocapitalization(.sentences)
                     .autocorrectionDisabled(false)
                     .submitLabel(.done)
-                    .focused($focused)
+                    .focused(focused)
                     .onSubmit(submit)
 
                 // While the keyboard is up, offer a way to put it away. Adding
                 // is the common case — submit and suggestion-pick keep focus —
                 // but there was no escape hatch, so the keyboard felt stuck. This
                 // tucks it down without touching the rapid-add flow.
-                if focused {
+                if focused.wrappedValue {
                     Button {
-                        focused = false
+                        focused.wrappedValue = false
                         Haptics.soft()
                     } label: {
                         Image(systemName: "keyboard.chevron.compact.down")
@@ -76,7 +77,7 @@ struct AddBar: View {
 
                 Button {
                     if text.trimmingCharacters(in: .whitespaces).isEmpty {
-                        focused = true
+                        focused.wrappedValue = true
                     } else {
                         submit()
                     }
@@ -98,13 +99,13 @@ struct AddBar: View {
         }
         .animation(.spring(response: 0.32, dampingFraction: 0.8), value: suggestions)
         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: text.isEmpty)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: focused)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: focused.wrappedValue)
     }
 
     /// Submit the current text, then keep focus so the keyboard stays up — adding
     /// many items in a row is the common case.
     private func submit() {
         onSubmit()
-        focused = true
+        focused.wrappedValue = true
     }
 }
