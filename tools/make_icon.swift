@@ -65,7 +65,7 @@ image.lockFocus()
 let R = NSRect(x: 0, y: 0, width: side, height: side)
 // Background: deep green with a gentle vertical lift.
 NSGradient(colors: [bg, bgDeep])!.draw(in: R, angle: -90)
-let cx: CGFloat = 0.5, cy: CGFloat = 0.54, w: CGFloat = 0.52, h = w * 0.72
+let cx: CGFloat = 0.5, cy: CGFloat = 0.54, w: CGFloat = 0.57, h = w * 0.72   // ~10% larger
 basket(R, cx, cy, w)
 leafShape(R, cx + 0.20, cy - h * 0.42 - 0.04, 0.10, lime)
 image.unlockFocus()
