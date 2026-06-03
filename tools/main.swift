@@ -172,8 +172,6 @@ func seasonDate(_ y: Int, _ m: Int, _ day: Int, _ h: Int = 12) -> Date {
 check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 8), calendar: utc) == .morning, "8am → morning")
 check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 19), calendar: utc) == .evening, "7pm → evening")
 check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 2), calendar: utc) == .night, "2am → night")
-check(Seasonality.season(seasonDate(2026, 12, 15), calendar: utc) == .winter, "December → winter")
-check(Seasonality.season(seasonDate(2026, 7, 4), calendar: utc) == .summer, "July → summer")
 check(Seasonality.holidayAccent(seasonDate(2026, 10, 31), calendar: utc) == "🎃", "Oct 31 → 🎃")
 check(Seasonality.holidayAccent(seasonDate(2026, 12, 20), calendar: utc) == "🎄", "mid-December → 🎄")
 check(Seasonality.holidayAccent(seasonDate(2026, 7, 4), calendar: utc) == nil, "ordinary July day → no accent")

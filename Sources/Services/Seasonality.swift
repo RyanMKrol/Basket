@@ -3,10 +3,6 @@ import Foundation
 /// Rough part of the day, for a gentle background tint.
 enum TimeOfDay { case morning, afternoon, evening, night }
 
-/// Calendar season (Northern-hemisphere assumption — a future `hemisphere`
-/// parameter could flip it).
-enum Season { case spring, summer, autumn, winter }
-
 /// Pure, date-driven flourishes that make Basket feel a little alive — a
 /// time-of-day tint, an occasional holiday accent, and a rotating empty-state
 /// line. All functions take `now` (and an optional calendar) so they're fully
@@ -18,15 +14,6 @@ enum Seasonality {
         case 12..<17: return .afternoon
         case 17..<21: return .evening
         default:      return .night
-        }
-    }
-
-    static func season(_ now: Date, calendar: Calendar = .current) -> Season {
-        switch calendar.component(.month, from: now) {
-        case 3...5:  return .spring
-        case 6...8:  return .summer
-        case 9...11: return .autumn
-        default:     return .winter
         }
     }
 
