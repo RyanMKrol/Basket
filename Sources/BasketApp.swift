@@ -5,6 +5,8 @@ import CoreText
 @main
 struct BasketApp: App {
     let container: ModelContainer
+    /// The tip jar lives for the app's lifetime and is shared via the environment.
+    @State private var tipJar = TipJar()
 
     init() {
         Self.registerFonts()
@@ -22,6 +24,7 @@ struct BasketApp: App {
         WindowGroup {
             ShoppingListView()
                 .preferredColorScheme(Theme.current.isDark ? .dark : .light)
+                .environment(tipJar)
         }
         .modelContainer(container)
     }

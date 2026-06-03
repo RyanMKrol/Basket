@@ -82,7 +82,14 @@ A change is done when, on the branch:
   - `Services/` — `Emoji` (3-stage cascade), `SemanticEmoji` (NLEmbedding),
     `Suggestions`, `Formatting`, `Haptics`, `Measure` (smart units — classifies an
     item's measure type by its emoji glyph), `Seasonality` (time-of-day / holiday
-    flourishes); **generated:** `EmojiTable.swift`, `SuggestionDictionary.swift`.
+    flourishes), `TipJar` (StoreKit 2 consumable tip jar); **generated:**
+    `EmojiTable.swift`, `SuggestionDictionary.swift`.
+- `StoreKit/Basket.storekit` — local StoreKit config for testing the tip jar.
+  IAP can't be exercised by `build_run.sh` (it `simctl launch`es, bypassing the
+  scheme's StoreKit config); test purchases by **Running from Xcode** (the
+  generated scheme references the config) or via App Store Connect sandbox.
+  `TipJar.swift` imports iOS-only StoreKit, so it's kept **out** of the
+  `tools/main.swift` native-harness compile list.
 - `Tests/BasketTests.swift` — XCTest (logic).
 - `tools/` — generators & audits (run from the repo root):
   - `gen_emoji.py` → `Sources/Services/EmojiTable.swift` (curated keyword→emoji
