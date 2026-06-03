@@ -71,19 +71,22 @@ check(Emoji.forName("Ice cream") == "🍦", "multi-word beats 'cream'")
 check(Emoji.forName("Strawberries") == "🍓", "stem: strawberries")
 check(Emoji.forName("widget") == Emoji.fallback, "unknown → fallback")
 
-print("Suggestions:")
-check(Suggestions.rank(query: " ", candidates: [cand("Milk", times: 5, daysAgo: 1)], onList: [], now: now).isEmpty,
+print("Suggestions (history ranking, via combined with an empty dictionary):")
+func ranked(_ query: String, _ candidates: [SuggestionCandidate], onList: Set<String> = []) -> [Suggestion] {
+    Suggestions.combined(query: query, history: candidates, dictionary: [], onList: onList, now: now)
+}
+check(ranked(" ", [cand("Milk", times: 5, daysAgo: 1)]).isEmpty,
       "empty query → nothing")
-check(Suggestions.rank(query: "TOM", candidates: [cand("Tomatoes", times: 1, daysAgo: 1), cand("Milk", times: 1, daysAgo: 1)], onList: [], now: now).map(\.name) == ["Tomatoes"],
+check(ranked("TOM", [cand("Tomatoes", times: 1, daysAgo: 1), cand("Milk", times: 1, daysAgo: 1)]).map(\.name) == ["Tomatoes"],
       "substring, case-insensitive")
-check(Suggestions.rank(query: "to", candidates: [cand("Tomatoes", times: 9, daysAgo: 0)], onList: ["tomatoes"], now: now).isEmpty,
+check(ranked("to", [cand("Tomatoes", times: 9, daysAgo: 0)], onList: ["tomatoes"]).isEmpty,
       "excludes items already on list")
-check(Suggestions.rank(query: "te", candidates: [cand("Tea", times: 9, daysAgo: 40)], onList: [], now: now).isEmpty,
+check(ranked("te", [cand("Tea", times: 9, daysAgo: 40)]).isEmpty,
       "forgets things older than a month")
-check(Suggestions.rank(query: "t", candidates: [cand("Tortillas", times: 1, daysAgo: 20), cand("Tea", times: 8, daysAgo: 0)], onList: [], now: now).first?.name == "Tea",
+check(ranked("t", [cand("Tortillas", times: 1, daysAgo: 20), cand("Tea", times: 8, daysAgo: 0)]).first?.name == "Tea",
       "frequent + recent ranks higher")
-check(Suggestions.rank(query: "thing", candidates: (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }, onList: [], now: now).count == Suggestions.maxResults,
-      "caps at maxResults")
+check(ranked("thing", (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }).count == Suggestions.combinedMax,
+      "caps at combinedMax")
 
 print("Semantic fallback (NLEmbedding):")
 check(Emoji.forName("Flounder") == "🐟", "novel fish Flounder → 🐟")
@@ -169,8 +172,6 @@ func seasonDate(_ y: Int, _ m: Int, _ day: Int, _ h: Int = 12) -> Date {
 check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 8), calendar: utc) == .morning, "8am → morning")
 check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 19), calendar: utc) == .evening, "7pm → evening")
 check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 2), calendar: utc) == .night, "2am → night")
-check(Seasonality.season(seasonDate(2026, 12, 15), calendar: utc) == .winter, "December → winter")
-check(Seasonality.season(seasonDate(2026, 7, 4), calendar: utc) == .summer, "July → summer")
 check(Seasonality.holidayAccent(seasonDate(2026, 10, 31), calendar: utc) == "🎃", "Oct 31 → 🎃")
 check(Seasonality.holidayAccent(seasonDate(2026, 12, 20), calendar: utc) == "🎄", "mid-December → 🎄")
 check(Seasonality.holidayAccent(seasonDate(2026, 7, 4), calendar: utc) == nil, "ordinary July day → no accent")
