@@ -128,14 +128,30 @@ enum Measure {
         }
     }
 
+    /// Parse a free-typed amount (from the editor's keyboard entry) into a clean
+    /// value in `unit`, or nil when there's no sensible number to use so the
+    /// existing quantity is kept. The unit's letters and stray spaces are ignored
+    /// ("750 ml" → 750), both "." and "," work as the decimal point, counts round
+    /// to whole numbers, anything zero-or-negative is rejected (a quantity can
+    /// never be typed down to nothing), and a generous ceiling guards runaway
+    /// input. Pairs with `numberString` (which seeds the field).
+    static func parse(_ text: String, unit: MeasureUnit) -> Double? {
+        let normalised = text.replacingOccurrences(of: ",", with: ".")
+        let cleaned = normalised.filter { $0.isNumber || $0 == "." }
+        guard let raw = Double(cleaned), raw > 0 else { return nil }
+        let capped = min(raw, 100_000)
+        return unit == .count ? max(1, capped.rounded()) : capped
+    }
+
     /// "500 ml", "1.5 kg", "2".
     static func format(_ value: Double, unit: MeasureUnit) -> String {
-        let n = number(value)
+        let n = numberString(value)
         return unit.symbol.isEmpty ? n : "\(n) \(unit.symbol)"
     }
 
-    /// Trim trailing zeros: 2.0 → "2", 0.5 → "0.5", 1.25 → "1.25".
-    private static func number(_ v: Double) -> String {
+    /// Just the number, trailing zeros trimmed: 2.0 → "2", 0.5 → "0.5", 1.25 →
+    /// "1.25". Used both inside `format` and to seed the editable field.
+    static func numberString(_ v: Double) -> String {
         let r = (v * 100).rounded() / 100
         if r == r.rounded() { return String(Int(r)) }
         var s = String(format: "%.2f", r)

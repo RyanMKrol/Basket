@@ -163,6 +163,18 @@ check(Measure.units(for: Measure.typeForName("Fresh basil")) == [.gram, .kilogra
 check(Measure.format(500, unit: .milliliter) == "500 ml", "format → 500 ml")
 check(Measure.format(1.5, unit: .kilogram) == "1.5 kg", "format → 1.5 kg")
 check(Measure.format(2, unit: .count) == "2", "format count → 2 (no unit)")
+check(Measure.numberString(2) == "2", "numberString 2 → 2 (seeds the typed field)")
+check(Measure.numberString(0.5) == "0.5", "numberString 0.5 → 0.5")
+check(Measure.parse("750", unit: .milliliter) == 750, "parse typed 750 ml → 750")
+check(Measure.parse("1.5", unit: .kilogram) == 1.5, "parse typed 1.5 kg → 1.5")
+check(Measure.parse("1,5", unit: .liter) == 1.5, "parse comma decimal 1,5 → 1.5")
+check(Measure.parse("750 ml", unit: .milliliter) == 750, "parse strips unit letters → 750")
+check(Measure.parse("12", unit: .count) == 12, "parse 12 count → 12")
+check(Measure.parse("3.7", unit: .count) == 4, "parse rounds counts to whole → 4")
+check(Measure.parse("0", unit: .gram) == nil, "parse 0 → nil (can't type down to nothing)")
+check(Measure.parse("", unit: .gram) == nil, "parse empty → nil (keeps existing)")
+check(Measure.parse("abc", unit: .gram) == nil, "parse non-number → nil")
+check(Measure.parse("999999", unit: .gram) == 100_000, "parse caps runaway input at 100000")
 
 print("Seasonality:")
 var utc = Calendar(identifier: .gregorian); utc.timeZone = TimeZone(identifier: "UTC")!
