@@ -1,85 +1,77 @@
-// Renders Basket's 1024×1024 app icon natively on macOS (AppKit): a soft
-// grocery-coloured gradient behind a pixel-art basket of fruit. The art is
-// composed procedurally on an N×N pixel grid (raise N for finer pixels), then
-// each cell is drawn as a crisp square.
+// Renders Basket's 1024×1024 app icon natively on macOS (AppKit): the "B1"
+// direction — a deep-green field with a warm woven basket (cream cloth, kraft
+// weave) and a small lime leaf. Edge-to-edge (iOS rounds the corners itself).
 // Run: swift tools/make_icon.swift <output.png>
 import AppKit
+
+// Palette (matches the B1 variation).
+let bg     = NSColor(srgbRed: 0.16, green: 0.32, blue: 0.24, alpha: 1)
+let bgDeep = NSColor(srgbRed: 0.12, green: 0.26, blue: 0.19, alpha: 1)
+let kraft  = NSColor(srgbRed: 0.82, green: 0.61, blue: 0.39, alpha: 1)
+let kraftD = NSColor(srgbRed: 0.58, green: 0.41, blue: 0.24, alpha: 1)
+let cream  = NSColor(srgbRed: 0.98, green: 0.96, blue: 0.90, alpha: 1)
+let lime   = NSColor(srgbRed: 0.74, green: 0.86, blue: 0.40, alpha: 1)
+let leaf   = NSColor(srgbRed: 0.46, green: 0.68, blue: 0.40, alpha: 1)
+
+func P(_ R: NSRect, _ x: CGFloat, _ y: CGFloat) -> NSPoint { NSPoint(x: R.minX + x * R.width, y: R.maxY - y * R.height) }
+func S(_ R: NSRect, _ v: CGFloat) -> CGFloat { v * R.width }
+func disc(_ R: NSRect, _ cx: CGFloat, _ cy: CGFloat, _ rad: CGFloat, _ c: NSColor) {
+    c.setFill(); let p = P(R, cx, cy)
+    NSBezierPath(ovalIn: NSRect(x: p.x - S(R, rad), y: p.y - S(R, rad), width: S(R, rad) * 2, height: S(R, rad) * 2)).fill()
+}
+func box(_ R: NSRect, _ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, _ rad: CGFloat, _ c: NSColor) {
+    c.setFill(); let tl = P(R, x, y)
+    NSBezierPath(roundedRect: NSRect(x: tl.x, y: tl.y - S(R, h), width: S(R, w), height: S(R, h)), xRadius: S(R, rad), yRadius: S(R, rad)).fill()
+}
+func poly(_ R: NSRect, _ pts: [(CGFloat, CGFloat)], _ c: NSColor) {
+    c.setFill(); let path = NSBezierPath()
+    for (i, p) in pts.enumerated() { let q = P(R, p.0, p.1); if i == 0 { path.move(to: q) } else { path.line(to: q) } }
+    path.close(); path.fill()
+}
+func line(_ R: NSRect, _ pts: [(CGFloat, CGFloat)], _ w: CGFloat, _ c: NSColor) {
+    c.setStroke(); let path = NSBezierPath()
+    for (i, p) in pts.enumerated() { let q = P(R, p.0, p.1); if i == 0 { path.move(to: q) } else { path.line(to: q) } }
+    path.lineWidth = S(R, w); path.lineCapStyle = .round; path.lineJoinStyle = .round; path.stroke()
+}
+func curve(_ R: NSRect, _ a: (CGFloat, CGFloat), _ c1: (CGFloat, CGFloat), _ c2: (CGFloat, CGFloat), _ b: (CGFloat, CGFloat), _ w: CGFloat, _ col: NSColor) {
+    col.setStroke(); let path = NSBezierPath(); path.move(to: P(R, a.0, a.1))
+    path.curve(to: P(R, b.0, b.1), controlPoint1: P(R, c1.0, c1.1), controlPoint2: P(R, c2.0, c2.1))
+    path.lineWidth = S(R, w); path.lineCapStyle = .round; path.stroke()
+}
+func leafShape(_ R: NSRect, _ cx: CGFloat, _ cy: CGFloat, _ s: CGFloat, _ c: NSColor) {
+    c.setFill(); let path = NSBezierPath()
+    let base = P(R, cx - s * 0.55, cy + s * 0.55), tip = P(R, cx + s * 0.55, cy - s * 0.55)
+    path.move(to: base)
+    path.curve(to: tip, controlPoint1: P(R, cx - s * 0.5, cy - s * 0.3), controlPoint2: P(R, cx + s * 0.05, cy - s * 0.65))
+    path.curve(to: base, controlPoint1: P(R, cx + s * 0.3, cy + s * 0.05), controlPoint2: P(R, cx - s * 0.05, cy + s * 0.65))
+    path.fill()
+}
+
+func basket(_ R: NSRect, _ cx: CGFloat, _ cy: CGFloat, _ w: CGFloat) {
+    let h = w * 0.72
+    curve(R, (cx - w * 0.30, cy - h * 0.10), (cx - w * 0.20, cy - h * 0.80), (cx + w * 0.20, cy - h * 0.80), (cx + w * 0.30, cy - h * 0.10), w * 0.085, kraftD)
+    poly(R, [(cx - w * 0.26, cy - h * 0.10), (cx + w * 0.26, cy - h * 0.10), (cx, cy - h * 0.50)], cream)
+    poly(R, [(cx - w * 0.50, cy - h * 0.08), (cx + w * 0.50, cy - h * 0.08), (cx + w * 0.36, cy + h * 0.55), (cx - w * 0.36, cy + h * 0.55)], kraft)
+    box(R, cx - w * 0.56, cy - h * 0.20, w * 1.12, h * 0.15, w * 0.05, kraftD)
+    for vy in [0.12, 0.32] { line(R, [(cx - w * 0.33, cy + h * CGFloat(vy)), (cx + w * 0.33, cy + h * CGFloat(vy))], w * 0.026, kraftD) }
+    for vx in stride(from: CGFloat(-0.28), through: 0.28, by: 0.14) {
+        line(R, [(cx + vx * w, cy - h * 0.04), (cx + vx * w * 0.78, cy + h * 0.5)], w * 0.018, kraftD)
+    }
+}
 
 let side: CGFloat = 1024
 let image = NSImage(size: NSSize(width: side, height: side))
 image.lockFocus()
-
-// Warm gradient (green → cream → tomato), the app's palette.
-NSGradient(colors: [
-    NSColor(srgbRed: 0.86, green: 0.93, blue: 0.83, alpha: 1),
-    NSColor(srgbRed: 0.99, green: 0.97, blue: 0.94, alpha: 1),
-    NSColor(srgbRed: 0.98, green: 0.88, blue: 0.85, alpha: 1),
-])!.draw(in: NSRect(x: 0, y: 0, width: side, height: side), angle: -90)
-
-// Palette.
-let tomato    = NSColor(srgbRed: 0.91, green: 0.42, blue: 0.40, alpha: 1)
-let apple     = NSColor(srgbRed: 0.55, green: 0.73, blue: 0.38, alpha: 1)
-let orange    = NSColor(srgbRed: 0.96, green: 0.66, blue: 0.30, alpha: 1)
-let stem      = NSColor(srgbRed: 0.44, green: 0.57, blue: 0.32, alpha: 1)
-let weaveLite = NSColor(srgbRed: 0.85, green: 0.67, blue: 0.45, alpha: 1)
-let weaveDark = NSColor(srgbRed: 0.73, green: 0.55, blue: 0.35, alpha: 1)
-let rim       = NSColor(srgbRed: 0.65, green: 0.47, blue: 0.29, alpha: 1)
-
-// N×N pixel grid (row 0 at the top). 22 reads finer than a chunky 13.
-let N = 22
-let center = Double(N - 1) / 2.0            // 10.5
-
-// Three plump fruits sitting in the basket.
-let fruitR = 3.6
-let fruits: [(cx: Double, cy: Double, color: NSColor)] = [
-    (center - 5.0, 8.5, tomato),
-    (center,       7.3, apple),
-    (center + 5.0, 8.5, orange),
-]
-
-// Basket bowl: rim at rows 11–12, tapered body to row 19 (smaller than the
-// fruits are big, per the brief).
-let rimRows = 11...12
-let bodyTop = 13, bodyBot = 19
-func halfWidth(_ row: Int) -> Double {
-    let t = Double(row - rimRows.lowerBound) / Double(bodyBot - rimRows.lowerBound)
-    return 7.3 * (1 - t) + 4.3 * t          // 7.3 at the rim → 4.3 at the base
-}
-
-func cellColor(_ col: Int, _ row: Int) -> NSColor? {
-    let x = Double(col), y = Double(row)
-    // Fruit (drawn in front of the basket) + a little stem on top of each.
-    for f in fruits {
-        let dx = x - f.cx, dy = y - f.cy
-        if dx * dx + dy * dy <= fruitR * fruitR { return f.color }
-        if col == Int(f.cx.rounded()) && row == Int((f.cy - fruitR - 1).rounded()) { return stem }
-    }
-    // Basket.
-    if rimRows.contains(row), abs(x - center) <= halfWidth(rimRows.lowerBound) { return rim }
-    if (bodyTop...bodyBot).contains(row), abs(x - center) <= halfWidth(row) {
-        return (col + row).isMultiple(of: 2) ? weaveLite : weaveDark
-    }
-    return nil
-}
-
-let cell = side / CGFloat(N)
-for row in 0..<N {
-    for col in 0..<N {
-        guard let c = cellColor(col, row) else { continue }
-        c.setFill()
-        let x = CGFloat(col) * cell
-        let yTop = side - CGFloat(row + 1) * cell   // flip: row 0 at the top
-        NSRect(x: x, y: yTop, width: cell + 0.5, height: cell + 0.5).fill()
-    }
-}
-
+let R = NSRect(x: 0, y: 0, width: side, height: side)
+// Background: deep green with a gentle vertical lift.
+NSGradient(colors: [bg, bgDeep])!.draw(in: R, angle: -90)
+let cx: CGFloat = 0.5, cy: CGFloat = 0.54, w: CGFloat = 0.52, h = w * 0.72
+basket(R, cx, cy, w)
+leafShape(R, cx + 0.20, cy - h * 0.42 - 0.04, 0.10, lime)
 image.unlockFocus()
 
-let outPath = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "icon-1024.png"
-guard let tiff = image.tiffRepresentation,
-      let rep = NSBitmapImageRep(data: tiff),
-      let png = rep.representation(using: .png, properties: [:]) else {
-    fputs("failed to render icon\n", stderr); exit(1)
-}
-try! png.write(to: URL(fileURLWithPath: outPath))
-print("wrote \(outPath)")
+let out = CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "icon-1024.png"
+guard let tiff = image.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
+      let png = rep.representation(using: .png, properties: [:]) else { fputs("render failed\n", stderr); exit(1) }
+try! png.write(to: URL(fileURLWithPath: out))
+print("wrote \(out)")
