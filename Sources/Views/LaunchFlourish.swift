@@ -52,5 +52,8 @@ struct LaunchFlourish: View {
                 onFinished()
             }
         }
+        // A sub-second splash with no function of its own — skip it entirely for
+        // VoiceOver rather than making it sit through a branding animation.
+        .accessibilityHidden(true)
     }
 }

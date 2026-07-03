@@ -19,6 +19,7 @@ struct ClearedCelebration: View {
                     .font(.system(size: 66))
                     .scaleEffect(shown ? 1 : 0.4)
                     .opacity(shown ? 1 : 0)
+                    .accessibilityHidden(true)
             }
             Text("All done!")
                 .font(Theme.title(26, weight: .bold))

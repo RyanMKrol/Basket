@@ -27,5 +27,6 @@ struct SparkleBurst: View {
             withAnimation(.easeOut(duration: 0.55)) { animate = true }
         }
         .allowsHitTesting(false)
+        .accessibilityHidden(true)   // purely decorative flourish
     }
 }
