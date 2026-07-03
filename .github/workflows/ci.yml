@@ -1,0 +1,55 @@
+name: CI
+
+# main is the shared integration point everyone merges their own worktree
+# branch into directly (see CLAUDE.md — this repo doesn't use pull requests),
+# so there's no review step to catch a broken build/test before it lands.
+# This is that catch, after the fact.
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      # Simulator device names/availability vary by runner image, so resolve
+      # one instead of hardcoding a model that might not exist on it.
+      - name: Resolve an available iPhone simulator
+        id: sim
+        run: |
+          name=$(xcrun simctl list devices available \
+            | awk -F'[()]' '/iPhone/{print $1; exit}' \
+            | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
+          if [ -z "$name" ]; then
+            echo "No available iPhone simulator found on this runner." >&2
+            xcrun simctl list devices available >&2
+            exit 1
+          fi
+          echo "Resolved simulator: $name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: XCTest suite
+        run: |
+          xcodebuild test \
+            -project Basket.xcodeproj -scheme Basket \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}"
+
+      # The same pure-logic Sources files, compiled and run natively on macOS —
+      # fast, no simulator. See README.md → Tests.
+      - name: Native logic harness
+        run: |
+          swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
+                 Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
+                 Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
+                 Sources/Services/Formatting.swift \
+                 Sources/Services/Measure.swift Sources/Services/Seasonality.swift \
+                 tools/main.swift -o /tmp/basket_check
+          /tmp/basket_check

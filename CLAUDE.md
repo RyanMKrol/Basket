@@ -69,6 +69,11 @@ A change is done when, on the branch:
 - **Docs updated in the same commit:** keep `README.md` in step with behaviour.
 - **Generated files regenerated, not hand-edited** (see below).
 
+Both test commands above also run in CI (`.github/workflows/ci.yml`) on every
+push to `main` — the only backstop this repo has, since there's no PR review
+step (see the golden rule above). It's a best-practice safety net, not
+something Apple requires for App Store submission.
+
 ## Project map
 
 - `project.yml` — XcodeGen spec; the `.xcodeproj` is **generated** (run
