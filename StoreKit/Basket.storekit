@@ -8,7 +8,7 @@
       "internalID" : "10000000-0000-0000-0000-000000000001",
       "localizations" : [
         {
-          "description" : "A small thank-you — buy the developer a coffee.",
+          "description" : "A small thank-you. Buy the developer a coffee.",
           "displayName" : "Coffee",
           "locale" : "en_GB"
         }
@@ -23,7 +23,7 @@
       "internalID" : "10000000-0000-0000-0000-000000000002",
       "localizations" : [
         {
-          "description" : "A kind tip — treat the developer to lunch.",
+          "description" : "A kind tip. Treat the developer to lunch.",
           "displayName" : "Lunch",
           "locale" : "en_GB"
         }
@@ -38,7 +38,7 @@
       "internalID" : "10000000-0000-0000-0000-000000000003",
       "localizations" : [
         {
-          "description" : "A generous tip — a proper feast. Thank you!",
+          "description" : "A generous tip for a proper feast. Thank you!",
           "displayName" : "Feast",
           "locale" : "en_GB"
         }
