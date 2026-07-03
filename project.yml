@@ -26,6 +26,9 @@ targets:
       path: Sources/Info.plist
       properties:
         CFBundleDisplayName: Basket
+        # No networking, no custom crypto — declared here so App Store Connect
+        # stops asking the export-compliance question on every submission.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
