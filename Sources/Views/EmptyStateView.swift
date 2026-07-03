@@ -14,6 +14,7 @@ struct EmptyStateView: View {
                             .offset(x: 16, y: -4)
                     }
                 }
+                .accessibilityHidden(true)
             Text(Seasonality.emptyStateLine(.now))
                 .font(Theme.title(22, weight: .bold))
                 .foregroundStyle(Theme.onPaper)

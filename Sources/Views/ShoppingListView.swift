@@ -177,6 +177,10 @@ struct ShoppingListView: View {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { titleRainbow.toggle() }
             Haptics.soft()
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Basket")
+        .accessibilityAddTraits(supporter ? [.isHeader, .isButton] : .isHeader)
+        .accessibilityHint(supporter ? "Double tap to toggle the rainbow title" : "")
     }
 
     private var header: some View {
@@ -193,6 +197,8 @@ struct ShoppingListView: View {
             }
             .buttonStyle(.plain)
             .padding(.leading, 4)
+            .accessibilityLabel("About Basket")
+            .accessibilityHint("Shows app info and the tip jar")
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
@@ -204,19 +210,23 @@ struct ShoppingListView: View {
             Text("Got it")
                 .font(Theme.body(13, weight: .semibold))
                 .foregroundStyle(Theme.onPaperSoft)
+                .accessibilityAddTraits(.isHeader)
             Rectangle()
                 .fill(Theme.onPaperSoft.opacity(0.25))
                 .frame(height: 1)
+                .accessibilityHidden(true)
             Button(action: clearGot) {
                 HStack(spacing: 4) {
                     Image(systemName: "checkmark.circle")
                         .font(.system(size: 12, weight: .semibold))
+                        .accessibilityHidden(true)
                     Text("Clear all")
                         .font(Theme.body(13, weight: .semibold))
                 }
                 .foregroundStyle(Theme.onPaperSoft)
             }
             .buttonStyle(.plain)
+            .accessibilityHint("Removes everything in the Got it section")
         }
         .padding(.horizontal, 6)
         .padding(.top, 14)

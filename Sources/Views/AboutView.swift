@@ -22,10 +22,12 @@ struct AboutView: View {
                 Text("🧺")
                     .font(.system(size: 60))
                     .padding(.top, 10)
+                    .accessibilityHidden(true)
 
                 Text("Basket")
                     .font(Theme.title(32, weight: .bold))
                     .foregroundStyle(Theme.onPaper)
+                    .accessibilityAddTraits(.isHeader)
 
                 Text("A soft, friendly shopping list.\nOn your device, and nowhere else.")
                     .font(Theme.body(15))
@@ -108,5 +110,7 @@ struct AboutView: View {
         .buttonStyle(.plain)
         .disabled(tipJar.purchasingID != nil)
         .opacity(tipJar.purchasingID != nil && !busy ? 0.5 : 1)
+        .accessibilityLabel("\(badge.label) tip, \(product.displayPrice)\(busy ? ", purchasing" : "")")
+        .accessibilityHint("Leaves a tip — doesn't unlock anything")
     }
 }

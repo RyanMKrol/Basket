@@ -75,6 +75,11 @@ via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
   `tools/audit_coverage.swift` — currently **100%** (0 fall-throughs; ~91%
   curated, ~9% semantic).
 - A warm tri-colour (green/yellow/tomato) background bloom.
+- **VoiceOver support** — every interactive control (check circle, quantity
+  stepper and unit pills, add bar, tip buttons) has a proper label, hint, and
+  action, and purely decorative flourishes (sparkles, the launch splash, empty
+  state's basket emoji) are hidden from the accessibility tree instead of
+  cluttering it.
 
 ## Build & run (CLI, no Xcode GUI)
 

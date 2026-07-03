@@ -38,6 +38,7 @@ struct AddBar: View {
                             .basketCard()
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel("Add \(s.name)")
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -72,6 +73,7 @@ struct AddBar: View {
                             .foregroundStyle(Theme.inkSoft.opacity(0.5))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("Dismiss keyboard")
                     .transition(.scale.combined(with: .opacity))
                 }
 
@@ -88,6 +90,7 @@ struct AddBar: View {
                                          ? Theme.inkSoft.opacity(0.4) : Theme.leaf)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(text.trimmingCharacters(in: .whitespaces).isEmpty ? "Add item" : "Add \(text)")
                 .animation(.easeInOut(duration: 0.2), value: text.isEmpty)
             }
             .padding(.horizontal, 16)

@@ -39,6 +39,7 @@ struct QuantityEditor: View {
                         .background(Theme.inkSoft.opacity(0.12), in: Circle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Clear quantity")
             }
 
             HStack(spacing: 8) {
@@ -78,6 +79,7 @@ struct QuantityEditor: View {
                     .onChange(of: fieldFocused) { _, focused in
                         if !focused { commit() }
                     }
+                    .accessibilityLabel("Quantity, \(unitName(unit))")
                 if !unit.symbol.isEmpty {
                     Text(unit.symbol)
                         .font(Theme.body(16, weight: .semibold))
@@ -93,6 +95,20 @@ struct QuantityEditor: View {
                 .frame(minWidth: 84)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: beginEditing)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityHint("Double tap to type an exact amount")
+        }
+    }
+
+    /// Full unit name for VoiceOver, since the on-row symbol ("ml", "kg") isn't
+    /// always clear read aloud.
+    private func unitName(_ u: MeasureUnit) -> String {
+        switch u {
+        case .count:      return "units"
+        case .gram:       return "grams"
+        case .kilogram:   return "kilograms"
+        case .milliliter: return "millilitres"
+        case .liter:      return "litres"
         }
     }
 
@@ -124,6 +140,8 @@ struct QuantityEditor: View {
                 .background(selected ? Theme.leaf : Theme.inkSoft.opacity(0.12), in: Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(unitName(u))
+        .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
     }
 
     /// Plus / minus. While the keyboard is up, step from the *typed* amount — so a
@@ -148,5 +166,6 @@ struct QuantityEditor: View {
                 .background(Theme.leaf, in: Circle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(up ? "Increase quantity" : "Decrease quantity")
     }
 }
