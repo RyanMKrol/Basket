@@ -84,6 +84,13 @@ A change is done when, on the branch:
     item's measure type by its emoji glyph), `Seasonality` (time-of-day / holiday
     flourishes), `TipJar` (StoreKit 2 consumable tip jar); **generated:**
     `EmojiTable.swift`, `SuggestionDictionary.swift`.
+  - `PrivacyInfo.xcprivacy` — Apple's required privacy manifest; declares the
+    "required-reason" APIs the app touches (currently just `UserDefaults`, for
+    `TipJar`'s tipped flag — reason `CA92.1`, own app's data only). App Store
+    Connect rejects binaries missing a declaration for any required-reason API
+    they use, so **add a new entry here** whenever new code starts using one
+    (`UserDefaults`, file timestamps, system boot time, disk space, active
+    keyboard — see Apple's required-reason API list).
 - `StoreKit/Basket.storekit` — local StoreKit config for testing the tip jar.
   IAP can't be exercised by `build_run.sh` (it `simctl launch`es, bypassing the
   scheme's StoreKit config); test purchases by **Running from Xcode** (the
