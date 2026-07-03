@@ -32,6 +32,12 @@ targets:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        # Portrait-only by design (see above) — but iOS still lets an
+        # iPhone-only app run in iPad's Split View/Slide Over multitasking by
+        # default, which requires supporting all four orientations. This opts
+        # the app out of that multitasking mode instead, which is what Apple's
+        # own App Store Connect validation expects for a portrait-only app.
+        UIRequiresFullScreen: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.basket
