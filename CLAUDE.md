@@ -97,7 +97,10 @@ A change is done when, on the branch:
   - `gen_suggestions.py` → `Sources/Services/SuggestionDictionary.swift` (unifies
     `corpus/*.txt` with the emoji table's keyword vocabulary).
   - `audit_coverage.swift` — audits emoji coverage over `corpus/*.txt`.
-  - `make_icon.swift` / `make_icon_options.swift` — render the app icon.
+  - `make_icon.swift` / `make_icon_options.swift` — legacy programmatic icon
+    renderer, **superseded**: `Sources/Assets.xcassets/AppIcon.appiconset/icon-1024.png`
+    is now the design agency's artwork, not generator output. Don't run these
+    against the appiconset without checking with the user first.
   - `main.swift` — the native logic test harness.
 
 ## Emoji pipeline (when changing food→emoji mapping)
