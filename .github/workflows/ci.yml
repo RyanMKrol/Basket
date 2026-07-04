@@ -4,19 +4,9 @@ name: CI
 # branch into directly (see CLAUDE.md — this repo doesn't use pull requests),
 # so there's no review step to catch a broken build/test before it lands.
 # This is that catch, after the fact.
-#
-# Push is intentionally unfiltered (not just `branches: [main]`): the implementation
-# harness's loop (.harness/scripts/loop.sh) pushes each task to its own throwaway
-# branch (e.g. t001) and gates the merge to main on THAT branch's CI run — a
-# main-only filter means no run ever fires for the task branch and the loop waits
-# out CI_TIMEOUT for nothing every single attempt.
 on:
   push:
-
-# Cancel a superseded run on the same branch (e.g. a loop retry) to save CI minutes.
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [main]
 
 jobs:
   test:
