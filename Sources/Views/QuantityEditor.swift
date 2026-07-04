@@ -67,6 +67,8 @@ struct QuantityEditor: View {
                     .fixedSize(horizontal: true, vertical: false)
                     .frame(minWidth: 40)
                     .onAppear { fieldFocused = true }
+                    .submitLabel(.done)
+                    .onSubmit { fieldFocused = false }
                     // Keep the field in step with the − / + buttons while the
                     // keyboard is up: tapping them changes `value`, so mirror the
                     // new amount into the buffer rather than leaving stale text.
