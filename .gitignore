@@ -15,20 +15,3 @@ screenshots/
 
 # macOS
 .DS_Store
-
-# implementation harness — transient loop scratch + generated status board
-.harness/worklog/.result
-.harness/worklog/.claude-out
-.harness/worklog/.failures.buf
-.harness/worklog/STATUS.md
-.harness/worklog/*.log
-.harness/worklog/*.audit.md
-
-# harness: atomic-write temps (TASKS.json + the owner-overlay files never keep a crashed-mid-write file)
-.harness/tracking/*.tmp
-.harness/tracking/*.tmp.*
-
-# harness: ideas->tasks pipeline — private inbox + ephemeral per-sweep scratch
-.harness/tracking/IDEAS.md
-.harness/.pending-tasks/*.json
-.harness/.pending-questions/*.json

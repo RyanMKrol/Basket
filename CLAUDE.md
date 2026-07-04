@@ -132,13 +132,3 @@ Requires Xcode's CLI tools + XcodeGen (`brew install xcodegen`) and an iOS
 **simulator runtime matching the SDK** (else `xcodebuild test` and asset-catalog
 / app-icon compilation fail with "No simulator runtime version … available" —
 fix with `xcodebuild -downloadPlatform iOS`).
-
-## Autonomous build harness (`.harness/`)
-
-This repo also has an optional Ralph-style autonomous build loop under
-`.harness/` — it works a `.harness/tracking/TASKS.json` backlog one
-fully-verified task at a time, gated on green CI, using the worktree flow
-above for isolation. It's independent of normal interactive work: nothing
-here changes how you work by hand. See `.harness/docs/HARNESS.md` for the
-full design, and `.harness/CLAUDE.md` (loads automatically when editing
-`.harness/`) for the backlog-authoring mandate.
