@@ -114,7 +114,7 @@
     {
       "id": "T006",
       "title": "Return/Done key dismisses the Quantity Editor's keyboard",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
