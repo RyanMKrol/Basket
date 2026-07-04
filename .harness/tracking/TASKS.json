@@ -48,7 +48,7 @@
     {
       "id": "T003",
       "title": "Restrict got-it row unmark to the check circle only",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
