@@ -134,3 +134,13 @@ Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
 > Note: `xcodebuild test` and app-icon (asset catalog) compilation require an
 > installed iOS **simulator runtime matching the SDK**. If you hit "No simulator
 > runtime version … available", run `xcodebuild -downloadPlatform iOS`.
+
+## Build status
+
+An optional autonomous build loop (`.harness/`) works a small backlog one
+verified task at a time, gated on green CI — see `.harness/docs/HARNESS.md`.
+Current backlog:
+
+| Task | Status |
+| --- | --- |
+| T001 — Document the harness dashboard in README | pending |

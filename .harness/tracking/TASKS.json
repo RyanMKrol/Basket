@@ -1,0 +1,137 @@
+{
+  "_doc": "Implementation backlog for the single sequential Ralph loop. SOURCE OF TRUTH for done/not-done + dependency order; docs/HARNESS.md §8.1 = schema. Each task's `do` + `done-when` live in a per-task Markdown spec at the `spec` path (.harness/tasks/TNNN.md, sections '## Do' / '## Done when'); every BUILDABLE task carries `facets` (difficulty auto-tuning) — gated (gate / needs-human) tasks are carved out and carry neither.",
+  "version": 1,
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Document the harness dashboard in README",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "scaffold"
+      ],
+      "scope": [
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T001.md",
+      "facets": {
+        "layer": "meta",
+        "workType": "docs",
+        "risk": []
+      }
+    },
+    {
+      "id": "T002",
+      "title": "Fix the abrupt end-of-celebration cutoff with a proper fade-out curve",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "bugfix"
+      ],
+      "scope": [
+        "Sources/Views/ShoppingListView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T002.md",
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T003",
+      "title": "Restrict got-it row unmark to the check circle only",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "component"
+      ],
+      "scope": [
+        "Sources/Views/ItemRow.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T003.md",
+      "facets": {
+        "layer": "views",
+        "workType": "component",
+        "risk": []
+      }
+    },
+    {
+      "id": "T004",
+      "title": "Fix vertical alignment of the supporter heart next to the title",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "style"
+      ],
+      "scope": [
+        "Sources/Views/ShoppingListView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T004.md",
+      "facets": {
+        "layer": "views",
+        "workType": "style",
+        "risk": []
+      }
+    },
+    {
+      "id": "T005",
+      "title": "Tap outside the Quantity Editor to dismiss it",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "bugfix"
+      ],
+      "scope": [
+        "Sources/Views/ShoppingListView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T005.md",
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T006",
+      "title": "Return/Done key dismisses the Quantity Editor's keyboard",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "component"
+      ],
+      "scope": [
+        "Sources/Views/QuantityEditor.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T006.md",
+      "facets": {
+        "layer": "views",
+        "workType": "component",
+        "risk": []
+      }
+    }
+  ]
+}
