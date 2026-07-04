@@ -26,7 +26,7 @@
     {
       "id": "T002",
       "title": "Fix the abrupt end-of-celebration cutoff with a proper fade-out curve",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
