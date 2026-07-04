@@ -387,7 +387,7 @@ struct ShoppingListView: View {
         guard !celebrating else { return }
         withAnimation(.easeOut(duration: 0.3)) { celebrating = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
-            withAnimation(.easeIn(duration: 0.4)) { celebrating = false }
+            withAnimation(.easeOut(duration: 0.5)) { celebrating = false }
         }
     }
 
