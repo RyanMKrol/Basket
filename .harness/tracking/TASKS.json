@@ -70,7 +70,7 @@
     {
       "id": "T004",
       "title": "Fix vertical alignment of the supporter heart next to the title",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
