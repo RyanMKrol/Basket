@@ -22,6 +22,7 @@ struct EmptyStateView: View {
                 .font(Theme.body(17))
                 .foregroundStyle(Theme.onPaperSoft)
                 .multilineTextAlignment(.center)
+                .accessibilityIdentifier("emptyState.subtitle")
             Spacer()
             Spacer()
         }

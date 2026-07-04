@@ -39,6 +39,7 @@ struct AddBar: View {
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel("Add \(s.name)")
+                        .accessibilityIdentifier("addBar.suggestion.\(s.name)")
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
                 }
@@ -58,6 +59,7 @@ struct AddBar: View {
                     .submitLabel(.done)
                     .focused(focused)
                     .onSubmit(submit)
+                    .accessibilityIdentifier("addBar.textField")
 
                 // While the keyboard is up, offer a way to put it away. Adding
                 // is the common case — submit and suggestion-pick keep focus —
@@ -74,6 +76,7 @@ struct AddBar: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("Dismiss keyboard")
+                    .accessibilityIdentifier("addBar.dismissKeyboard")
                     .transition(.scale.combined(with: .opacity))
                 }
 
@@ -91,6 +94,7 @@ struct AddBar: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(text.trimmingCharacters(in: .whitespaces).isEmpty ? "Add item" : "Add \(text)")
+                .accessibilityIdentifier("addBar.addButton")
                 .animation(.easeInOut(duration: 0.2), value: text.isEmpty)
             }
             .padding(.horizontal, 16)

@@ -25,6 +25,7 @@ struct ClearedCelebration: View {
                 .font(Theme.title(26, weight: .bold))
                 .foregroundStyle(Theme.onPaper)
                 .opacity(shown ? 1 : 0)
+                .accessibilityIdentifier("celebration.title")
         }
         .onAppear {
             withAnimation(reduceMotion ? .easeIn(duration: 0.35)

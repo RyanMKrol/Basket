@@ -12,12 +12,24 @@ struct BasketApp: App {
         Self.registerFonts()
         // Pick a theme: BASKET_THEME env var (soft | pixel | dive | cozy | arcade).
         Theme.select(id: ProcessInfo.processInfo.environment["BASKET_THEME"])
+        // UI tests launch with `-uiTesting` so each run starts from a fresh,
+        // isolated in-memory store instead of touching the real on-device data.
+        let arguments = ProcessInfo.processInfo.arguments
         do {
-            container = try ModelContainer(for: GroceryItem.self, KnownItem.self)
+            if arguments.contains("-uiTesting") {
+                let config = ModelConfiguration(isStoredInMemoryOnly: true)
+                container = try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+            } else {
+                container = try ModelContainer(for: GroceryItem.self, KnownItem.self)
+            }
         } catch {
             fatalError("Failed to create SwiftData container: \(error)")
         }
-        Self.seedIfEmpty(container.mainContext)
+        // `-uiTestingEmpty` opts a test out of the starter items, for flows that
+        // need to start from the empty state.
+        if !arguments.contains("-uiTestingEmpty") {
+            Self.seedIfEmpty(container.mainContext)
+        }
     }
 
     var body: some Scene {

@@ -109,7 +109,8 @@ without the local file the build still works for the simulator.
 
 ## Tests
 
-Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
+Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways,
+and UI flows are covered by a third:
 
 - `Tests/BasketTests.swift` — the XCTest suite, run on the simulator:
 
@@ -118,6 +119,9 @@ Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
   xcodebuild test -project Basket.xcodeproj -scheme Basket \
     -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
   ```
+
+  This same command also runs `UITests/` (below) — both are wired into the
+  `Basket` scheme's test action, so one `xcodebuild test` covers both.
 
 - `tools/main.swift` — the **same source files** run natively on macOS (fast, no
   simulator needed):
@@ -130,6 +134,28 @@ Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
          Sources/Services/Measure.swift Sources/Services/Seasonality.swift \
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
+
+- `UITests/` — XCUITest flow tests (add an item, check one off, edit its
+  quantity, empty state, "All done!" celebration) driving a real simulator
+  through the actual UI, backed by an isolated in-memory SwiftData store (see
+  `-uiTesting` / `-uiTestingEmpty` in `BasketApp.init`, checked via
+  `ProcessInfo.processInfo.arguments`). Every step attaches a screenshot to the
+  test report (`XCTAttachment`, `.lifetime = .keepAlways`), viewable in Xcode's
+  Report Navigator — or export them as plain PNGs:
+
+  ```sh
+  ./tools/export_ui_screenshots.sh                 # → screenshots/ui-tests/
+  ./tools/export_ui_screenshots.sh "iPhone 17"     # target a different simulator
+  ```
+
+  Interactive elements carry stable `.accessibilityIdentifier`s (`addBar.*`,
+  `itemRow.*`, `quantityEditor.*`, `header.*`) so tests query by identifier
+  rather than matching on copy, which is free to change independently.
+
+  UI tests run against the simulator via the accessibility tree (XCUITest
+  injects synthetic touch events into the simulator process) — they don't
+  drive your physical mouse/trackpad, and can run with no visible Simulator
+  window (`xcrun simctl boot` without opening `Simulator.app`).
 
 > Note: `xcodebuild test` and app-icon (asset catalog) compilation require an
 > installed iOS **simulator runtime matching the SDK**. If you hit "No simulator
