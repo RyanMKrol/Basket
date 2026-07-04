@@ -56,12 +56,6 @@ struct ShoppingListView: View {
     var body: some View {
         ZStack {
             BasketBackground()
-                .onTapGesture {
-                    guard expandedID != nil else { return }
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                        expandedID = nil
-                    }
-                }
 
             VStack(spacing: 0) {
                 header
@@ -165,7 +159,7 @@ struct ShoppingListView: View {
     }
 
     @ViewBuilder private var titleView: some View {
-        HStack(alignment: .center, spacing: 7) {
+        HStack(alignment: .firstTextBaseline, spacing: 7) {
             if supporter && titleRainbow {
                 rainbowTitle.font(Theme.title(34, weight: .bold))
             } else {
@@ -393,7 +387,7 @@ struct ShoppingListView: View {
         guard !celebrating else { return }
         withAnimation(.easeOut(duration: 0.3)) { celebrating = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
-            withAnimation(.easeOut(duration: 0.5)) { celebrating = false }
+            withAnimation(.easeIn(duration: 0.4)) { celebrating = false }
         }
     }
 

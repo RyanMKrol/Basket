@@ -6,8 +6,8 @@ import SwiftUI
 /// Tap targets differ by section. On the to-get list the **check circle** checks
 /// the item off, while tapping the **rest of the row** (or the "+ Qty" chip)
 /// opens an inline quantity editor that slides down inside the card. In the faded
-/// "Got it" section, only the **check circle** restores the item — tapping the
-/// rest of the row does nothing.
+/// "Got it" section there's no quantity affordance, so tapping anywhere restores
+/// the item.
 struct ItemRow: View {
     let name: String
     let emoji: String
@@ -31,7 +31,41 @@ struct ItemRow: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 12) {
-                rowInfo
+                HStack(spacing: 12) {
+                    Text(emoji)
+                        .font(.system(size: 24))
+                        .frame(width: 34, height: 34)
+
+                    Text(name)
+                        .font(Theme.body(17, weight: .medium))
+                        .foregroundStyle(showChecked ? Theme.inkSoft : Theme.ink)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        // Strikethrough that draws left → right, in sync with the check.
+                        .overlay(alignment: .leading) {
+                            Capsule()
+                                .fill(Theme.inkSoft)
+                                .frame(height: 1.5)
+                                .offset(y: 2)   // nudge to the glyphs' visual middle (pixel fonts sit low)
+                                .scaleEffect(x: showChecked ? 1 : 0, anchor: .leading)
+                                .animation(.easeInOut(duration: 0.45), value: showChecked)
+                        }
+
+                    Spacer(minLength: 8)
+
+                    if showsQuantity {
+                        quantityChip
+                            .fixedSize()
+                    }
+                }
+                // One VoiceOver stop for the row's info, separate from the check
+                // button below — otherwise every child (emoji, name, quantity
+                // chip) reads as its own stop.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(quantityText.map { "\(name), \($0)" } ?? name)
+                .accessibilityAddTraits(.isButton)
+                .accessibilityHint(showsQuantity ? "Double tap to set quantity" : "Double tap to restore to your list")
+                .accessibilityAction { showsQuantity ? onTapQuantity() : onToggle() }
 
                 CheckCircle(isChecked: showChecked)
                     .overlay { if isChecking { SparkleBurst() } }
@@ -45,10 +79,9 @@ struct ItemRow: View {
             }
             .contentShape(Rectangle())
             // To-get rows open the quantity editor on a body tap; got-it rows
-            // (no quantity affordance) do nothing — only the CheckCircle
-            // restores them. (Touch only — VoiceOver uses the accessibility
-            // actions above instead.)
-            .onTapGesture { if showsQuantity { onTapQuantity() } }
+            // (no quantity affordance) restore the item instead. (Touch only —
+            // VoiceOver uses the accessibility actions above instead.)
+            .onTapGesture { showsQuantity ? onTapQuantity() : onToggle() }
 
             if isExpanded, let quantityEditor {
                 quantityEditor
@@ -65,53 +98,6 @@ struct ItemRow: View {
         )
         .scaleEffect(isFlashing ? 1.03 : 1)
         .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isFlashing)
-    }
-
-    /// The row's emoji/name/quantity-chip cluster, as one VoiceOver stop
-    /// separate from the check button below — otherwise every child (emoji,
-    /// name, quantity chip) reads as its own stop. To-get rows expose it as a
-    /// button that opens the quantity editor; got-it rows expose only the
-    /// label, since the check circle is the sole restore control.
-    @ViewBuilder
-    private var rowInfo: some View {
-        let content = HStack(spacing: 12) {
-            Text(emoji)
-                .font(.system(size: 24))
-                .frame(width: 34, height: 34)
-
-            Text(name)
-                .font(Theme.body(17, weight: .medium))
-                .foregroundStyle(showChecked ? Theme.inkSoft : Theme.ink)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                // Strikethrough that draws left → right, in sync with the check.
-                .overlay(alignment: .leading) {
-                    Capsule()
-                        .fill(Theme.inkSoft)
-                        .frame(height: 1.5)
-                        .offset(y: 2)   // nudge to the glyphs' visual middle (pixel fonts sit low)
-                        .scaleEffect(x: showChecked ? 1 : 0, anchor: .leading)
-                        .animation(.easeInOut(duration: 0.45), value: showChecked)
-                }
-
-            Spacer(minLength: 8)
-
-            if showsQuantity {
-                quantityChip
-                    .fixedSize()
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(quantityText.map { "\(name), \($0)" } ?? name)
-
-        if showsQuantity {
-            content
-                .accessibilityAddTraits(.isButton)
-                .accessibilityHint("Double tap to set quantity")
-                .accessibilityAction { onTapQuantity() }
-        } else {
-            content
-        }
     }
 
     /// The quantity affordance: a faint, tappable "+ Qty" when unset, or the
