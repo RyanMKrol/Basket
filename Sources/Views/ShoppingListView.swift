@@ -56,6 +56,12 @@ struct ShoppingListView: View {
     var body: some View {
         ZStack {
             BasketBackground()
+                .onTapGesture {
+                    guard expandedID != nil else { return }
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                        expandedID = nil
+                    }
+                }
 
             VStack(spacing: 0) {
                 header
