@@ -26,6 +26,11 @@ targets:
       path: Sources/Info.plist
       properties:
         CFBundleDisplayName: Basket
+        # App Store Connect requires a unique build number per upload for a
+        # given marketing version (CFBundleShortVersionString stays 1.0 until
+        # the next real release). Bump this each time a new archive is
+        # uploaded before the version is actually submitted.
+        CFBundleVersion: "2"
         # No networking, no custom crypto — declared here so App Store Connect
         # stops asking the export-compliance question on every submission.
         ITSAppUsesNonExemptEncryption: false
