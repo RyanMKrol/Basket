@@ -159,7 +159,7 @@ struct ShoppingListView: View {
     }
 
     @ViewBuilder private var titleView: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 7) {
+        HStack(alignment: .center, spacing: 7) {
             if supporter && titleRainbow {
                 rainbowTitle.font(Theme.title(34, weight: .bold))
             } else {
