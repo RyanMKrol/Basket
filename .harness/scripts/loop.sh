@@ -766,9 +766,34 @@ if [ "${DRY_RUN:-0}" = "1" ]; then
   exit 0
 fi
 
+# sync_root — the loop never checks anything out in $ROOT (the primary checkout) — every push
+# happens from $LOOP_WT, its own throwaway sibling worktree. So $ROOT's local `main` sits stale
+# after every task unless a human remembers to `git pull` it by hand. Run on EVERY exit path (the
+# EXIT trap below fires for normal completion, MAX_ITERS, rate-limit, or a manual Ctrl-C) to fast-
+# forward $ROOT back to origin/main, so the human's own working copy is never left behind.
+# Never touches $ROOT if it's dirty or not on main — that's the human's own in-progress work, not
+# the loop's to disturb; skip silently rather than checkout/pull over it.
+sync_root() {
+  local cur
+  cur="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null)" || return 0
+  if [ "$cur" != "main" ]; then
+    log "sync: $ROOT is on '$cur', not main — leaving it alone"
+    return 0
+  fi
+  if [ -n "$(git -C "$ROOT" status --porcelain 2>/dev/null)" ]; then
+    log "sync: $ROOT has local changes — leaving it alone"
+    return 0
+  fi
+  if git -C "$ROOT" pull --quiet --ff-only 2>/dev/null; then
+    log "sync: $ROOT fast-forwarded to $(git -C "$ROOT" rev-parse --short HEAD)"
+  else
+    log "WARN: sync: couldn't fast-forward $ROOT to origin/main"
+  fi
+}
+
 # --- Main loop --------------------------------------------------------------
 acquire_lock
-trap 'release_lock' EXIT INT TERM
+trap 'release_lock; sync_root' EXIT INT TERM
 
 cur_task=""; cur_attempts=0; cur_rung=0; cur_base=0; cur_verification="ci-only"
 
