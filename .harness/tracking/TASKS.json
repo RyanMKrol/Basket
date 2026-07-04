@@ -1,0 +1,19 @@
+{
+  "_doc": "Implementation backlog for the single sequential Ralph loop. SOURCE OF TRUTH for done/not-done + dependency order; docs/HARNESS.md §8.1 = schema. Each task's `do` + `done-when` live in a per-task Markdown spec at the `spec` path (.harness/tasks/TNNN.md, sections '## Do' / '## Done when'); every BUILDABLE task carries `facets` (difficulty auto-tuning) — gated (gate / needs-human) tasks are carved out and carry neither.",
+  "version": 1,
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Document the harness dashboard in README",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": ["scaffold"],
+      "scope": ["README.md"],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T001.md",
+      "facets": { "layer": "meta", "workType": "docs", "risk": [] }
+    }
+  ]
+}
