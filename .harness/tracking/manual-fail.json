@@ -1,1 +1,7 @@
-{}
+{
+  "T002": {
+    "failed": true,
+    "reason": "When I click through all of my basket, the \"All Done\" appears fading in, but it still clips out. It doesn't actually fade out like I asked for.",
+    "at": "2026-07-04T21:26:19Z"
+  }
+}
