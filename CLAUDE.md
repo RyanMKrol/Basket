@@ -62,7 +62,8 @@ A change is done when, on the branch:
 - **Builds clean:** `./build_run.sh` reaches `** BUILD SUCCEEDED **` (it also
   launches the app on the simulator and saves a screenshot to `screenshots/`).
 - **Tests pass:**
-  - XCTest on the simulator —
+  - XCTest + XCUITest on the simulator — one command runs both, since
+    `BasketUITests` is wired into the same scheme's test action:
     `xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
   - Native logic harness (fast, no simulator) — compile the pure-logic `Sources`
     files together with `tools/main.swift` and run it (see `README.md` → Tests).
@@ -103,6 +104,13 @@ something Apple requires for App Store submission.
   `TipJar.swift` imports iOS-only StoreKit, so it's kept **out** of the
   `tools/main.swift` native-harness compile list.
 - `Tests/BasketTests.swift` — XCTest (logic).
+- `UITests/` — XCUITest flow tests, driving a real simulator through the app's
+  actual UI (add/check-off/quantity-edit/empty-state flows), each step
+  attaching a screenshot to the test report. `BasketUITestCase` (base class)
+  launches the app with `-uiTesting` (isolated in-memory SwiftData store) and
+  optionally `-uiTestingEmpty` (skip the starter items) — see `BasketApp.init`.
+  Wired into the `Basket` scheme's test action alongside `BasketTests`, so
+  `xcodebuild test -scheme Basket` runs both.
 - `tools/` — generators & audits (run from the repo root):
   - `gen_emoji.py` → `Sources/Services/EmojiTable.swift` (curated keyword→emoji
     table, from inline data + `emoji_supplement.txt`).
@@ -114,6 +122,10 @@ something Apple requires for App Store submission.
     is now the design agency's artwork, not generator output. Don't run these
     against the appiconset without checking with the user first.
   - `main.swift` — the native logic test harness.
+  - `export_ui_screenshots.sh` / `rename_ui_screenshots.py` — run `UITests/`
+    and export their `XCTAttachment` screenshots as plain PNGs into
+    `screenshots/ui-tests/`, named after the test + attachment instead of
+    Xcode's opaque `.xcresult` filenames.
 
 ## Emoji pipeline (when changing food→emoji mapping)
 

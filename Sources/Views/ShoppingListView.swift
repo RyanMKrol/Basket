@@ -25,7 +25,10 @@ struct ShoppingListView: View {
     /// True briefly while the "you got everything" celebration plays.
     @State private var celebrating = false
     /// Cold-start launch flourish — fires once per process, not on resume.
-    @State private var showFlourish = LaunchOnce.consume()
+    /// Skipped under UI testing so tests don't have to wait out a splash that
+    /// isn't part of the flow being verified.
+    @State private var showFlourish = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+        ? false : LaunchOnce.consume()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(TipJar.self) private var tipJar
     /// Supporters tap the title to toggle the rainbow look. Defaults on after a
@@ -199,6 +202,7 @@ struct ShoppingListView: View {
             .padding(.leading, 4)
             .accessibilityLabel("About Basket")
             .accessibilityHint("Shows app info and the tip jar")
+            .accessibilityIdentifier("header.aboutButton")
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
@@ -227,6 +231,7 @@ struct ShoppingListView: View {
             }
             .buttonStyle(.plain)
             .accessibilityHint("Removes everything in the Got it section")
+            .accessibilityIdentifier("gotSection.clearAll")
         }
         .padding(.horizontal, 6)
         .padding(.top, 14)

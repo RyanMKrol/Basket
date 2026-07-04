@@ -66,6 +66,7 @@ struct ItemRow: View {
                 .accessibilityAddTraits(.isButton)
                 .accessibilityHint(showsQuantity ? "Double tap to set quantity" : "Double tap to restore to your list")
                 .accessibilityAction { showsQuantity ? onTapQuantity() : onToggle() }
+                .accessibilityIdentifier("itemRow.\(name)")
 
                 CheckCircle(isChecked: showChecked)
                     .overlay { if isChecking { SparkleBurst() } }
@@ -76,6 +77,7 @@ struct ItemRow: View {
                     .accessibilityLabel(showChecked ? "Got it" : "Not got yet")
                     .accessibilityAddTraits(.isButton)
                     .accessibilityAction { onToggle() }
+                    .accessibilityIdentifier("itemRow.check.\(name)")
             }
             .contentShape(Rectangle())
             // To-get rows open the quantity editor on a body tap; got-it rows
