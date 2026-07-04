@@ -107,6 +107,12 @@ xcodegen generate
 `Signing.xcconfig` (committed) optionally includes `Signing.local.xcconfig`, so
 without the local file the build still works for the simulator.
 
+### Harness dashboard
+
+`node .harness/dashboard/server.js` starts a local, read-only viewer for the
+autonomous build loop's backlog: task status, dependencies, and recent worklog
+entries from `.harness/tracking/TASKS.json`.
+
 ## Tests
 
 Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways:
