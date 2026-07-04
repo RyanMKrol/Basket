@@ -44,6 +44,15 @@ targets:
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        # XcodeGen applies its own default of "1,2" (universal) for
+        # `type: application` targets, which silently overrides the
+        # project-level TARGETED_DEVICE_FAMILY above — Xcode still derives
+        # the compiled Info.plist's UIDeviceFamily from this target-level
+        # value even with GENERATE_INFOPLIST_FILE: NO, so without this
+        # override the shipped binary was universal despite being meant as
+        # iPhone-only, and App Store Connect required iPad screenshots for
+        # an app never designed or tested on iPad.
+        TARGETED_DEVICE_FAMILY: "1"
   BasketTests:
     type: bundle.unit-test
     platform: iOS
