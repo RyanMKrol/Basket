@@ -92,7 +92,7 @@
     {
       "id": "T005",
       "title": "Tap outside the Quantity Editor to dismiss it",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
