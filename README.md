@@ -135,10 +135,11 @@ and UI flows are covered by a third:
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
 
-- `UITests/` — XCUITest flow tests (add an item, check one off, edit its
-  quantity, empty state, "All done!" celebration) driving a real simulator
-  through the actual UI, backed by an isolated in-memory SwiftData store (see
-  `-uiTesting` / `-uiTestingEmpty` in `BasketApp.init`, checked via
+- `UITests/` — XCUITest flow tests (add an item, suggestions, check one off,
+  restore/clear "Got it", edit quantity, empty state, "All done!"
+  celebration, keyboard dismiss) driving a real simulator through the actual
+  UI, backed by an isolated in-memory SwiftData store (see `-uiTesting` /
+  `-uiTestingEmpty` in `BasketApp.init`, checked via
   `ProcessInfo.processInfo.arguments`). Every step attaches a screenshot to the
   test report (`XCTAttachment`, `.lifetime = .keepAlways`), viewable in Xcode's
   Report Navigator — or export them as plain PNGs:
@@ -156,6 +157,21 @@ and UI flows are covered by a third:
   injects synthetic touch events into the simulator process) — they don't
   drive your physical mouse/trackpad, and can run with no visible Simulator
   window (`xcrun simctl boot` without opening `Simulator.app`).
+
+  - `AccessibilityAuditTests.swift` runs XCTest's built-in
+    `performAccessibilityAudit()` over the main list, quantity editor, empty
+    state, and About sheet — catching hit-region/label/trait regressions
+    automatically. `.contrast`, `.textClipped`, and `.dynamicType` are
+    excluded (with reasons documented inline: the soft/pastel palette and
+    colour emoji don't fit those heuristics, and the pixel fonts are
+    deliberately fixed-size), not silently ignored.
+  - `TapPrecisionTests.swift` stress-tests the app's smallest controls (the
+    +/- stepper buttons, unit pills, the check circle) with taps offset from
+    dead-center at a fixed, seeded jitter — standing in for a real finger's
+    imprecision, since XCUITest's default tap always lands exactly on
+    center. Every trial is asserted individually; nothing is averaged into a
+    pass-rate threshold, so a real hit-target problem fails the suite
+    instead of being tolerated.
 
 > Note: `xcodebuild test` and app-icon (asset catalog) compilation require an
 > installed iOS **simulator runtime matching the SDK**. If you hit "No simulator

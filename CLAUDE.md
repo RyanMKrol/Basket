@@ -105,12 +105,22 @@ something Apple requires for App Store submission.
   `tools/main.swift` native-harness compile list.
 - `Tests/BasketTests.swift` — XCTest (logic).
 - `UITests/` — XCUITest flow tests, driving a real simulator through the app's
-  actual UI (add/check-off/quantity-edit/empty-state flows), each step
-  attaching a screenshot to the test report. `BasketUITestCase` (base class)
-  launches the app with `-uiTesting` (isolated in-memory SwiftData store) and
-  optionally `-uiTestingEmpty` (skip the starter items) — see `BasketApp.init`.
-  Wired into the `Basket` scheme's test action alongside `BasketTests`, so
-  `xcodebuild test -scheme Basket` runs both.
+  actual UI (add/suggestions/check-off/quantity-edit/empty-state flows), each
+  step attaching a screenshot to the test report. `BasketUITestCase` (base
+  class) launches the app with `-uiTesting` (isolated in-memory SwiftData
+  store) and optionally `-uiTestingEmpty` (skip the starter items) — see
+  `BasketApp.init`. Wired into the `Basket` scheme's test action alongside
+  `BasketTests`, so `xcodebuild test -scheme Basket` runs both.
+  - `AccessibilityAuditTests.swift` — `performAccessibilityAudit()` over the
+    main screens; `.contrast`/`.textClipped`/`.dynamicType` excluded with
+    reasons documented inline (soft palette + colour emoji + deliberately
+    fixed-size pixel fonts), everything else must pass cleanly.
+  - `TapJitter.swift` / `TapPrecisionTests.swift` — a seeded pseudo-random
+    offset generator + `XCUIElement.tapJittered`, used to stress-test the
+    smallest controls (stepper buttons, unit pills, check circle) with
+    off-center taps standing in for real finger imprecision. Every trial is
+    asserted individually (no averaged pass-rate threshold) and a failure at
+    a given trial index is reproducible, since the seed is fixed.
 - `tools/` — generators & audits (run from the repo root):
   - `gen_emoji.py` → `Sources/Services/EmojiTable.swift` (curated keyword→emoji
     table, from inline data + `emoji_supplement.txt`).

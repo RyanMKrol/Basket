@@ -94,7 +94,10 @@ struct QuantityEditor: View {
                 .font(Theme.body(16, weight: .semibold))
                 .foregroundStyle(Theme.ink)
                 .monospacedDigit()
-                .frame(minWidth: 84)
+                // minHeight brings the tappable area up to Apple's 44pt
+                // minimum (flagged by performAccessibilityAudit's hit-region
+                // check) without changing the text's own visual size.
+                .frame(minWidth: 84, minHeight: 44)
                 .contentShape(Rectangle())
                 .onTapGesture(perform: beginEditing)
                 .accessibilityAddTraits(.isButton)

@@ -197,6 +197,11 @@ struct ShoppingListView: View {
                 Image(systemName: "info.circle")
                     .font(.system(size: 17))
                     .foregroundStyle(Theme.onPaperSoft)
+                    // The icon itself stays visually small; this just grows the
+                    // tappable area to Apple's 44x44 minimum (flagged by
+                    // performAccessibilityAudit's hit-region check).
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .padding(.leading, 4)
