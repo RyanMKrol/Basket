@@ -77,4 +77,29 @@ final class QuantityEditorFlowTests: BasketUITestCase {
         )
         wait(for: [gone], timeout: 3)
     }
+
+    /// Typing an amount that doesn't parse to a positive number (here, just
+    /// "0") is rejected on commit — the previous quantity stands.
+    func testTypingInvalidAmountKeepsOldValue() {
+        launchApp()
+
+        app.buttons["itemRow.Milk"].tap()
+        let value = app.buttons["quantityEditor.value"]
+        XCTAssertTrue(value.waitForExistence(timeout: 3))
+        value.tap()
+
+        let field = app.textFields["quantityEditor.field"]
+        XCTAssertTrue(field.waitForExistence(timeout: 3))
+        let seeded = (field.value as? String) ?? ""
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: seeded.count))
+        field.typeText("0")
+        attachScreenshot("01-typed-zero")
+
+        app.buttons["itemRow.Eggs"].tap()
+
+        let row = app.buttons["itemRow.Milk"]
+        XCTAssertTrue(row.waitForExistence(timeout: 3))
+        XCTAssertEqual(row.label, "Milk, 500 ml")
+        attachScreenshot("02-unchanged")
+    }
 }

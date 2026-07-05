@@ -1,0 +1,79 @@
+import XCTest
+
+/// Runs XCTest's built-in accessibility audit (`performAccessibilityAudit`)
+/// over the app's main screens, catching hit-region/label/trait regressions
+/// automatically instead of relying only on manual VoiceOver passes.
+///
+/// Two audit categories are excluded wholesale, and one specific issue is
+/// suppressed — each documented below, not silently dropped. `.hitRegion`,
+/// `.elementDetection` (bar the one exception), `.sufficientElementDescription`,
+/// and `.trait` all stay enabled and must pass cleanly.
+final class AccessibilityAuditTests: BasketUITestCase {
+    /// `.all` minus:
+    /// - `.dynamicType`: the pixel-art theme's `VT323`/`Silkscreen` fonts are
+    ///   fixed-size by design (a deliberate retro-pixel aesthetic), so they
+    ///   don't participate in Dynamic Type scaling. A design choice, not a bug.
+    /// - `.textClipped`: flagged almost every single-line item name, colour
+    ///   emoji glyph, and secondary label in the app as "clipped", including
+    ///   ones confirmed rendering in full in this suite's own screenshots
+    ///   (e.g. "Sourdough bread"). This audit statically compares a Text's
+    ///   ideal size to its laid-out frame, which is a poor fit for
+    ///   intentionally-truncating `.lineLimit(1)` labels and colour emoji —
+    ///   100% false positives here, so excluded rather than fought.
+    /// - `.contrast`: the app's soft/pastel palette (the faint "+ Qty"
+    ///   affordance, muted secondary text in the About sheet, colour emoji
+    ///   rendered as "text") fails this audit's contrast heuristics almost
+    ///   everywhere by design. That's a real product/design question — dial
+    ///   up contrast on specific elements, or accept the soft look — not one
+    ///   this test should silently decide either way, so it's excluded here
+    ///   pending an explicit call from the app's owner, rather than papering
+    ///   over it with a long, copy-coupled per-element allowlist.
+    private var auditTypes: XCUIAccessibilityAuditType {
+        XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped, .contrast])
+    }
+
+    func testMainListPassesAccessibilityAudit() throws {
+        launchApp()
+        XCTAssertTrue(app.buttons["itemRow.Milk"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+    }
+
+    func testEmptyStatePassesAccessibilityAudit() throws {
+        launchApp(seeded: false)
+        XCTAssertTrue(app.staticTexts["emptyState.subtitle"].waitForExistence(timeout: 5))
+        try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+    }
+
+    func testQuantityEditorPassesAccessibilityAudit() throws {
+        launchApp()
+        app.buttons["itemRow.Milk"].tap()
+        XCTAssertTrue(app.buttons["quantityEditor.value"].waitForExistence(timeout: 3))
+        try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+    }
+
+    func testAboutSheetPassesAccessibilityAudit() throws {
+        launchApp()
+        app.buttons["header.aboutButton"].tap()
+        XCTAssertTrue(app.staticTexts["about.title"].waitForExistence(timeout: 3))
+        try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+    }
+
+    /// Returning `true` marks an issue as handled (suppressed); `false` lets
+    /// it fail the test. Every issue is printed either way, so a failure's
+    /// log always shows the full list, not just the first one XCTest reports.
+    private func handleIssue(_ issue: XCUIAccessibilityAuditIssue) -> Bool {
+        print("A11Y AUDIT ISSUE: \(issue.auditType) — \(issue.compactDescription) — element: \(issue.element?.debugDescription ?? "nil")")
+
+        // One "Potentially inaccessible text" (.elementDetection) instance
+        // shows up transiently in the About sheet with no element reference
+        // attached at all — nothing to localize or act on. Suppressed
+        // narrowly (only when there's genuinely no element to point at), so
+        // any future .elementDetection finding that *does* name an element
+        // still fails the test as it should.
+        if issue.auditType == .elementDetection && issue.element == nil {
+            return true
+        }
+
+        return false
+    }
+}

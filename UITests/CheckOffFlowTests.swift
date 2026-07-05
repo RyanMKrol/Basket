@@ -48,4 +48,24 @@ final class CheckOffFlowTests: BasketUITestCase {
         XCTAssertTrue(app.staticTexts["celebration.title"].waitForExistence(timeout: 5))
         attachScreenshot("02-celebration")
     }
+
+    /// "Clear all" empties the whole "Got it" section immediately, rather
+    /// than waiting for its 1-hour TTL.
+    func testClearAllEmptiesGotItSection() {
+        launchApp()
+
+        app.buttons["itemRow.check.Milk"].tap()
+        XCTAssertTrue(app.staticTexts["Got it"].waitForExistence(timeout: 3))
+        attachScreenshot("01-one-checked")
+
+        app.buttons["gotSection.clearAll"].tap()
+        attachScreenshot("02-cleared")
+
+        let gone = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: app.staticTexts["Got it"]
+        )
+        wait(for: [gone], timeout: 3)
+        XCTAssertFalse(app.buttons["itemRow.check.Milk"].exists)
+    }
 }

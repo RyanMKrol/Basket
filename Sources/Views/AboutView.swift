@@ -28,6 +28,7 @@ struct AboutView: View {
                     .font(Theme.title(32, weight: .bold))
                     .foregroundStyle(Theme.onPaper)
                     .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("about.title")
 
                 Text("A soft, friendly shopping list.\nOn your device, and nowhere else.")
                     .font(Theme.body(15))
