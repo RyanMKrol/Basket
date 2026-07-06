@@ -109,10 +109,11 @@ without the local file the build still works for the simulator.
 
 ## Tests
 
-Pure logic (emoji mapping, suggestion ranking, formatting) is covered two ways,
-and UI flows are covered by a third:
+Coverage is layered like a pyramid — pure logic at the bottom (fast, no
+simulator), SwiftData/StoreKit/snapshot tests in the middle, full UI flows on
+top:
 
-- `Tests/BasketTests.swift` — the XCTest suite, run on the simulator:
+- `Tests/` — the XCTest suite, run on the simulator:
 
   ```sh
   xcodegen generate
@@ -121,7 +122,32 @@ and UI flows are covered by a third:
   ```
 
   This same command also runs `UITests/` (below) — both are wired into the
-  `Basket` scheme's test action, so one `xcodebuild test` covers both.
+  `Basket` scheme's test action, so one `xcodebuild test` covers both
+  (with code coverage gathered; view it in Xcode's Report Navigator or via
+  `xcrun xccov`). Beyond the pure-logic tests in `BasketTests.swift`, this
+  target holds the middle layer:
+
+  - `ListLogicTests.swift` — the section partitioning (to-get / recently-got
+    / TTL-expired) and the check-off spark→commit state machine
+    (`CheckOffChoreography`), extracted from `ShoppingListView` into
+    `Services/ListLogic.swift` precisely so they're testable without a
+    simulator.
+  - `ModelTests.swift` — SwiftData semantics against an in-memory
+    `ModelContainer`: the first-launch seed (`BasketApp.seedIfEmpty`), the
+    `KnownItems.rememberAdd` suggestion-memory upsert, and the
+    `GroceryItem.unit` raw-string round-trip.
+  - `TipJarTests.swift` — the tip jar's product loading through a local
+    `SKTestSession` (StoreKitTest) on `StoreKit/Basket.storekit`. Purchases
+    themselves can't run in a plain unit-test host (no UI anchor for the
+    confirmation; transaction injection needs a test-plan-level StoreKit
+    config) — see the scope note in the file.
+  - `SnapshotTests.swift` — pixel-level reference images
+    ([swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing))
+    of the core views (`ItemRow` states, `QuantityEditor`, the empty state),
+    stored in `Tests/__Snapshots__/`. Unlike the flow tests' screenshots
+    (review aids), these are assertions — a visual regression fails the
+    build. Recorded on iOS 26.x and skipped (`XCTSkip`) on other majors,
+    where OS text rendering would diff without a real regression.
 
 - `tools/main.swift` — the **same source files** run natively on macOS (fast, no
   simulator needed):
@@ -137,12 +163,25 @@ and UI flows are covered by a third:
 
 - `UITests/` — XCUITest flow tests (add an item, suggestions, check one off,
   restore/clear "Got it", edit quantity, empty state, "All done!"
-  celebration, keyboard dismiss) driving a real simulator through the actual
-  UI, backed by an isolated in-memory SwiftData store (see `-uiTesting` /
-  `-uiTestingEmpty` in `BasketApp.init`, checked via
-  `ProcessInfo.processInfo.arguments`). Every step attaches a screenshot to the
-  test report (`XCTAttachment`, `.lifetime = .keepAlways`), viewable in Xcode's
-  Report Navigator — or export them as plain PNGs:
+  celebration, keyboard dismiss, persistence across relaunch) driving a real
+  simulator through the actual UI, backed by an isolated in-memory SwiftData
+  store (see `-uiTesting` / `-uiTestingEmpty` in `BasketApp.init`; the
+  persistence tests point `UITEST_STORE_URL` at their own temp file instead).
+
+  Tests run **deterministically** by default (`Services/TestHooks.swift`):
+  `-uiTestingDisableAnimations` turns off UIKit/SwiftUI animations and
+  shrinks the 0.55s check-commit delay, and `UITEST_FROZEN_DATE` freezes the
+  wall clock (an ordinary July morning) so TTL cutoffs, holiday flourishes,
+  and the day-rotating empty-state line render identically on every run —
+  one check-off flow opts back into `realTiming` to keep the production
+  choreography covered. Assertions never read live UI state bare: every
+  state check is a bounded wait (`waitForLabel` / `waitForValue` /
+  `waitForGone` / `waitForToGetCount` in `BasketUITestCase`), because
+  XCUITest gives no guarantee a tap's effects have rendered by the next
+  line — a bare assert can fail on a slow run or falsely pass on a stale
+  read. Every step attaches a screenshot to the test report
+  (`XCTAttachment`, `.lifetime = .keepAlways`), viewable in Xcode's Report
+  Navigator — or export them as plain PNGs:
 
   ```sh
   ./tools/export_ui_screenshots.sh                 # → screenshots/ui-tests/
@@ -159,12 +198,13 @@ and UI flows are covered by a third:
   window (`xcrun simctl boot` without opening `Simulator.app`).
 
   - `AccessibilityAuditTests.swift` runs XCTest's built-in
-    `performAccessibilityAudit()` over the main list, quantity editor, empty
-    state, and About sheet — catching hit-region/label/trait regressions
-    automatically. `.contrast`, `.textClipped`, and `.dynamicType` are
-    excluded (with reasons documented inline: the soft/pastel palette and
-    colour emoji don't fit those heuristics, and the pixel fonts are
-    deliberately fixed-size), not silently ignored.
+    `performAccessibilityAudit()` over the main list (in the default theme
+    and each alternate `BASKET_THEME`), quantity editor, empty state, and
+    About sheet — catching hit-region/label/trait regressions automatically.
+    `.contrast`, `.textClipped`, and `.dynamicType` are excluded (with
+    reasons documented inline: the soft/pastel palette and colour emoji
+    don't fit those heuristics, and the pixel fonts are deliberately
+    fixed-size), not silently ignored.
   - `TapPrecisionTests.swift` stress-tests the app's smallest controls (the
     +/- stepper buttons, unit pills, the check circle) with taps offset from
     dead-center at a fixed, seeded jitter — standing in for a real finger's
@@ -176,3 +216,14 @@ and UI flows are covered by a third:
 > Note: `xcodebuild test` and app-icon (asset catalog) compilation require an
 > installed iOS **simulator runtime matching the SDK**. If you hit "No simulator
 > runtime version … available", run `xcodebuild -downloadPlatform iOS`.
+
+### CI
+
+`.github/workflows/ci.yml` runs the full suite (simulator tests + native
+harness) on **every branch push** — pre-merge signal for worktree branches,
+post-merge backstop on `main`. On failure it uploads the `.xcresult` bundle
+(which contains the failure screenshots and audit logs) as a workflow
+artifact. The merge-gating job never retries: a flaky test should fail
+loudly. Instead, a scheduled nightly `flake-hunt` job runs every test up to
+5 times (`-test-iterations 5 -run-tests-until-failure`) to surface the
+only-fails-sometimes kind before it wastes anyone's day.

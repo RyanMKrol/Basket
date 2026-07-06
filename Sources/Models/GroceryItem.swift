@@ -35,3 +35,6 @@ final class GroceryItem {
         self.unitRaw = unitRaw
     }
 }
+
+/// Lets `ListLogic` partition live items (unit tests use plain structs).
+extension GroceryItem: ListEntry {}

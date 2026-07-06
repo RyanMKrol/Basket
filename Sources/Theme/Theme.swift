@@ -139,7 +139,7 @@ struct BasketBackground: View {
 
     @ViewBuilder private var timeTint: some View {
         if !Theme.current.isDark {
-            switch Seasonality.timeOfDay(.now) {
+            switch Seasonality.timeOfDay(AppClock.now) {
             case .morning:   Color(red: 0.50, green: 0.62, blue: 0.85).opacity(0.05)
             case .afternoon: Color.clear
             case .evening:   Color(red: 0.96, green: 0.64, blue: 0.34).opacity(0.06)

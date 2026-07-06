@@ -48,7 +48,7 @@ struct ItemRow: View {
                                 .frame(height: 1.5)
                                 .offset(y: 2)   // nudge to the glyphs' visual middle (pixel fonts sit low)
                                 .scaleEffect(x: showChecked ? 1 : 0, anchor: .leading)
-                                .animation(.easeInOut(duration: 0.45), value: showChecked)
+                                .animation(.easeInOut(duration: 0.45).unlessUITesting, value: showChecked)
                         }
 
                     Spacer(minLength: 8)
@@ -99,7 +99,7 @@ struct ItemRow: View {
                 .opacity(isFlashing ? 1 : 0)
         )
         .scaleEffect(isFlashing ? 1.03 : 1)
-        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isFlashing)
+        .animation(.spring(response: 0.3, dampingFraction: 0.5).unlessUITesting, value: isFlashing)
     }
 
     /// The quantity affordance: a faint, tappable "+ Qty" when unset, or the
@@ -150,7 +150,7 @@ struct CheckCircle: View {
                 .scaleEffect(isChecked ? 1 : 0.1)
                 .opacity(isChecked ? 1 : 0)
         }
-        .animation(.spring(response: 0.42, dampingFraction: 0.6), value: isChecked)
+        .animation(.spring(response: 0.42, dampingFraction: 0.6).unlessUITesting, value: isChecked)
         .contentShape(Rectangle())
     }
 }

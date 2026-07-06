@@ -12,20 +12,21 @@ final class QuantityEditorFlowTests: BasketUITestCase {
 
         let value = app.buttons["quantityEditor.value"]
         XCTAssertTrue(value.waitForExistence(timeout: 3))
-        XCTAssertEqual(value.label, "500 ml")
+        waitForLabel(value, equals: "500 ml")
         attachScreenshot("01-editor-open-default")
 
         app.buttons["quantityEditor.increase"].tap()
-        XCTAssertEqual(app.buttons["quantityEditor.value"].label, "550 ml")
+        waitForLabel(value, equals: "550 ml")
         attachScreenshot("02-after-increase")
 
         app.buttons["quantityEditor.decrease"].tap()
+        waitForLabel(value, equals: "500 ml")
         app.buttons["quantityEditor.decrease"].tap()
-        XCTAssertEqual(app.buttons["quantityEditor.value"].label, "450 ml")
+        waitForLabel(value, equals: "450 ml")
         attachScreenshot("03-after-decrease")
 
         app.buttons["quantityEditor.unit.L"].tap()
-        XCTAssertEqual(app.buttons["quantityEditor.value"].label, "0.45 L")
+        waitForLabel(value, equals: "0.45 L")
         attachScreenshot("04-switched-to-liters")
     }
 
@@ -56,7 +57,7 @@ final class QuantityEditorFlowTests: BasketUITestCase {
 
         let row = app.buttons["itemRow.Milk"]
         XCTAssertTrue(row.waitForExistence(timeout: 3))
-        XCTAssertEqual(row.label, "Milk, 750 ml")
+        waitForLabel(row, equals: "Milk, 750 ml")
         attachScreenshot("02-committed")
     }
 
@@ -71,11 +72,7 @@ final class QuantityEditorFlowTests: BasketUITestCase {
         app.buttons["quantityEditor.clear"].tap()
         attachScreenshot("02-cleared")
 
-        let gone = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "exists == false"),
-            object: app.buttons["quantityEditor.value"]
-        )
-        wait(for: [gone], timeout: 3)
+        waitForGone(app.buttons["quantityEditor.value"])
     }
 
     /// Typing an amount that doesn't parse to a positive number (here, just
@@ -99,7 +96,7 @@ final class QuantityEditorFlowTests: BasketUITestCase {
 
         let row = app.buttons["itemRow.Milk"]
         XCTAssertTrue(row.waitForExistence(timeout: 3))
-        XCTAssertEqual(row.label, "Milk, 500 ml")
+        waitForLabel(row, equals: "Milk, 500 ml")
         attachScreenshot("02-unchanged")
     }
 }

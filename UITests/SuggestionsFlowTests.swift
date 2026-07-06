@@ -18,7 +18,7 @@ final class SuggestionsFlowTests: BasketUITestCase {
         suggestion.tap()
 
         XCTAssertTrue(app.buttons["itemRow.Banana"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["1 to get"].waitForExistence(timeout: 3))
+        waitForToGetCount(1)
         attachScreenshot("02-added-from-suggestion")
     }
 }

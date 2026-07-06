@@ -28,8 +28,8 @@ struct ClearedCelebration: View {
                 .accessibilityIdentifier("celebration.title")
         }
         .onAppear {
-            withAnimation(reduceMotion ? .easeIn(duration: 0.35)
-                                       : .spring(response: 0.5, dampingFraction: 0.6)) {
+            withAppAnimation(reduceMotion ? .easeIn(duration: 0.35)
+                                          : .spring(response: 0.5, dampingFraction: 0.6)) {
                 shown = true
             }
         }

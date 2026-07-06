@@ -95,7 +95,7 @@ struct AddBar: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(text.trimmingCharacters(in: .whitespaces).isEmpty ? "Add item" : "Add \(text)")
                 .accessibilityIdentifier("addBar.addButton")
-                .animation(.easeInOut(duration: 0.2), value: text.isEmpty)
+                .animation(.easeInOut(duration: 0.2).unlessUITesting, value: text.isEmpty)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -104,9 +104,9 @@ struct AddBar: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 8)
         }
-        .animation(.spring(response: 0.32, dampingFraction: 0.8), value: suggestions)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: text.isEmpty)
-        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: focused.wrappedValue)
+        .animation(.spring(response: 0.32, dampingFraction: 0.8).unlessUITesting, value: suggestions)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8).unlessUITesting, value: text.isEmpty)
+        .animation(.spring(response: 0.3, dampingFraction: 0.8).unlessUITesting, value: focused.wrappedValue)
     }
 
     /// Submit the current text, then keep focus so the keyboard stays up — adding

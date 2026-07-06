@@ -14,6 +14,9 @@ final class TapPrecisionTests: BasketUITestCase {
     private let trialsPerControl = 8
     /// Max offset from center, as a fraction of the control's own size.
     private let jitterMagnitude = 0.3
+    /// Per-trial settle deadline. Generous relative to the (animation-free)
+    /// updates being waited on, so a timeout means a genuinely missed tap.
+    private let trialTimeout: TimeInterval = 2
 
     /// The +/- stepper buttons are 32x32 — right at the edge of Apple's
     /// 44x44 minimum tap-target guidance — so they're the single most likely
@@ -21,7 +24,8 @@ final class TapPrecisionTests: BasketUITestCase {
     func testJitteredStepperTaps() {
         launchApp()
         app.buttons["itemRow.Milk"].tap()
-        XCTAssertTrue(app.buttons["quantityEditor.value"].waitForExistence(timeout: 3))
+        let value = app.buttons["quantityEditor.value"]
+        XCTAssertTrue(value.waitForExistence(timeout: 3))
 
         var jitter = SeededJitter(seed: 0xBA5C_E7A1)
         // Milk starts at 500 ml; step() adds 50 while under 1000.
@@ -32,9 +36,8 @@ final class TapPrecisionTests: BasketUITestCase {
             let dx = jitter.next() * jitterMagnitude
             let dy = jitter.next() * jitterMagnitude
             app.buttons["quantityEditor.increase"].tapJittered(dx: dx, dy: dy)
-            let label = app.buttons["quantityEditor.value"].label
-            if label != expected[i] {
-                misses.append("trial \(i) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(label)', want '\(expected[i])'")
+            if !waitUntilLabel(value, equals: expected[i], timeout: trialTimeout) {
+                misses.append("trial \(i) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(value.label)', want '\(expected[i])'")
             }
         }
 
@@ -47,7 +50,8 @@ final class TapPrecisionTests: BasketUITestCase {
     func testJitteredUnitPillTaps() {
         launchApp()
         app.buttons["itemRow.Milk"].tap()
-        XCTAssertTrue(app.buttons["quantityEditor.value"].waitForExistence(timeout: 3))
+        let value = app.buttons["quantityEditor.value"]
+        XCTAssertTrue(value.waitForExistence(timeout: 3))
 
         var jitter = SeededJitter(seed: 0xBA5C_E7B2)
         var misses: [String] = []
@@ -60,9 +64,8 @@ final class TapPrecisionTests: BasketUITestCase {
             let dx = jitter.next() * jitterMagnitude
             let dy = jitter.next() * jitterMagnitude
             app.buttons[identifier].tapJittered(dx: dx, dy: dy)
-            let label = app.buttons["quantityEditor.value"].label
-            if label != want {
-                misses.append("trial \(i) tapping \(identifier) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(label)', want '\(want)'")
+            if !waitUntilLabel(value, equals: want, timeout: trialTimeout) {
+                misses.append("trial \(i) tapping \(identifier) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(value.label)', want '\(want)'")
             }
         }
 
@@ -71,27 +74,30 @@ final class TapPrecisionTests: BasketUITestCase {
 
     /// The check circle is the single most-used gesture in the whole app —
     /// worth stress-testing even though, at 40x40, it's a shade under the
-    /// stepper buttons' risk. Each check/uncheck cycle needs to fully settle
-    /// (~0.55s commit delay) before the next tap, or a rapid re-tap is
-    /// dropped by the app's own re-entrancy guard rather than reflecting a
-    /// tap-precision problem.
+    /// stepper buttons' risk.
     func testJitteredCheckCircleTaps() {
         launchApp()
-        XCTAssertTrue(app.buttons["itemRow.check.Milk"].waitForExistence(timeout: 5))
+        let check = app.buttons["itemRow.check.Milk"]
+        XCTAssertTrue(check.waitForExistence(timeout: 5))
 
         var jitter = SeededJitter(seed: 0xBA5C_E7C3)
         var misses: [String] = []
 
         for i in 0..<trialsPerControl {
-            let want = i % 2 == 0 ? "Got it" : "Not got yet"
+            let checking = i % 2 == 0
+            let want = checking ? "Got it" : "Not got yet"
             let dx = jitter.next() * jitterMagnitude
             let dy = jitter.next() * jitterMagnitude
-            app.buttons["itemRow.check.Milk"].tapJittered(dx: dx, dy: dy)
-            let label = app.buttons["itemRow.check.Milk"].label
-            if label != want {
-                misses.append("trial \(i) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(label)', want '\(want)'")
+            check.tapJittered(dx: dx, dy: dy)
+            if !waitUntilLabel(check, equals: want, timeout: trialTimeout) {
+                misses.append("trial \(i) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(check.label)', want '\(want)'")
             }
-            Thread.sleep(forTimeInterval: 0.7)   // let the check/uncheck settle
+            // A check isn't finished when its label flips — the row only
+            // moves into (or out of) "Got it" once the commit lands, and a
+            // tap in that window is swallowed by the app's re-entrancy
+            // guard. Wait for the section itself so the next trial measures
+            // tap precision, not rapid-tap protection.
+            waitUntilExists(gotSectionHeader, checking, timeout: trialTimeout)
         }
 
         XCTAssertTrue(misses.isEmpty, "Jittered check-circle taps missed:\n" + misses.joined(separator: "\n"))
