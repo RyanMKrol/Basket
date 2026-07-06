@@ -62,11 +62,15 @@ struct AboutView: View {
             switch tipJar.state {
             case .idle, .loading:
                 ProgressView().tint(Theme.leaf).frame(height: 86)
+                    // The audit test waits for this to disappear: auditing
+                    // mid-load races the spinner-to-settled transition.
+                    .accessibilityIdentifier("about.tipsLoading")
             case .unavailable:
                 Text("Tips aren't available right now.")
                     .font(Theme.body(13))
                     .foregroundStyle(Theme.onPaperSoft)
                     .frame(height: 86)
+                    .accessibilityIdentifier("about.tipsUnavailable")
             case .loaded:
                 HStack(spacing: 12) {
                     ForEach(tipJar.products, id: \.id, content: tipButton)

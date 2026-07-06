@@ -9,13 +9,11 @@ struct ShoppingListView: View {
     @Query private var known: [KnownItem]
 
     @State private var draft: String = ""
-    @State private var now: Date = .now
+    @State private var now: Date = AppClock.now
     @State private var flashID: PersistentIdentifier?
-    /// Items mid spark-burst (the first ~0.55s after a tap).
-    @State private var checkingIDs: Set<PersistentIdentifier> = []
-    /// Items whose burst finished but whose move into "Got it" is held until no
-    /// other check is still animating — so the list doesn't shuffle under taps.
-    @State private var pendingCommit: Set<PersistentIdentifier> = []
+    /// The check-off spark→commit state machine (the ~0.55s burst, and the
+    /// hold-until-nothing-else-is-animating batching — see CheckOffChoreography).
+    @State private var choreo = CheckOffChoreography<PersistentIdentifier>()
     /// The one row whose quantity editor is currently open (only one at a time).
     @State private var expandedID: PersistentIdentifier?
     /// Focus of the bottom add-bar field, lifted here so opening a quantity
@@ -27,8 +25,7 @@ struct ShoppingListView: View {
     /// Cold-start launch flourish — fires once per process, not on resume.
     /// Skipped under UI testing so tests don't have to wait out a splash that
     /// isn't part of the flow being verified.
-    @State private var showFlourish = ProcessInfo.processInfo.arguments.contains("-uiTesting")
-        ? false : LaunchOnce.consume()
+    @State private var showFlourish = TestHooks.isUITesting ? false : LaunchOnce.consume()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(TipJar.self) private var tipJar
     /// Supporters tap the title to toggle the rainbow look. Defaults on after a
@@ -40,17 +37,13 @@ struct ShoppingListView: View {
 
     private let ticker = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
-    private var cutoff: Date { now.addingTimeInterval(-gotTTL) }
-
     private var toGet: [GroceryItem] {
-        items.filter { !$0.isChecked }
+        ListLogic.toGet(items)
     }
 
     /// Checked items still within their TTL window, most-recently-got first.
     private var recentlyGot: [GroceryItem] {
-        items
-            .filter { $0.isChecked && ($0.checkedAt ?? .distantPast) > cutoff }
-            .sorted { ($0.checkedAt ?? .distantPast) > ($1.checkedAt ?? .distantPast) }
+        ListLogic.recentlyGot(items, now: now, ttl: gotTTL)
     }
 
     /// Nothing to get and nothing recently got — the empty state is showing.
@@ -74,8 +67,7 @@ struct ShoppingListView: View {
                                     name: item.name,
                                     emoji: Emoji.forName(item.name),
                                     isChecked: false,
-                                    isChecking: checkingIDs.contains(item.persistentModelID)
-                                        || pendingCommit.contains(item.persistentModelID),
+                                    isChecking: choreo.isInFlight(item.persistentModelID),
                                     isFlashing: item.persistentModelID == flashID,
                                     quantityText: quantityText(for: item),
                                     showsQuantity: true,
@@ -108,7 +100,7 @@ struct ShoppingListView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 4)
                         .padding(.bottom, 12)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.82), value: items.map(\.isChecked))
+                        .animation(.spring(response: 0.4, dampingFraction: 0.82).unlessUITesting, value: items.map(\.isChecked))
                     }
                 }
             }
@@ -129,14 +121,14 @@ struct ShoppingListView: View {
                 focused: $addBarFocused
             )
         }
-        .onAppear { now = .now; purgeExpired() }
-        .onReceive(ticker) { now = $0; purgeExpired() }
+        .onAppear { now = AppClock.now; purgeExpired() }
+        .onReceive(ticker) { _ in now = AppClock.now; purgeExpired() }
         .sheet(isPresented: $showingAbout) { AboutView() }
         // Full-screen so it covers the add bar too; only on a cold launch.
         .overlay {
             if showFlourish {
                 LaunchFlourish(reduceMotion: reduceMotion) {
-                    withAnimation(.easeOut(duration: 0.4)) { showFlourish = false }
+                    withAppAnimation(.easeOut(duration: 0.4)) { showFlourish = false }
                 }
                 .transition(.opacity)
             }
@@ -177,7 +169,7 @@ struct ShoppingListView: View {
         .contentShape(Rectangle())
         .onTapGesture {
             guard supporter else { return }
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { titleRainbow.toggle() }
+            withAppAnimation(.spring(response: 0.4, dampingFraction: 0.85)) { titleRainbow.toggle() }
             Haptics.soft()
         }
         .accessibilityElement(children: .ignore)
@@ -193,6 +185,9 @@ struct ShoppingListView: View {
             Text(toGet.count == 1 ? "1 to get" : "\(toGet.count) to get")
                 .font(Theme.body(15, weight: .medium))
                 .foregroundStyle(Theme.onPaperSoft)
+                // Stable handle for tests, so they don't have to query the
+                // display copy itself ("3 to get") to find the counter.
+                .accessibilityIdentifier("header.count")
             Button { showingAbout = true } label: {
                 Image(systemName: "info.circle")
                     .font(.system(size: 17))
@@ -220,6 +215,9 @@ struct ShoppingListView: View {
                 .font(Theme.body(13, weight: .semibold))
                 .foregroundStyle(Theme.onPaperSoft)
                 .accessibilityAddTraits(.isHeader)
+                // Distinct from the check circles' "Got it" *label*: tests use
+                // this to detect the section itself, unambiguously.
+                .accessibilityIdentifier("gotSection.header")
             Rectangle()
                 .fill(Theme.onPaperSoft.opacity(0.25))
                 .frame(height: 1)
@@ -289,7 +287,7 @@ struct ShoppingListView: View {
     /// Open/close a row's quantity editor. Opening for the first time seeds a
     /// smart default (e.g. milk → 500 ml) inferred from the item name.
     private func toggleQuantityEditor(_ item: GroceryItem) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+        withAppAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
             if expandedID == item.persistentModelID {
                 expandedID = nil
             } else {
@@ -311,7 +309,7 @@ struct ShoppingListView: View {
 
     private func stepQuantity(_ item: GroceryItem, up: Bool) {
         guard let u = item.unit else { return }
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
             item.quantity = Measure.step(item.quantity ?? Measure.defaultValue(for: u), unit: u, up: up)
         }
         Haptics.soft()
@@ -321,7 +319,7 @@ struct ShoppingListView: View {
         guard let u = item.unit else { return }
         let newValue = Measure.changeUnit(item.quantity ?? Measure.defaultValue(for: u),
                                           from: u, to: newUnit)
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
             item.quantity = newValue
             item.unit = newUnit
         }
@@ -332,14 +330,14 @@ struct ShoppingListView: View {
     /// keyboard shortcut past tapping +/- many times for a large quantity. The
     /// field only hands back values that already parsed sanely (see Measure.parse).
     private func setQuantity(_ item: GroceryItem, _ value: Double) {
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
+        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
             item.quantity = value
         }
         Haptics.soft()
     }
 
     private func clearQuantity(_ item: GroceryItem) {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+        withAppAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
             item.quantity = nil
             item.unitRaw = nil
             expandedID = nil
@@ -355,7 +353,7 @@ struct ShoppingListView: View {
         if expandedID == item.persistentModelID { expandedID = nil }
         if item.isChecked {
             // Un-check from the "Got it" section → straight back to the list.
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
+            withAppAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
                 item.isChecked = false
                 item.checkedAt = nil
             }
@@ -364,29 +362,23 @@ struct ShoppingListView: View {
         // Checking off: pop a spark burst in place. The row shows checked but
         // stays put — it only glides into "Got it" once *every* in-flight check
         // animation has finished, so the list never reorders under your taps
-        // when you're checking several things off at once.
+        // when you're checking several things off at once. (That batching, and
+        // the rapid-re-tap guard, live in CheckOffChoreography.)
         let id = item.persistentModelID
-        guard !checkingIDs.contains(id), !pendingCommit.contains(id) else { return }
-        checkingIDs.insert(id)
+        guard choreo.beginCheck(id) else { return }
         Haptics.success()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
-            checkingIDs.remove(id)
-            pendingCommit.insert(id)
-            // Nothing else still animating? Move everything that's waiting at once.
-            if checkingIDs.isEmpty { commitChecked() }
+        DispatchQueue.main.asyncAfter(deadline: .now() + TestHooks.checkCommitDelay) {
+            if let batch = choreo.finishBurst(id) { commitChecked(batch) }
         }
     }
 
     /// Glide every finished-but-waiting item into the "Got it" section together.
-    private func commitChecked() {
-        let ids = pendingCommit
-        guard !ids.isEmpty else { return }
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+    private func commitChecked(_ ids: Set<PersistentIdentifier>) {
+        withAppAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
             for item in items where ids.contains(item.persistentModelID) {
                 item.isChecked = true
-                item.checkedAt = .now
+                item.checkedAt = AppClock.now
             }
-            pendingCommit.removeAll()
         }
         // Just cleared the last thing to get? Celebrate the finished shop.
         if toGet.isEmpty { celebrateCleared() }
@@ -395,9 +387,9 @@ struct ShoppingListView: View {
     /// Play the one-shot "you got everything" celebration.
     private func celebrateCleared() {
         guard !celebrating else { return }
-        withAnimation(.easeOut(duration: 0.3)) { celebrating = true }
+        withAppAnimation(.easeOut(duration: 0.3)) { celebrating = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
-            withAnimation(.easeIn(duration: 0.4)) { celebrating = false }
+            withAppAnimation(.easeIn(duration: 0.4)) { celebrating = false }
         }
     }
 
@@ -405,7 +397,7 @@ struct ShoppingListView: View {
     private func clearGot() {
         let checked = items.filter { $0.isChecked }
         guard !checked.isEmpty else { return }
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+        withAppAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
             for item in checked { context.delete(item) }
         }
         Haptics.soft()
@@ -413,9 +405,9 @@ struct ShoppingListView: View {
 
     /// Remove checked items whose TTL has elapsed.
     private func purgeExpired() {
-        let expired = items.filter { $0.isChecked && ($0.checkedAt ?? .distantPast) <= cutoff }
+        let expired = ListLogic.expired(items, now: now, ttl: gotTTL)
         guard !expired.isEmpty else { return }
-        withAnimation(.easeInOut) {
+        withAppAnimation(.easeInOut) {
             for item in expired { context.delete(item) }
         }
     }
@@ -431,19 +423,19 @@ struct ShoppingListView: View {
         // Bump it back to the top of the to-get list (un-checking it if it was in
         // the "Got it" section) and give it a little flash instead.
         if let existing = items.first(where: { $0.name.lowercased() == key }) {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+            withAppAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 existing.isChecked = false
                 existing.checkedAt = nil
-                existing.createdAt = .now
+                existing.createdAt = AppClock.now
             }
             flash(existing)
         } else {
-            withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                context.insert(GroceryItem(name: name))
+            withAppAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                context.insert(GroceryItem(name: name, createdAt: AppClock.now))
             }
         }
 
-        rememberAdd(name)
+        KnownItems.rememberAdd(name, context: context, now: AppClock.now)
         Haptics.soft()
         draft = ""
     }
@@ -453,23 +445,11 @@ struct ShoppingListView: View {
         flashID = item.persistentModelID
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
             if flashID == item.persistentModelID {
-                withAnimation(.easeOut(duration: 0.3)) { flashID = nil }
+                withAppAnimation(.easeOut(duration: 0.3)) { flashID = nil }
             }
         }
     }
 
-    /// Upsert into the long-term memory that powers suggestions.
-    private func rememberAdd(_ name: String) {
-        let key = name.lowercased()
-        let descriptor = FetchDescriptor<KnownItem>(predicate: #Predicate { $0.key == key })
-        if let existing = try? context.fetch(descriptor).first {
-            existing.timesAdded += 1
-            existing.lastAddedAt = .now
-            existing.displayName = name
-        } else {
-            context.insert(KnownItem(key: key, displayName: name))
-        }
-    }
 }
 
 #Preview {

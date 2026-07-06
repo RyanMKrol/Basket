@@ -55,7 +55,26 @@ final class AccessibilityAuditTests: BasketUITestCase {
         launchApp()
         app.buttons["header.aboutButton"].tap()
         XCTAssertTrue(app.staticTexts["about.title"].waitForExistence(timeout: 3))
+        // The tip section opens as a loading spinner and settles async
+        // (unavailable or loaded, depending on whether StoreKit products
+        // resolve). Audit only the settled sheet: auditing mid-load made the
+        // result depend on a race, passing or failing by spinner timing.
+        waitForGone(app.descendants(matching: .any)["about.tipsLoading"], timeout: 8)
         try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+    }
+
+    /// The other themes share the layout but swap palette + fonts; sweep the
+    /// main list under each so a theme-specific regression can't hide behind
+    /// the default theme's passing audit.
+    func testMainListPassesAuditInEveryTheme() throws {
+        for theme in ["pixel", "dive", "cozy", "arcade"] {
+            app.launchEnvironment["BASKET_THEME"] = theme
+            launchApp()
+            XCTAssertTrue(app.buttons["itemRow.Milk"].waitForExistence(timeout: 5))
+            attachScreenshot("theme-\(theme)")
+            try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+            app.terminate()
+        }
     }
 
     /// Returning `true` marks an issue as handled (suppressed); `false` lets

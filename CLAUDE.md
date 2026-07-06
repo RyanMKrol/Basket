@@ -70,10 +70,14 @@ A change is done when, on the branch:
 - **Docs updated in the same commit:** keep `README.md` in step with behaviour.
 - **Generated files regenerated, not hand-edited** (see below).
 
-Both test commands above also run in CI (`.github/workflows/ci.yml`) on every
-push to `main` — the only backstop this repo has, since there's no PR review
-step (see the golden rule above). It's a best-practice safety net, not
-something Apple requires for App Store submission.
+Both test commands above also run in CI (`.github/workflows/ci.yml`) on
+**every branch push** — pre-merge signal for your worktree branch, post-merge
+backstop on `main` (there's no PR review step; see the golden rule above). On
+failure CI uploads the `.xcresult` (failure screenshots + audit logs) as an
+artifact, and a scheduled nightly `flake-hunt` job reruns every test up to 5
+times to surface only-fails-sometimes tests; the push-triggered job never
+retries. It's a best-practice safety net, not something Apple requires for
+App Store submission.
 
 ## Project map
 
@@ -88,8 +92,18 @@ something Apple requires for App Store submission.
   - `Services/` — `Emoji` (3-stage cascade), `SemanticEmoji` (NLEmbedding),
     `Suggestions`, `Formatting`, `Haptics`, `Measure` (smart units — classifies an
     item's measure type by its emoji glyph), `Seasonality` (time-of-day / holiday
-    flourishes), `TipJar` (StoreKit 2 consumable tip jar); **generated:**
-    `EmojiTable.swift`, `SuggestionDictionary.swift`.
+    flourishes), `TipJar` (StoreKit 2 consumable tip jar), `ListLogic`
+    (section partitioning + `CheckOffChoreography`, the check-off state
+    machine — pure and unit-tested), `KnownItems` (suggestion-memory upsert),
+    `TestHooks` + `AppClock` (the UI tests' determinism switchboard: launch
+    args/env for animations-off, frozen clock, temp store — **route any new
+    "current time" reads through `AppClock.now`** or they escape test
+    control, and prefer `withAppAnimation`/`.unlessUITesting` over bare
+    `withAnimation`/`.animation` so animations stay disable-able under test);
+    **generated:** `EmojiTable.swift`, `SuggestionDictionary.swift`.
+  - `Support/SharedFixtures.swift` — starter-item names, compiled into both
+    the app and `BasketUITests` (see project.yml) so seed and tests can't
+    drift.
   - `PrivacyInfo.xcprivacy` — Apple's required privacy manifest; declares the
     "required-reason" APIs the app touches (currently just `UserDefaults`, for
     `TipJar`'s tipped flag — reason `CA92.1`, own app's data only). App Store
@@ -99,18 +113,34 @@ something Apple requires for App Store submission.
     keyboard — see Apple's required-reason API list).
 - `StoreKit/Basket.storekit` — local StoreKit config for testing the tip jar.
   IAP can't be exercised by `build_run.sh` (it `simctl launch`es, bypassing the
-  scheme's StoreKit config); test purchases by **Running from Xcode** (the
-  generated scheme references the config) or via App Store Connect sandbox.
-  `TipJar.swift` imports iOS-only StoreKit, so it's kept **out** of the
-  `tools/main.swift` native-harness compile list.
-- `Tests/BasketTests.swift` — XCTest (logic).
+  scheme's StoreKit config); `Tests/TipJarTests.swift` covers product
+  *loading* via StoreKitTest's `SKTestSession` on this config — purchases
+  themselves can't run in a plain unit-test host (`purchase()` hangs without
+  a UI anchor; injected transactions need an .xctestplan-level StoreKit
+  config the generated scheme doesn't have — see the note in that file), so
+  test purchases by **Running from Xcode** (the generated scheme references
+  the config) or via App Store Connect sandbox. `TipJar.swift` imports
+  iOS-only StoreKit, so it's kept **out** of the `tools/main.swift`
+  native-harness compile list.
+- `Tests/` — XCTest: `BasketTests.swift` (pure logic), `ListLogicTests.swift`
+  (sectioning + check-off choreography), `ModelTests.swift` (SwiftData
+  in-memory: seed, suggestion-memory upsert), `TipJarTests.swift`
+  (StoreKitTest), `SnapshotTests.swift` (reference-image tests of the core
+  views; references in `Tests/__Snapshots__/`, recorded on iOS 26.x and
+  auto-skipped on other majors).
 - `UITests/` — XCUITest flow tests, driving a real simulator through the app's
-  actual UI (add/suggestions/check-off/quantity-edit/empty-state flows), each
-  step attaching a screenshot to the test report. `BasketUITestCase` (base
-  class) launches the app with `-uiTesting` (isolated in-memory SwiftData
-  store) and optionally `-uiTestingEmpty` (skip the starter items) — see
-  `BasketApp.init`. Wired into the `Basket` scheme's test action alongside
-  `BasketTests`, so `xcodebuild test -scheme Basket` runs both.
+  actual UI (add/suggestions/check-off/quantity-edit/empty-state/persistence
+  flows), each step attaching a screenshot to the test report.
+  `BasketUITestCase` (base class) launches the app with `-uiTesting`
+  (isolated in-memory SwiftData store), `-uiTestingDisableAnimations` +
+  `UITEST_FROZEN_DATE` (deterministic rendering — see `TestHooks`), and
+  optionally `-uiTestingEmpty` (skip the starter items) or `UITEST_STORE_URL`
+  (temp persistent store, for the relaunch tests) — see `BasketApp.init`.
+  Wired into the `Basket` scheme's test action alongside `BasketTests`, so
+  `xcodebuild test -scheme Basket` runs both. **House rule: never assert on
+  live UI state directly** — use the base class's bounded waits
+  (`waitForLabel` / `waitForValue` / `waitForGone` / `waitForToGetCount`),
+  and query by `accessibilityIdentifier`, never display copy.
   - `AccessibilityAuditTests.swift` — `performAccessibilityAudit()` over the
     main screens; `.contrast`/`.textClipped`/`.dynamicType` excluded with
     reasons documented inline (soft palette + colour emoji + deliberately

@@ -80,6 +80,12 @@ struct QuantityEditor: View {
                     .onChange(of: fieldFocused) { _, focused in
                         if !focused { commit() }
                     }
+                    // The editor can also be torn down while the keyboard is
+                    // still up (another row's tap closes this one — instantly,
+                    // when animations are off), and a removed view never gets
+                    // the focus-change callback. Without this, the typed
+                    // amount is silently dropped.
+                    .onDisappear(perform: commit)
                     .accessibilityLabel("Quantity, \(unitName(unit))")
                     .accessibilityIdentifier("quantityEditor.field")
                 if !unit.symbol.isEmpty {

@@ -16,9 +16,8 @@ final class AddItemFlowTests: BasketUITestCase {
 
         app.buttons["addBar.addButton"].tap()
 
-        let row = app.buttons["itemRow.Bananas"]
-        XCTAssertTrue(row.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["1 to get"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["itemRow.Bananas"].waitForExistence(timeout: 5))
+        waitForToGetCount(1)
         attachScreenshot("03-item-added")
     }
 
@@ -40,7 +39,7 @@ final class AddItemFlowTests: BasketUITestCase {
         app.buttons["addBar.addButton"].tap()
         attachScreenshot("01-readded")
 
-        XCTAssertTrue(app.staticTexts["1 to get"].waitForExistence(timeout: 3))
+        waitForToGetCount(1)
         XCTAssertEqual(app.buttons.matching(identifier: "itemRow.Bananas").count, 1)
     }
 
@@ -50,7 +49,7 @@ final class AddItemFlowTests: BasketUITestCase {
         launchApp()
 
         app.buttons["itemRow.check.Milk"].tap()
-        XCTAssertTrue(app.staticTexts["Got it"].waitForExistence(timeout: 3))
+        XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
         attachScreenshot("01-milk-checked-off")
 
         let field = app.textFields["addBar.textField"]
@@ -59,8 +58,8 @@ final class AddItemFlowTests: BasketUITestCase {
         app.buttons["addBar.addButton"].tap()
         attachScreenshot("02-readded-from-got-it")
 
-        XCTAssertTrue(app.staticTexts["4 to get"].waitForExistence(timeout: 3))
-        XCTAssertEqual(app.buttons["itemRow.check.Milk"].label, "Not got yet")
+        waitForToGetCount(4)
+        waitForLabel(app.buttons["itemRow.check.Milk"], equals: "Not got yet")
         XCTAssertEqual(app.buttons.matching(identifier: "itemRow.Milk").count, 1)
     }
 
@@ -81,11 +80,7 @@ final class AddItemFlowTests: BasketUITestCase {
         dismiss.tap()
         attachScreenshot("02-keyboard-dismissed")
 
-        let gone = XCTNSPredicateExpectation(
-            predicate: NSPredicate(format: "exists == false"),
-            object: dismiss
-        )
-        wait(for: [gone], timeout: 3)
-        XCTAssertEqual(field.value as? String, "Bananas")
+        waitForGone(dismiss)
+        waitForValue(field, equals: "Bananas")
     }
 }
