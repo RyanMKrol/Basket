@@ -3,13 +3,17 @@ name: CI
 # main is the shared integration point everyone merges their own worktree
 # branch into directly (see CLAUDE.md — this repo doesn't use pull requests),
 # so there's no review step to catch a broken build/test before it lands.
-# This is that catch, after the fact.
+# Running on every branch push gives each worktree branch a pre-merge signal;
+# the run on main after the merge is the final backstop. The nightly schedule
+# drives the flake-hunt job only (see below).
 on:
   push:
-    branches: [main]
+  schedule:
+    - cron: "17 3 * * *"
 
 jobs:
   test:
+    if: github.event_name == 'push'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,27 +24,32 @@ jobs:
       - name: Generate Xcode project
         run: xcodegen generate
 
-      # Simulator device names/availability vary by runner image, so resolve
-      # one instead of hardcoding a model that might not exist on it.
       - name: Resolve an available iPhone simulator
         id: sim
-        run: |
-          name=$(xcrun simctl list devices available \
-            | awk -F'[()]' '/iPhone/{print $1; exit}' \
-            | sed -E 's/^[[:space:]]+|[[:space:]]+$//g')
-          if [ -z "$name" ]; then
-            echo "No available iPhone simulator found on this runner." >&2
-            xcrun simctl list devices available >&2
-            exit 1
-          fi
-          echo "Resolved simulator: $name"
-          echo "name=$name" >> "$GITHUB_OUTPUT"
+        uses: ./.github/actions/resolve-simulator
 
-      - name: XCTest suite
+      # No retries here on purpose: a flaky test should fail the merge gate
+      # loudly, not be papered over. The nightly flake-hunt job is where
+      # repetition lives. Test timeouts turn a hung test (e.g. an await that
+      # never resolves) into a failure instead of a wedged runner.
+      - name: XCTest + XCUITest suite
         run: |
           xcodebuild test \
             -project Basket.xcodeproj -scheme Basket \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}"
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 600 \
+            -resultBundlePath TestResults.xcresult
+
+      # The failure screenshots and accessibility-audit logs live inside the
+      # result bundle — exactly what's needed to diagnose a UI-test failure,
+      # and gone with the runner unless uploaded.
+      - name: Upload result bundle on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults.xcresult
+          retention-days: 14
 
       # The same pure-logic Sources files, compiled and run natively on macOS —
       # fast, no simulator. See README.md → Tests.
@@ -53,3 +62,39 @@ jobs:
                  Sources/Services/Measure.swift Sources/Services/Seasonality.swift \
                  tools/main.swift -o /tmp/basket_check
           /tmp/basket_check
+
+  # Nightly: run every test up to 5 times, stopping at the first failure —
+  # a test that only fails sometimes is exactly what this surfaces. Kept out
+  # of the push-triggered job so the merge signal stays fast and strict.
+  flake-hunt:
+    if: github.event_name == 'schedule'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Resolve an available iPhone simulator
+        id: sim
+        uses: ./.github/actions/resolve-simulator
+
+      - name: Run the suite repeatedly to surface flakes
+        run: |
+          xcodebuild test \
+            -project Basket.xcodeproj -scheme Basket \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 600 \
+            -test-iterations 5 -run-tests-until-failure \
+            -resultBundlePath FlakeHunt.xcresult
+
+      - name: Upload result bundle on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flake-hunt-results
+          path: FlakeHunt.xcresult
+          retention-days: 14
