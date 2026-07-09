@@ -110,6 +110,10 @@ extension View {
 
 /// The app's background — switches treatment per theme.
 struct BasketBackground: View {
+    /// Injectable so snapshot tests can pin the time-of-day tint; production
+    /// uses the app clock. Mirrors `EmptyStateView.now`.
+    var now: Date = AppClock.now
+
     var body: some View {
         ZStack {
             Theme.paper
@@ -139,7 +143,7 @@ struct BasketBackground: View {
 
     @ViewBuilder private var timeTint: some View {
         if !Theme.current.isDark {
-            switch Seasonality.timeOfDay(AppClock.now) {
+            switch Seasonality.timeOfDay(now) {
             case .morning:   Color(red: 0.50, green: 0.62, blue: 0.85).opacity(0.05)
             case .afternoon: Color.clear
             case .evening:   Color(red: 0.96, green: 0.64, blue: 0.34).opacity(0.06)

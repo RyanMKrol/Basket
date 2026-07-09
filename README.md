@@ -147,7 +147,11 @@ top:
     stored in `Tests/__Snapshots__/`. Unlike the flow tests' screenshots
     (review aids), these are assertions — a visual regression fails the
     build. Recorded on iOS 26.x and skipped (`XCTSkip`) on other majors,
-    where OS text rendering would diff without a real regression.
+    where OS text rendering would diff without a real regression. The empty
+    state's background (`BasketBackground`) takes an injectable `now:` for
+    exactly the same reason as `EmptyStateView.now` — it renders a subtle
+    time-of-day tint, and without pinning it the snapshot flakes against
+    whatever the real wall clock says when the test happens to run.
 
 - `tools/main.swift` — the **same source files** run natively on macOS (fast, no
   simulator needed):

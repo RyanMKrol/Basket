@@ -13,14 +13,13 @@ import SwiftUI
 /// than fail: text rendering drifts between OS majors, and a diff there
 /// would be reporting the OS, not a regression.
 ///
-/// Even within 26.x, rendering can drift a hair between the exact Xcode/
-/// simulator build that recorded a reference and the one verifying it (this
-/// bit us once — CI's runner and a local machine both "26.x" but not
-/// byte-identical). Since CI's runner is the environment that actually gates
-/// merges and releases, re-record there rather than locally: trigger the
-/// `ci.yml` workflow manually (`workflow_dispatch`) with "Record snapshots"
-/// checked, which sets `BASKET_RECORD_SNAPSHOTS=1` and uploads the refreshed
-/// `Tests/__Snapshots__/` as a workflow artifact to download and commit.
+/// If a reference ever needs re-recording for a real reason (not just this
+/// runner-vs-that-runner drift), do it directly on CI rather than locally:
+/// trigger the `ci.yml` workflow manually (`workflow_dispatch`) with "Record
+/// snapshots" checked, which sets `BASKET_RECORD_SNAPSHOTS=1` and uploads the
+/// refreshed `Tests/__Snapshots__/` as a workflow artifact to download and
+/// commit — that way the reference matches the environment that actually
+/// gates merges and releases.
 final class SnapshotTests: XCTestCase {
     /// Matches `BasketUITestCase.frozenDate` — an ordinary July morning, so
     /// the empty state renders without a holiday accent, forever.
@@ -78,7 +77,7 @@ final class SnapshotTests: XCTestCase {
 
     func testEmptyState() {
         assertSnapshot(
-            of: ZStack { BasketBackground(); EmptyStateView(now: fixedNow) },
+            of: ZStack { BasketBackground(now: fixedNow); EmptyStateView(now: fixedNow) },
             as: .image(perceptualPrecision: 0.98, layout: .fixed(width: 390, height: 700))
         )
     }
