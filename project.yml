@@ -32,9 +32,12 @@ targets:
       properties:
         CFBundleDisplayName: Basket
         # App Store Connect requires a unique build number per upload for a
-        # given marketing version (CFBundleShortVersionString stays 1.0 until
-        # the next real release). Bump this each time a new archive is
-        # uploaded before the version is actually submitted.
+        # given marketing version. release.yml overrides this with the CI run
+        # number for every TestFlight upload, so this value only matters for
+        # local/Xcode builds. CFBundleShortVersionString (Sources/Info.plist)
+        # is separate — Apple closes a version's pre-release train once it's
+        # approved, so that has to be bumped by hand to open a new one before
+        # any further build can upload, even mid-cycle.
         CFBundleVersion: "2"
         # No networking, no custom crypto — declared here so App Store Connect
         # stops asking the export-compliance question on every submission.
