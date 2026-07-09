@@ -41,6 +41,14 @@ final class CheckOffFlowTests: BasketUITestCase {
     }
 
     /// Checking off every item plays the full-screen "All done!" celebration.
+    ///
+    /// In production the celebration auto-dismisses after ~1.6s, which made
+    /// this assert flaky: on a slow/contended runner the overlay could render
+    /// correctly (it's in the failure screenshot) yet appear and vanish in the
+    /// gap before XCUITest's first accessibility poll even landed, so every
+    /// `waitForExistence` snapshot missed it. `TestHooks.celebrationDuration`
+    /// now suppresses that auto-dismiss under UI testing, so the overlay stays
+    /// put and this observes a stable state instead of racing a timer.
     func testClearingWholeListShowsCelebration() {
         launchApp()
 

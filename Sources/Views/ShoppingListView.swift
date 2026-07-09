@@ -388,7 +388,11 @@ struct ShoppingListView: View {
     private func celebrateCleared() {
         guard !celebrating else { return }
         withAppAnimation(.easeOut(duration: 0.3)) { celebrating = true }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.6) {
+        // Auto-dismiss after the product-timed flourish. Suppressed under UI
+        // testing (nil) so the transient overlay can't vanish before the test
+        // observes it — see TestHooks.celebrationDuration.
+        guard let duration = TestHooks.celebrationDuration else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             withAppAnimation(.easeIn(duration: 0.4)) { celebrating = false }
         }
     }

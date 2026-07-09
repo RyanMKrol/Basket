@@ -23,6 +23,18 @@ enum TestHooks {
     /// so flows don't spend most of their wall-clock inside this pause.
     static var checkCommitDelay: TimeInterval { disableAnimations ? 0.05 : 0.55 }
 
+    /// How long the full-list "All done!" celebration stays up before it
+    /// auto-dismisses. Production plays it for 1.6s; under UI testing we
+    /// return nil to suppress the auto-dismiss entirely, so the overlay stays
+    /// put for the test to observe. Otherwise the celebration is a transient
+    /// 1.6s-of-real-time flourish that can appear and vanish in the gap before
+    /// a slow/contended runner's first accessibility poll even lands — the
+    /// overlay renders correctly (it's in the screenshot) yet every
+    /// `waitForExistence` snapshot misses it. A relaunched, fresh-store app
+    /// per test means a lingering overlay can't leak into another test, and
+    /// it's `allowsHitTesting(false)` so it never blocks a later tap.
+    static var celebrationDuration: TimeInterval? { isUITesting ? nil : 1.6 }
+
     /// The frozen wall-clock instant (ISO-8601, e.g. "2026-07-15T10:00:00Z")
     /// from the UITEST_FROZEN_DATE environment variable — so TTL cutoffs,
     /// seasonal flourishes, and the day-rotating empty-state line render the
