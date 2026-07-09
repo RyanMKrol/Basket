@@ -239,12 +239,26 @@ workflow — run it from the Actions tab when you want a new build on
 TestFlight. It re-runs the test suite as a gate, then archives, signs, and
 uploads straight to App Store Connect via `xcodebuild -exportArchive`
 (`method: app-store-connect`, `destination: upload` — no `altool`/Transporter/
-fastlane needed). `CFBundleVersion` is bumped to the run number on the
-runner only, not committed back to the repo.
+fastlane needed). `CFBundleVersion` (build number) is bumped to the run number
+on the runner only, not committed back to the repo. Every job first selects
+the newest Xcode 26 (`.github/actions/select-xcode`) so the archive builds
+against the iOS 26 SDK Apple requires, rather than whatever the runner's
+default Xcode happens to be.
+
+**Bumping the marketing version.** App Store Connect closes a version's
+pre-release train once that version is approved, so before uploading again you
+must raise `CFBundleShortVersionString` (e.g. `1.0` → `1.0.1`). Set it in
+**`project.yml`** (`targets.Basket.info.properties`), not in
+`Sources/Info.plist` — the plist is **generated** by `xcodegen generate` (run
+in every build and CI job) and any hand-edit is overwritten on the next
+generate, with unlisted keys reset to XcodeGen's defaults. After editing
+`project.yml`, run `xcodegen generate` and commit the regenerated plist too.
 
 Requires four repo secrets, generated once from an [App Store Connect API
 key](https://appstoreconnect.apple.com) (Users and Access → Integrations →
-App Store Connect API, role **App Manager**):
+App Store Connect API). Auto-managed signing for the archive needs the key's
+role to be **Admin** (App Manager can upload but can't create the distribution
+profile):
 
 - `APPSTORE_API_KEY` — the downloaded `.p8` key file's contents
 - `APPSTORE_KEY_ID` / `APPSTORE_ISSUER_ID` — shown alongside the key

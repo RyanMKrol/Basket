@@ -15,6 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Select Xcode 26
+        uses: ./.github/actions/select-xcode
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
@@ -46,6 +49,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Select Xcode 26
+        uses: ./.github/actions/select-xcode
 
       - name: Install XcodeGen
         run: brew install xcodegen

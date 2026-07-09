@@ -31,13 +31,18 @@ targets:
       path: Sources/Info.plist
       properties:
         CFBundleDisplayName: Basket
-        # App Store Connect requires a unique build number per upload for a
-        # given marketing version. release.yml overrides this with the CI run
-        # number for every TestFlight upload, so this value only matters for
-        # local/Xcode builds. CFBundleShortVersionString (Sources/Info.plist)
-        # is separate — Apple closes a version's pre-release train once it's
-        # approved, so that has to be bumped by hand to open a new one before
-        # any further build can upload, even mid-cycle.
+        # Marketing version. This is the source of truth: `xcodegen generate`
+        # regenerates Sources/Info.plist from these properties on every build
+        # (locally and in CI), so editing the plist directly is futile — the
+        # next generate resets any key not listed here to XcodeGen's default
+        # (CFBundleShortVersionString would fall back to "1.0"). Apple closes a
+        # version's pre-release train once it's approved, so bump this to open
+        # a new one before any further TestFlight/App Store upload, even
+        # mid-cycle.
+        CFBundleShortVersionString: "1.0.1"
+        # Build number — must be unique per upload for a given marketing
+        # version. release.yml overrides this with the CI run number for every
+        # TestFlight upload, so this literal only matters for local/Xcode builds.
         CFBundleVersion: "2"
         # No networking, no custom crypto — declared here so App Store Connect
         # stops asking the export-compliance question on every submission.
