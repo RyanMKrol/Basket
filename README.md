@@ -227,3 +227,26 @@ artifact. The merge-gating job never retries: a flaky test should fail
 loudly. Instead, a scheduled nightly `flake-hunt` job runs every test up to
 5 times (`-test-iterations 5 -run-tests-until-failure`) to surface the
 only-fails-sometimes kind before it wastes anyone's day.
+
+### Releasing to TestFlight
+
+`.github/workflows/release.yml` is a manually-triggered (`workflow_dispatch`)
+workflow — run it from the Actions tab when you want a new build on
+TestFlight. It re-runs the test suite as a gate, then archives, signs, and
+uploads straight to App Store Connect via `xcodebuild -exportArchive`
+(`method: app-store-connect`, `destination: upload` — no `altool`/Transporter/
+fastlane needed). `CFBundleVersion` is bumped to the run number on the
+runner only, not committed back to the repo.
+
+Requires four repo secrets, generated once from an [App Store Connect API
+key](https://appstoreconnect.apple.com) (Users and Access → Integrations →
+App Store Connect API, role **App Manager**):
+
+- `APPSTORE_API_KEY` — the downloaded `.p8` key file's contents
+- `APPSTORE_KEY_ID` / `APPSTORE_ISSUER_ID` — shown alongside the key
+- `APPSTORE_TEAM_ID` — Membership details on developer.apple.com (also the
+  `DEVELOPMENT_TEAM` value in your local, git-ignored `Signing.local.xcconfig`)
+
+Once uploaded, the build appears under App Store Connect → TestFlight after
+Apple finishes processing (~10-30 min) and is immediately installable by
+internal testers.
