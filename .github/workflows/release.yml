@@ -1,0 +1,132 @@
+name: Release
+
+# Manual only — an App Store Connect upload isn't something we want firing on
+# every push (this repo doesn't gate merges behind review; see CLAUDE.md), so
+# it's a deliberate, on-demand action instead of an `on: push` trigger.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  # Same gate as ci.yml's `test` job: a manual dispatch could target any ref,
+  # not just a freshly-merged main, so re-verify before spending an archive +
+  # upload on it rather than trusting whatever CI last said about this SHA.
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Resolve an available iPhone simulator
+        id: sim
+        uses: ./.github/actions/resolve-simulator
+
+      - name: XCTest + XCUITest suite
+        run: |
+          xcodebuild test \
+            -project Basket.xcodeproj -scheme Basket \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -test-timeouts-enabled YES -default-test-execution-time-allowance 600 \
+            -resultBundlePath TestResults.xcresult
+
+      - name: Upload result bundle on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults.xcresult
+          retention-days: 14
+
+  release:
+    needs: test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # CFBundleVersion just needs to be unique-per-upload for the current
+      # marketing version — the run number always increases, so it's a
+      # simple stand-in that needs no state committed back to the repo.
+      - name: Bump build number to this run's number
+        run: |
+          sed -i '' "s/CFBundleVersion: \".*\"/CFBundleVersion: \"${{ github.run_number }}\"/" project.yml
+
+      # Mirrors Signing.local.xcconfig (the git-ignored, machine-specific file
+      # a human's Xcode uses locally — see project.yml) so the committed
+      # project stays team-agnostic even on this runner.
+      - name: Write signing config
+        env:
+          APPSTORE_TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+        run: echo "DEVELOPMENT_TEAM = $APPSTORE_TEAM_ID" > Signing.local.xcconfig
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Write App Store Connect API key
+        env:
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+        run: |
+          mkdir -p ~/private_keys
+          echo "$APPSTORE_API_KEY" > ~/private_keys/AuthKey_$APPSTORE_KEY_ID.p8
+
+      # Not committed (unlike Signing.local.xcconfig, a Team ID isn't
+      # secret) — generated here purely to keep the repo team-agnostic.
+      - name: Write export options
+        env:
+          APPSTORE_TEAM_ID: ${{ secrets.APPSTORE_TEAM_ID }}
+        run: |
+          mkdir -p build
+          cat > build/ExportOptions.plist <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>destination</key>
+              <string>upload</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>teamID</key>
+              <string>$APPSTORE_TEAM_ID</string>
+          </dict>
+          </plist>
+          PLIST
+
+      - name: Archive
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcodebuild archive \
+            -project Basket.xcodeproj -scheme Basket \
+            -archivePath build/Basket.xcarchive \
+            -destination "generic/platform=iOS" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey_$APPSTORE_KEY_ID.p8 \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
+
+      # method=app-store-connect + destination=upload in ExportOptions.plist
+      # makes this step upload straight to App Store Connect — no separate
+      # altool/Transporter/fastlane step needed.
+      - name: Export & upload to App Store Connect
+        env:
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/Basket.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist build/ExportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath ~/private_keys/AuthKey_$APPSTORE_KEY_ID.p8 \
+            -authenticationKeyID "$APPSTORE_KEY_ID" \
+            -authenticationKeyIssuerID "$APPSTORE_ISSUER_ID"
