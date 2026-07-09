@@ -11,8 +11,16 @@ import SwiftUI
 /// References live in `Tests/__Snapshots__/` and were recorded on an
 /// iOS 26.x simulator. On any other major OS version the tests skip rather
 /// than fail: text rendering drifts between OS majors, and a diff there
-/// would be reporting the OS, not a regression. (Re-record with
-/// `SnapshotTesting.isRecording = true` or by deleting the references.)
+/// would be reporting the OS, not a regression.
+///
+/// Even within 26.x, rendering can drift a hair between the exact Xcode/
+/// simulator build that recorded a reference and the one verifying it (this
+/// bit us once — CI's runner and a local machine both "26.x" but not
+/// byte-identical). Since CI's runner is the environment that actually gates
+/// merges and releases, re-record there rather than locally: trigger the
+/// `ci.yml` workflow manually (`workflow_dispatch`) with "Record snapshots"
+/// checked, which sets `BASKET_RECORD_SNAPSHOTS=1` and uploads the refreshed
+/// `Tests/__Snapshots__/` as a workflow artifact to download and commit.
 final class SnapshotTests: XCTestCase {
     /// Matches `BasketUITestCase.frozenDate` — an ordinary July morning, so
     /// the empty state renders without a holiday accent, forever.
@@ -20,6 +28,9 @@ final class SnapshotTests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+        if ProcessInfo.processInfo.environment["BASKET_RECORD_SNAPSHOTS"] == "1" {
+            isRecording = true
+        }
         let version = UIDevice.current.systemVersion
         guard version.hasPrefix("26.") else {
             throw XCTSkip("References recorded on iOS 26.x; \(version) diffs on OS text rendering, not regressions.")
