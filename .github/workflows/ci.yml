@@ -5,11 +5,18 @@ name: CI
 # so there's no review step to catch a broken build/test before it lands.
 # Running on every branch push gives each worktree branch a pre-merge signal;
 # the run on main after the merge is the final backstop. The nightly schedule
-# drives the flake-hunt job only (see below).
+# drives the flake-hunt job only (see below). workflow_dispatch drives the
+# record-snapshots job only — see SnapshotTests.swift.
 on:
   push:
   schedule:
     - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      record_snapshots:
+        description: "Record snapshots (refresh Tests/__Snapshots__ on this runner instead of verifying against them)"
+        type: boolean
+        default: true
 
 jobs:
   test:
@@ -97,4 +104,43 @@ jobs:
         with:
           name: flake-hunt-results
           path: FlakeHunt.xcresult
+          retention-days: 14
+
+  # Re-records Tests/__Snapshots__ on THIS runner (see SnapshotTests.swift for
+  # why that matters) instead of verifying against the existing references.
+  # SnapshotTesting intentionally fails a recording run to flag it for review,
+  # so the artifact upload runs regardless of outcome — download it, eyeball
+  # the diff, and commit the refreshed PNGs.
+  record-snapshots:
+    if: github.event_name == 'workflow_dispatch' && inputs.record_snapshots
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Resolve an available iPhone simulator
+        id: sim
+        uses: ./.github/actions/resolve-simulator
+
+      - name: Record SnapshotTests references
+        env:
+          BASKET_RECORD_SNAPSHOTS: "1"
+        run: |
+          xcodebuild test \
+            -project Basket.xcodeproj -scheme Basket \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -only-testing:BasketTests/SnapshotTests \
+            -resultBundlePath RecordSnapshots.xcresult || true
+
+      - name: Upload refreshed references
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorded-snapshots
+          path: Tests/__Snapshots__
           retention-days: 14

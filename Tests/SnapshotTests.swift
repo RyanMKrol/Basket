@@ -11,8 +11,15 @@ import SwiftUI
 /// References live in `Tests/__Snapshots__/` and were recorded on an
 /// iOS 26.x simulator. On any other major OS version the tests skip rather
 /// than fail: text rendering drifts between OS majors, and a diff there
-/// would be reporting the OS, not a regression. (Re-record with
-/// `SnapshotTesting.isRecording = true` or by deleting the references.)
+/// would be reporting the OS, not a regression.
+///
+/// If a reference ever needs re-recording for a real reason (not just this
+/// runner-vs-that-runner drift), do it directly on CI rather than locally:
+/// trigger the `ci.yml` workflow manually (`workflow_dispatch`) with "Record
+/// snapshots" checked, which sets `BASKET_RECORD_SNAPSHOTS=1` and uploads the
+/// refreshed `Tests/__Snapshots__/` as a workflow artifact to download and
+/// commit — that way the reference matches the environment that actually
+/// gates merges and releases.
 final class SnapshotTests: XCTestCase {
     /// Matches `BasketUITestCase.frozenDate` — an ordinary July morning, so
     /// the empty state renders without a holiday accent, forever.
@@ -20,6 +27,9 @@ final class SnapshotTests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+        if ProcessInfo.processInfo.environment["BASKET_RECORD_SNAPSHOTS"] == "1" {
+            isRecording = true
+        }
         let version = UIDevice.current.systemVersion
         guard version.hasPrefix("26.") else {
             throw XCTSkip("References recorded on iOS 26.x; \(version) diffs on OS text rendering, not regressions.")
@@ -67,7 +77,7 @@ final class SnapshotTests: XCTestCase {
 
     func testEmptyState() {
         assertSnapshot(
-            of: ZStack { BasketBackground(); EmptyStateView(now: fixedNow) },
+            of: ZStack { BasketBackground(now: fixedNow); EmptyStateView(now: fixedNow) },
             as: .image(perceptualPrecision: 0.98, layout: .fixed(width: 390, height: 700))
         )
     }
