@@ -1,6 +1,7 @@
 import Foundation
 import StoreKit
 import Observation
+import os
 
 /// A small consumable "tip jar" over StoreKit 2 — three coffee-themed tips.
 /// Tipping is entirely optional and never unlocks anything; we just remember
@@ -32,6 +33,7 @@ final class TipJar {
     private(set) var hasTipped = UserDefaults.standard.bool(forKey: TipJar.tippedKey)
 
     private static let tippedKey = "basket.hasTipped"
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.ryankrol.basket", category: "TipJar")
     private var updatesTask: Task<Void, Never>?
 
     init() {
@@ -59,9 +61,21 @@ final class TipJar {
         state = .loading
         do {
             let fetched = try await Product.products(for: TipJar.ids).sorted { $0.price < $1.price }
+            if fetched.isEmpty {
+                // StoreKit reached Apple's servers fine and returned zero products for
+                // known ids — this is an App Store Connect config/approval issue
+                // (products not "Approved", or Agreements/Tax/Banking incomplete),
+                // not a network or client-side problem. Logged distinctly from the
+                // catch below so Console.app can tell the two apart.
+                Self.logger.error("Product.products(for:) returned zero products for ids: \(TipJar.ids.joined(separator: ", "), privacy: .public)")
+            } else if fetched.count < TipJar.ids.count {
+                let missing = Set(TipJar.ids).subtracting(fetched.map(\.id))
+                Self.logger.error("Product.products(for:) returned only \(fetched.count, privacy: .public)/\(TipJar.ids.count, privacy: .public) products; missing: \(missing.joined(separator: ", "), privacy: .public)")
+            }
             products = fetched
             state = fetched.isEmpty ? .unavailable : .loaded
         } catch {
+            Self.logger.error("Product.products(for:) threw: \(error.localizedDescription, privacy: .public)")
             state = .unavailable
         }
     }
