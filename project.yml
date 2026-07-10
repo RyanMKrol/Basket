@@ -27,6 +27,17 @@ targets:
     platform: iOS
     sources:
       - Sources
+    # App Group: the SwiftData store lives in this shared container so the
+    # (future) Siri App Intent and widget extension read the same list. On the
+    # simulator the entitlement alone is enough; a real-device/TestFlight build
+    # also needs the App Groups capability enabled for this App ID (Automatic
+    # signing registers it on the first device build). XcodeGen generates the
+    # .entitlements plist from these properties, like it does Info.plist.
+    entitlements:
+      path: Sources/Basket.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.ryankrol.basket
     info:
       path: Sources/Info.plist
       properties:
