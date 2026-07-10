@@ -184,3 +184,69 @@ Requires Xcode's CLI tools + XcodeGen (`brew install xcodegen`) and an iOS
 **simulator runtime matching the SDK** (else `xcodebuild test` and asset-catalog
 / app-icon compilation fail with "No simulator runtime version … available" —
 fix with `xcodebuild -downloadPlatform iOS`).
+
+## Autonomous build harness (`.harness/`)
+
+This repo also carries an **autonomous implementation harness** — a single
+sequential shell loop (`.harness/scripts/loop.sh`, run via
+`.harness/scripts/supervise.sh`) that builds the `.harness/tracking/TASKS.json`
+backlog one fully-verified task at a time, gated on green GitHub CI.
+[`.harness/docs/HARNESS.md`](./.harness/docs/HARNESS.md) is the authoritative
+design; `.harness/CLAUDE.md` (the authoring mandate) loads automatically when
+working inside `.harness/`. The harness's flow **matches this repo's golden
+rule** — the loop builds in its own isolation worktree (`../basket-loop`) on a
+`tNNN` branch and merges to `main` itself on green CI, exactly like any other
+worktree task.
+
+Harness-specific rules that apply to ALL work in this repo:
+
+### Backlog tasks carry facets (difficulty auto-tuning)
+
+Every BUILDABLE task you add to `.harness/tracking/TASKS.json` MUST carry a
+`"facets": { "layer": …, "workType": …, "risk": [...] }` object, with values
+chosen ONLY from `.harness/config/facets.json`'s controlled vocabulary (use the
+task's `scope` paths to pick the `layer`). The loop's policy reads facets to
+choose each task's STARTING model/effort from escalation history; the
+cold-start prior is the `harness.env` `MODEL`/`EFFORT` floor. **Never add
+per-task `model`/`effort` fields — the loop ignores them.** `needs-human`
+(gated) tasks are carved out — they get NO facets. Author through the
+`/implementation-harness-add-to-backlog` skill when available; the rule holds
+even on a direct `TASKS.json` edit.
+
+### The loop is the sole writer of harness task status
+
+Under the autonomous loop, only the LOOP flips a task's `"status"` in
+`TASKS.json` (in a follow-up commit, once the build clears the structural
+checks and audit gate). Never set `"status"` yourself while working on a
+harness-driven task — doing so trips the scope gate. Working BY HAND (no loop
+running), set the task's `"status": "done"` in the same commit as the work,
+like any other doc update.
+
+### Every harness attempt is fully cold
+
+The harness measures whether a model can build a task *from the spec alone, in
+one cold pass* — that signal drives difficulty calibration and the audit gate.
+Never read `worklog/TNNN.md` as guidance and never resume a previous attempt's
+partial work; build only from the task's `spec` (`## Do` / `## Done when`),
+`scope`, and `verify`. A task that can't be done in one cold pass is mis-sized
+and should be split, not resumed.
+
+### Record trade-offs & limitations
+
+When a change introduces or reveals a design trade-off or known limitation, add
+a row to `.harness/custom/docs/LIMITATIONS.md` **in the same commit** — what it
+is, why, the impact, and when to revisit. (Use the `custom/` overlay, never the
+plugin-owned `.harness/docs/LIMITATIONS.md`, which is refreshed on upgrade.)
+
+### Respect the needs-human gate
+
+Tasks with `"gate": "needs-human"` need a one-time human step (credentials,
+provisioning, spending real money). Prepare everything around it, record
+`failed:blocked`, never auto-complete it.
+
+### Customize in `.harness/custom/`, not in place
+
+The harness's prose files (`.harness/CLAUDE.md`, `.harness/README.md`,
+`.harness/docs/**`) are plugin-owned and refreshed by
+`implementation-harness:implementation-harness-upgrade` — project-specific
+additions go in the matching file under `.harness/custom/`.
