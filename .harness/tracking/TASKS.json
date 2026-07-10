@@ -1,5 +1,5 @@
 {
-  "_doc": "Implementation backlog for the single sequential Ralph loop. SOURCE OF TRUTH for done/not-done + dependency order; docs/HARNESS.md \u00a78.1 = schema. Each task's `do` + `done-when` live in a per-task Markdown spec at the `spec` path (.harness/tasks/TNNN.md, sections '## Do' / '## Done when'); every BUILDABLE task carries `facets` (difficulty auto-tuning) \u2014 a needs-human gated task is carved out and carries none. `gate` is `null` (buildable) or `needs-human` (a one-time human step). To require a human to review a deliverable BEFORE dependents proceed, author the work as a normal buildable task plus a separate `needs-human` review task that dependsOn it, and point the dependents at the review task.",
+  "_doc": "Implementation backlog for the single sequential Ralph loop. SOURCE OF TRUTH for done/not-done + dependency order; docs/HARNESS.md §8.1 = schema. Each task's `do` + `done-when` live in a per-task Markdown spec at the `spec` path (.harness/tasks/TNNN.md, sections '## Do' / '## Done when'); every BUILDABLE task carries `facets` (difficulty auto-tuning) — a needs-human gated task is carved out and carries none. `gate` is `null` (buildable) or `needs-human` (a one-time human step). To require a human to review a deliverable BEFORE dependents proceed, author the work as a normal buildable task plus a separate `needs-human` review task that dependsOn it, and point the dependents at the review task.",
   "version": 1,
   "tasks": [
     {
@@ -583,7 +583,7 @@
     {
       "id": "T026",
       "title": "App Group + shared SwiftData container (foundation for Siri/widgets)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": "needs-human",
       "tags": [
