@@ -268,3 +268,16 @@ profile):
 Once uploaded, the build appears under App Store Connect → TestFlight after
 Apple finishes processing (~10-30 min) and is immediately installable by
 internal testers.
+
+## Autonomous backlog (implementation harness)
+
+The repo carries an autonomous build harness in [`.harness/`](./.harness/README.md):
+a sequential loop that builds `.harness/tracking/TASKS.json` one fully-verified
+task at a time, gated on the same CI suite above. Current backlog status:
+
+| Task | Title | Status |
+|------|-------|--------|
+| T001 | Fix tautological Seasonality assertion in the native harness | pending |
+
+Preview with `DRY_RUN=1 .harness/scripts/loop.sh`; run with
+`.harness/scripts/supervise.sh` (from a real terminal).
