@@ -71,6 +71,9 @@ case "$GIT_COMMON" in /*) ;; *) GIT_COMMON="$ROOT/$GIT_COMMON" ;; esac   # make 
 # Shared mkdir-based repo lock (acquire_lock/release_lock) — sourced so its path derivation can
 # never drift from other scripts (mark-*.sh, consolidate-ideas.sh) that coordinate with this loop.
 . "$SCRIPT_DIR/repo-lock.sh"
+# Shared scope-matching (normalize_scope_prefix + scope_match) — the SINGLE implementation, also sourced
+# by loop.in-place.sh + check-task-scope.sh so the gate and the linter can never disagree.
+. "$SCRIPT_DIR/scope-lib.sh"
 
 NAME="$(basename "$ROOT")"                       # repo dir name → worktree + lock naming
 MODEL="${MODEL:-claude-haiku-4-5}"              # COLD-START FLOOR — the cheapest tier; the policy tunes UP from here (pin the full id; the bare alias drifts)
@@ -93,6 +96,7 @@ LOOP_WT="${LOOP_WT:-$(dirname "$ROOT")/${NAME}-loop}"   # the loop's own isolati
 SYNC_PRIMARY_ON_DONE="${SYNC_PRIMARY_ON_DONE:-1}"   # when the loop finishes (backlog drained), leave the PRIMARY checkout on the latest main (safe/ff-only, skips a dirty tree); 0=never touch the primary checkout
 CLAUDE_BIN="${CLAUDE_BIN:-claude}"
 CLAUDE_FLAGS="${CLAUDE_FLAGS:---dangerously-skip-permissions}"
+PRINT_PROMPT="${PRINT_PROMPT:-1}"                # 1 = echo each prompt (the running phase only: build OR audit) to the console before invoking Claude; 0 = silence
 # Rate-limit handling: poll + resume the SAME task on a usage/session limit (don't exit), so we
 # resume shortly after the quota resets rather than waiting out supervise's full cadence. A PARSED
 # reset time is honoured directly (+ RL_BUFFER cushion, capped at RL_BACKOFF_MAX); when nothing
@@ -192,7 +196,7 @@ POLICY_MINN="$(blob config/facets.json | jq -r '.policy.minN // 6' 2>/dev/null)"
 POLICY_EXPLORE_PM="$(blob config/facets.json | jq -r '.policy.exploreProbabilityPM // 0' 2>/dev/null)"; POLICY_EXPLORE_PM="${POLICY_EXPLORE_PM:-0}"
 # Periodic recheck of a rejected exploration rung: rows of other cell activity that must land since
 # that rung's last touch before it's offered again (batch-boundary judgment — see policy.jq header).
-POLICY_EXPLORE_COOLDOWN_N="$(blob config/facets.json | jq -r '.policy.exploreCooldownN // 40' 2>/dev/null)"; POLICY_EXPLORE_COOLDOWN_N="${POLICY_EXPLORE_COOLDOWN_N:-40}"
+POLICY_EXPLORE_COOLDOWN_N="$(blob config/facets.json | jq -r '.policy.exploreCooldownN // 20' 2>/dev/null)"; POLICY_EXPLORE_COOLDOWN_N="${POLICY_EXPLORE_COOLDOWN_N:-20}"
 # Verification-aware calibration knobs (the blocking audit gate — designs/audit-verification.md §4.6). Read from origin/main via blob.
 AUDIT_START_N="$(blob config/facets.json | jq -r '.policy.auditStartN // 3' 2>/dev/null)"; AUDIT_START_N="${AUDIT_START_N:-3}"
 AUDIT_FLOOR_N="$(blob config/facets.json | jq -r '.policy.auditFloorN // 8' 2>/dev/null)"; AUDIT_FLOOR_N="${AUDIT_FLOOR_N:-8}"
@@ -265,8 +269,8 @@ pick_base() {
   if [ -z "$layer" ] || [ -z "$wt" ] || [ -z "$tiers" ] || [ -z "$rows" ] || [ "$rows" = "[]" ]; then printf '%s 0' "$cold"; return; fi
   local mf risk; mf="$(blob tracking/manual-fail.json)"; [ -n "$mf" ] || mf='{}'
   risk="$(tj -c --arg id "$id" '.tasks[]|select(.id==$id)|.facets.risk // []')"; [ -n "$risk" ] || risk='[]'
-  local chosen pm exploreIdx
-  read -r chosen pm exploreIdx <<<"$(jq -rn --argjson rows "$rows" --argjson tiers "$tiers" --arg layer "$layer" --arg wt "$wt" \
+  local chosen pm exploreIdx _erem   # _erem = policy.jq's 4th field (dashboard cooldown state) — unused here
+  read -r chosen pm exploreIdx _erem <<<"$(jq -rn --argjson rows "$rows" --argjson tiers "$tiers" --arg layer "$layer" --arg wt "$wt" \
      --argjson floor "$POLICY_FLOOR" --argjson minN "$POLICY_MINN" --argjson coldIdx "$cold" \
      --argjson manualFail "$mf" --argjson risk "$risk" --argjson explorePM "$POLICY_EXPLORE_PM" --argjson exploreCooldownN "$POLICY_EXPLORE_COOLDOWN_N" \
      --argjson auditCount -1 --argjson auditStartN "$AUDIT_START_N" --argjson auditFloorN "$AUDIT_FLOOR_N" --argjson auditFloorPM "$AUDIT_FLOOR_PM" \
@@ -327,6 +331,17 @@ flush_failures() {
   : >"$FAILURES_BUF"
 }
 
+# status_done_on_remote <id> — true iff origin/main's TASKS.json ALREADY records $id as done. Used to
+# VERIFY a status flip actually persisted: a lost flip (a push that never landed) is silently reverted
+# by the next cold rebuild off origin/main, orphaning the task on main as pending-though-done — the
+# exact trigger for the idle-verdict stall. Best-effort read; any gap → false, so the caller retries.
+status_done_on_remote() {
+  local id="$1"
+  git -C "$ROOT" fetch origin --quiet 2>/dev/null || true
+  git -C "$ROOT" show "origin/main:.harness/tracking/TASKS.json" 2>/dev/null \
+    | jq -e --arg id "$id" 'any(.tasks[]; .id==$id and .status=="done")' >/dev/null 2>&1
+}
+
 # record_outcome <id> <blocked> [reason] — append an outcome row to the ledger ON MAIN, committed
 # via a detached worktree (mirrors block_task). Used for the SUCCESS case; block_task folds the row
 # into its own commit. Forward-only + best-effort — never fails the caller.
@@ -356,7 +371,20 @@ record_outcome() {
       fi
     fi
     git -C "$LOOP_WT" commit -q -m "$id: record outcome [skip ci]" 2>/dev/null || true
-    git -C "$LOOP_WT" push --quiet origin HEAD:main 2>/dev/null || log "WARN: couldn't push outcome for $id"
+    if [ "$blocked" = false ]; then
+      # Persist-or-shout: on the SUCCESS flip, VERIFY status=done actually reached origin/main; retry
+      # the push once; if it STILL hasn't landed, log an ERROR so a human sees the divergence rather
+      # than it silently re-appearing as pending next cold rebuild (the idle-stall precondition).
+      local _persisted=0 _try
+      for _try in 1 2; do
+        git -C "$LOOP_WT" push --quiet origin HEAD:main 2>/dev/null || true
+        if status_done_on_remote "$id"; then _persisted=1; break; fi
+        sleep 1
+      done
+      [ "$_persisted" = 1 ] || log "ERROR: status=done for $id did NOT persist to main after 2 tries — it may re-appear as pending (idle-stall risk); mark it done by hand if so."
+    else
+      git -C "$LOOP_WT" push --quiet origin HEAD:main 2>/dev/null || log "WARN: couldn't push outcome for $id"
+    fi
     remove_wt
   fi
 }
@@ -749,6 +777,20 @@ EOF
   printf 'You may change ONLY these files:\n'
   if [ -n "$sc" ]; then printf '%s\n' "$sc" | sed 's/^/  - /'; else printf '  (none declared — keep the diff minimal)\n'; fi
   printf '%s\n' 'PLUS you may always add/change TEST files and your own .harness/worklog/<TASK>.md. Touching ANY OTHER file — including .harness/tracking/TASKS.json (the loop owns it) or a doc not listed above — AUTO-FAILS this task. If you genuinely need a file that is not listed, do NOT edit it: record `failed:blocked <TASK> needs <file> (out of scope)` so a human can fix the scope.'
+  # If the task is marked expectsTest, make writing a test an EXPLICIT REQUIREMENT here. structural_checks
+  # already AUTO-FAILS a diff that changes no test file (STRUCT_FAIL_KIND=test-missing), but nothing else
+  # told the builder — so it would fail blind, and (since the SCOPE block frames tests as merely
+  # "allowed") a cost-minimizing builder is if anything nudged to skip them. State it as mandatory and
+  # tie it back to scope so there's no ambiguity that tests belong in this task.
+  if tj -e --arg id "$tid" '.tasks[]|select(.id==$id)|.expectsTest==true' >/dev/null 2>&1; then
+    printf '\n--- TESTS — REQUIRED for this task (it is marked expectsTest) ---\n'
+    printf 'You MUST add or change at least one TEST file that exercises the behaviour in "## Do" and pins the\n'
+    printf '"## Done when" acceptance items. Test files are ALWAYS in scope (see SCOPE above) — so this is a\n'
+    printf 'REQUIREMENT of this task, not a scope exception you can skip. A diff that changes NO test file\n'
+    printf 'AUTO-FAILS this task (structural gate: test-missing); a green run against the EXISTING tests only\n'
+    printf 'is NOT sufficient. Write the test to what "## Done when" says it must assert, and keep it hermetic\n'
+    printf '(a scratch/throwaway resource — never the real prod DB, live services, or real data).\n'
+  fi
   _custom_preamble build
   visual_verify_block "$tid"
   # Append the task's Markdown spec (## Do / ## Done when) verbatim — read from the git ref. The
@@ -865,6 +907,21 @@ run_claude() {
   local out="$LOOP_WT/.harness/worklog/.claude-out.${phase}"          # reassembled plain text — unchanged meaning
   local rc
   local -a eff=(); [ -n "$effort" ] && eff=(--effort "$effort")   # some models (e.g. Haiku) have no effort param — omit the flag entirely
+  # Echo the EXACT prompt handed to Claude (build or audit), wrapped in a heavy banner, so a human
+  # watching the console can read what the agent was actually asked. To stderr (never into claude's
+  # stdin/stdout pipeline below). PRINT_PROMPT=0 in harness.env silences it.
+  if [ "${PRINT_PROMPT:-1}" = 1 ]; then
+    local _ph _meta _bar='================================================================================'
+    _ph="$(printf '%s' "$phase" | tr '[:lower:]' '[:upper:]')"
+    # Repeat the model/effort on BOTH the opening and END lines so a human scrolling the console
+    # doesn't have to jump back up past the prompt to see which tier ran. Build banners also show the
+    # escalation position (rung/attempt — WHY this tier); the audit runs at the fixed AUDITOR tier,
+    # not a ladder rung, so rung/attempt is meaningless there and omitted.
+    _meta="($model${effort:+ / $effort})"
+    [ "$phase" = build ] && _meta="$_meta  ·  rung ${cur_rung:-0} · attempt $(( ${cur_attempts:-0} + 1 ))"
+    { printf '\n%s\n=====  %s PROMPT  —  task %s  %s\n%s\n%s\n%s\n=====  END %s PROMPT  —  task %s  %s\n%s\n\n' \
+        "$_bar" "$_ph" "${cur_task:-?}" "$_meta" "$_bar" "$pr" "$_bar" "$_ph" "${cur_task:-?}" "$_meta" "$_bar"; } >&2
+  fi
   set +e
   # `${arr[@]+"${arr[@]}"}` (guard, NOT a bare "${arr[@]}") — on bash < 4.4 (macOS ships 3.2) expanding a
   # declared-but-EMPTY array under `set -u` throws `unbound variable` and crashes run_claude BEFORE claude
@@ -889,47 +946,10 @@ run_claude() {
 # green and BEFORE the fast-forward to main, so unaudited work never reaches main. Cold-ness is
 # enforced by tearing the branch/worktree down on every capability failure (see the done/fail paths).
 
-# normalize_scope_prefix <raw> — strip a trailing `/`, `/**`, or `/*` so a directory-style glob
-# becomes a bare prefix. Shared by `scope` entries (structural_checks) and SCOPE_EXEMPT_GLOBS
-# (in_scope_exempt) — keep both on this ONE implementation; they drifted apart once already.
-normalize_scope_prefix() {
-  local s="$1"
-  s="${s%/}"; s="${s%/\*\*}"; s="${s%/\*}"
-  printf '%s' "$s"
-}
-
-# scope_match <file> <scope-entry> — true if <file> is within <scope-entry>. THE single scope-matching
-# implementation, shared by `scope` (structural_checks) and SCOPE_EXEMPT_GLOBS (in_scope_exempt), and
-# mirrored verbatim in loop.in-place.sh + check-task-scope.sh — keep all four identical. Supports:
-#   • an exact path                          (src/auth/session.ts)
-#   • a directory prefix, recursive          (dir/  dir/**  dir/*  → everything under dir)
-#   • a single-level extension glob          (dir/*.tsx → any *.tsx DIRECTLY in dir, not nested)
-# A double-quoted ${f#"$s"/} treats `*` as a literal, so an extension glob like dir/*.tsx used to match
-# NOTHING (permanent scope-creep). The single-level case below matches with an UNQUOTED case pattern —
-# which does expand `*`/`?`/`[…]` — engaged ONLY when a metacharacter survives normalization, so every
-# entry that worked before (no residual metachar) still takes the identical exact/prefix path.
-scope_match() {
-  local f="$1" s d1 d2
-  s="$(normalize_scope_prefix "$2")"
-  case "$s" in
-    *[*?[]*)
-      # residual glob metacharacter → single-level glob: case-glob match, then require equal directory
-      # depth so `*` can't span a `/` (an unquoted case `*` otherwise matches across directories).
-      case "$f" in
-        $s)
-          d1="${f//[!\/]/}"; d2="${s//[!\/]/}"
-          [ "${#d1}" -eq "${#d2}" ] && return 0
-          ;;
-      esac
-      return 1
-      ;;
-    *)
-      [ "$f" = "$s" ] && return 0
-      [ "${f#"$s"/}" != "$f" ] && return 0
-      return 1
-      ;;
-  esac
-}
+# normalize_scope_prefix + scope_match live in the shared scope-lib.sh (sourced at the top of this
+# script, next to repo-lock.sh) — the SINGLE implementation shared with loop.in-place.sh and
+# check-task-scope.sh. It used to be duplicated verbatim in all three and drifted/re-broke; don't inline
+# it here again (scope-match.test.sh fails if any of the three grows its own copy).
 
 # in_scope_exempt <file> — true if <file> matches one of SCOPE_EXEMPT_GLOBS (space-separated
 # repo-relative path entries, same matching rule as `scope` itself via scope_match).
@@ -1151,6 +1171,7 @@ acquire_lock
 trap 'release_lock' EXIT INT TERM
 
 cur_task=""; cur_attempts=0; cur_rung=0; cur_base=0; cur_explored=0; cur_verification="ci-only"; hb_started=""
+idle_task=""; idle_count=0   # consecutive-idle guard: a task reporting idle repeatedly (its status won't persist) is BLOCKED, never spun on
 
 # ─── Resume an interrupted mid-climb from a leftover heartbeat ──────────────────────────────────
 # See the heartbeat block above for why a leftover file here means a genuine interruption. Bounded
@@ -1361,7 +1382,25 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
     failed:soft)    log "agent soft-failed $rtask: ${extra:-} — tearing down for a COLD retry."; cleanup_task "$branch"; record_failure "$task" "agent-soft-fail" "${extra:-}"; bump "$task" ;;
     failed:blocked) log "agent reports blocker on $rtask: ${extra:-}"; record_failure "$task" "agent-blocked" "${extra:-}"; block_task "$task" "agent reported failed:blocked — ${extra:-}" ;;
     waiting)        log "waiting on deps for $rtask: ${extra:-}"; sleep "$WAIT_SECONDS" ;;
-    idle)           log "agent reports idle — nothing to do"; run_hook drained idle; board; sync_primary_checkout; exit 0 ;;
+    idle)
+      # A per-task "nothing to do" — NOT a drained backlog. The agent cold-read origin/main and found
+      # THIS task's Done-when already met: its work reached main in a prior attempt, but the status flip
+      # was lost (pending-though-done divergence). Reconcile the ONE task (re-do the lost status=done
+      # flip) and CONTINUE — the genuine "backlog drained" exit is the select_task-empty path at the top
+      # of the loop, never here. GUARD: if the same task reports idle repeatedly the reconcile itself
+      # isn't persisting, so BLOCK after 2 to surface it to a human instead of spinning forever (and
+      # starving every other ready task, which is exactly the bug this handler replaces).
+      if [ "$task" = "$idle_task" ]; then idle_count=$((idle_count + 1)); else idle_task="$task"; idle_count=1; fi
+      if [ "$idle_count" -ge 2 ]; then
+        log "agent reported idle on $task ${idle_count}× — its done status isn't persisting; BLOCKING for a human."
+        block_task "$task" "repeated idle: work appears on main but status never persisted to done — needs a human to mark it done or fix the divergence"
+        idle_task=""; idle_count=0
+      else
+        log "agent reports idle on $task — Done-when already met on main; reconciling status=done and continuing."
+        record_outcome "$task" false
+        heartbeat_clear; cur_task=""; cur_attempts=0; cur_rung=0; cur_base=0; cur_explored=0
+      fi
+      ;;
     *)              log "unrecognized result '$status' — backing off"; sleep "$WAIT_SECONDS" ;;
   esac
   board

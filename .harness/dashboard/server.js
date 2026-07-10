@@ -160,6 +160,8 @@ function loadState() {
       waiting: buckets.waiting.length,
       needsHuman: buckets.needsHuman.length,
       failedPendingReview: buckets.failedPendingReview.length,
+      closedFailed: buckets.closedFailed.length,
+      donePendingReview: buckets.donePendingReview.length,
       done: buckets.done.length,
     },
     buckets,
@@ -208,6 +210,13 @@ function runPolicy(argPairs) {
   const n = Number(String(out).trim().split(/\s+/)[0]);
   return Number.isFinite(n) ? n : null;
 }
+// runPolicyRaw — like runPolicy but returns the FULL parsed token array (TIER mode is
+// "chosenIdx explorePM exploreIdx remain"), so the internals view can show the downward-exploration state.
+function runPolicyRaw(argPairs) {
+  const args = ['-rn', '-f', POLICY_JQ];
+  for (const [flag, name, val] of argPairs) args.push(flag, name, val);
+  return String(execFileSync('jq', args, { encoding: 'utf8', timeout: 5000 })).trim().split(/\s+/).map(Number);
+}
 
 function buildHarnessState() {
   const facets = readJson(FACETS_PATH, {});
@@ -219,7 +228,7 @@ function buildHarnessState() {
   const auditFloorN = pol.auditFloorN != null ? pol.auditFloorN : 8;
   const auditFloorPM = Math.round((pol.auditFloor != null ? pol.auditFloor : 0.10) * 1000);
   const explorePM = pol.exploreProbabilityPM != null ? pol.exploreProbabilityPM : 0;
-  const exploreCooldownN = pol.exploreCooldownN != null ? pol.exploreCooldownN : 40;
+  const exploreCooldownN = pol.exploreCooldownN != null ? pol.exploreCooldownN : 20;
 
   const key = mtimeKey([OUTCOMES_PATH, FAILURES_PATH, FACETS_PATH, OVERLAY_PATHS.manualFail, TASKS_PATH]);
   if (_harnessCache.key === key && _harnessCache.value) return _harnessCache.value;
@@ -237,7 +246,7 @@ function buildHarnessState() {
     const rowsJson = JSON.stringify(outcomes), ladderJson = JSON.stringify(ladder), mfJson = JSON.stringify(manualFail);
     for (const c of cells) {
       try {
-        const chosenIdx = runPolicy([
+        const parts = runPolicyRaw([
           ['--argjson', 'rows', rowsJson], ['--argjson', 'tiers', ladderJson],
           ['--arg', 'layer', c.layer], ['--arg', 'wt', c.workType],
           ['--argjson', 'floor', String(floor)], ['--argjson', 'minN', String(minN)], ['--argjson', 'coldIdx', String(coldIdx)],
@@ -246,6 +255,12 @@ function buildHarnessState() {
           ['--argjson', 'auditFloorN', String(auditFloorN)], ['--argjson', 'auditFloorPM', String(auditFloorPM)],
           ['--argjson', 'explorePM', String(explorePM)], ['--argjson', 'exploreCooldownN', String(exploreCooldownN)],
         ]);
+        const chosenIdx = Number.isFinite(parts[0]) ? parts[0] : null;
+        c.explorePMOut = Number.isFinite(parts[1]) ? parts[1] : 0;    // per-mille offered THIS call (0 = not armed now)
+        c.exploreIdx = Number.isFinite(parts[2]) ? parts[2] : -1;     // the cheaper rung being probed, -1 = none / promoted
+        c.exploreRemain = Number.isFinite(parts[3]) ? parts[3] : -2;  // -2 no cheaper rung · -1 promoted · 0 armed · N>0 cell-rows until re-armed
+        c.exploreN = Number.isFinite(parts[4]) ? parts[4] : 0;        // samples the candidate rung has gathered
+        c.exploreWinOk = Number.isFinite(parts[5]) ? parts[5] : 0;    // successes in its trailing minN window
         const tier = (chosenIdx != null && ladder[chosenIdx]) || null;
         c.chosenModel = tier ? tier.model : null;
         c.chosenEffort = tier ? tier.effort : null;
@@ -269,7 +284,7 @@ function buildHarnessState() {
 
   const value = {
     ladder, coldIdx,
-    policy: { floor, minN, auditStartN, auditFloorN, auditFloor: auditFloorPM / 1000, auditorModel: pol.auditorModel || null, auditorEffort: pol.auditorEffort || null },
+    policy: { floor, minN, auditStartN, auditFloorN, auditFloor: auditFloorPM / 1000, auditorModel: pol.auditorModel || null, auditorEffort: pol.auditorEffort || null, explorePM, exploreCooldownN },
     cells, recent: recentActivity(outcomes, failures, 20), failureKinds: failureKinds(failures), jqOk,
   };
   _harnessCache = { key, value };
@@ -522,7 +537,7 @@ function renderPage() {
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
-  .container{max-width:1000px;margin:0 auto;padding:26px 20px 72px;}
+  .container{max-width:1200px;margin:0 auto;padding:26px 20px 72px;}   /* wider content → ~1/3 less side gutter on a typical laptop viewport */
   h1{font-size:22px;font-weight:700;margin:0 0 4px;}
   .sub{color:var(--muted);margin:0 0 14px;font-size:13px;}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
@@ -539,6 +554,7 @@ function renderPage() {
   .summary-chip.action .n{color:var(--human);}
   .summary-chip.review .n{color:var(--red);}
   .summary-chip.done .n{color:var(--green);}
+  .summary-chip.fail .n{color:var(--red);}
 
   .pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--panel-2);border:1px solid var(--border);color:var(--muted);white-space:nowrap;margin-left:4px;}
   .pill.buildable{color:var(--amber);background:color-mix(in srgb, var(--amber) 14%, transparent);border-color:color-mix(in srgb, var(--amber) 40%, transparent);}
@@ -603,7 +619,8 @@ function renderPage() {
   .cog.spin{animation:cogspin 1s linear infinite}
   @keyframes cogspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion: reduce){.cog.spin{animation:none}}
-  .themepicker{display:flex;align-items:center;gap:5px;margin-left:auto}
+  .themepicker{display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-left:auto}
+  .swatch-row{display:flex;gap:8px}
   .swatch{width:20px;height:20px;padding:0;border-radius:50%;border:2px solid var(--border);cursor:pointer;box-shadow:none}
   .swatch:hover{border-color:var(--muted)}
   .swatch.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
@@ -658,9 +675,12 @@ function renderPage() {
   .refcard ol{margin:6px 0 0;padding-left:22px} .refcard li{margin:2px 0;font-size:12px}
   .refcard .knob{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:2px 0;color:var(--muted)} .refcard .knob b{color:var(--text);font-weight:600;text-align:right}
   .recent{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:4px 14px}
-  .recent .ev{display:flex;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px} .recent .ev:last-child{border-bottom:none}
+  .recent .ev{display:grid;grid-template-columns:120px 44px 118px 132px 180px 1fr;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px} .recent .ev:last-child{border-bottom:none}
   .recent .ev .t{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
   .recent .ev .eid{font-weight:700;min-width:42px}
+  .recent .ev .pill{margin-left:0}                                      /* pills fill from the column's left edge, not offset by .pill's default left margin */
+  .recent .ev .c-facet{overflow:hidden;text-overflow:ellipsis}
+  .recent .ev .c-detail{min-width:0;overflow-wrap:anywhere}             /* let the flexible detail column wrap/shrink instead of overflowing the grid */
 </style>
 </head>
 <body>
@@ -673,10 +693,18 @@ function renderPage() {
     <button class="tab" data-view="harness" onclick="switchView('harness')">Internals</button>
   </nav>
   <div class="themepicker" title="Dashboard theme — saved in this browser only">
-    <button type="button" class="swatch" data-theme="ink" style="background:#1a2b45" title="Ink" onclick="setTheme('ink')"></button>
-    <button type="button" class="swatch" data-theme="forest" style="background:#1e3c2e" title="Forest" onclick="setTheme('forest')"></button>
-    <button type="button" class="swatch" data-theme="plum" style="background:#2f1f45" title="Plum" onclick="setTheme('plum')"></button>
-    <button type="button" class="swatch" data-theme="amber" style="background:#3d2a15" title="Amber" onclick="setTheme('amber')"></button>
+    <div class="swatch-row">
+      <button type="button" class="swatch" data-sel="ink" style="background:#1a2b45" title="Ink" onclick="setTheme('ink')"></button>
+      <button type="button" class="swatch" data-sel="forest" style="background:#1e3c2e" title="Forest" onclick="setTheme('forest')"></button>
+      <button type="button" class="swatch" data-sel="plum" style="background:#2f1f45" title="Plum" onclick="setTheme('plum')"></button>
+      <button type="button" class="swatch" data-sel="amber" style="background:#3d2a15" title="Amber" onclick="setTheme('amber')"></button>
+    </div>
+    <div class="swatch-row">
+      <button type="button" class="swatch" data-sel="ink-light" title="Ink (light)" onclick="setTheme('ink-light')"></button>
+      <button type="button" class="swatch" data-sel="forest-light" title="Forest (light)" onclick="setTheme('forest-light')"></button>
+      <button type="button" class="swatch" data-sel="plum-light" title="Plum (light)" onclick="setTheme('plum-light')"></button>
+      <button type="button" class="swatch" data-sel="amber-light" title="Amber (light)" onclick="setTheme('amber-light')"></button>
+    </div>
   </div>
 </div>
 <div id="nowbar" class="nowbar"></div>
@@ -695,7 +723,7 @@ function renderPage() {
 </div>
 <script>
 const HARNESS_PROJECT_KEY = ${JSON.stringify(NAME)};
-const state = { activeView: 'backlog', open: new Set(), openLogs: new Set(), closedSections: new Set(), selected: new Set(), doneFilter: 'all', lastClicked: null, lastData: null, lastFetchedJson: null, openIdeas: new Set(), lastIdeasData: null, lastIdeasJson: null, lastHarnessJson: null, lastNowJson: null, nowLogOpen: { build: false, audit: false } };
+const state = { activeView: 'backlog', open: new Set(), openLogs: new Set(), closedSections: new Set(), selected: new Set(), lastClicked: null, lastData: null, lastFetchedJson: null, openIdeas: new Set(), lastIdeasData: null, lastIdeasJson: null, lastHarnessJson: null, lastNowJson: null, nowLogOpen: { build: false, audit: false } };
 
 function switchView(name) {
   state.activeView = name;
@@ -750,7 +778,11 @@ function nowLogDetails(phase, info, cur) {
   </details>\`;
 }
 
-function onNowLogToggle(phase, el) { state.nowLogOpen[phase] = el.open; }
+function onNowLogToggle(phase, el) {
+  state.nowLogOpen[phase] = el.open;
+  // Opening the panel jumps straight to the newest output (don't wait for the next 5s poll).
+  if (el.open) { const pre = document.getElementById('now-log-' + phase + '-pre'); if (pre) pre.scrollTop = pre.scrollHeight; }
+}
 
 function renderNow(data) {
   const el = document.getElementById('nowbar');
@@ -786,10 +818,27 @@ function renderNow(data) {
   h += '<span class="' + fetchCls + '" title="Age of the last git fetch — the dashboard renders LOCAL files, so origin changes are invisible until something fetches. Set HARNESS_DASHBOARD_FETCH_SECONDS to have the dashboard fetch itself.">origin seen: ' + ago(fr.lastFetchSec) + fetchNote + '</span>';
   h += nowLogDetails('build', data.build, cur);
   h += nowLogDetails('audit', data.audit, cur);
-  el.innerHTML = h;
+  // Capture each open live-output box's scroll position BEFORE innerHTML rebuilds (and destroys) it, so a
+  // reader who scrolled up to read isn't yanked back to the bottom on every 5s poll. We follow the live
+  // tail (scroll to bottom) ONLY when the reader was already pinned to the bottom, or the box was just
+  // opened / first rendered; otherwise we keep exactly where they'd scrolled to.
+  const priorScroll = {};
   ['build', 'audit'].forEach(function (phase) {
     const pre = document.getElementById('now-log-' + phase + '-pre');
-    if (pre && state.nowLogOpen[phase]) pre.scrollTop = pre.scrollHeight;
+    if (pre) priorScroll[phase] = {
+      top: pre.scrollTop,
+      hidden: pre.clientHeight === 0,                                      // collapsed panel → treat next render as a fresh open
+      atBottom: pre.scrollHeight - pre.scrollTop - pre.clientHeight <= 24  // within ~a line of the tail
+    };
+  });
+  el.innerHTML = h;
+  ['build', 'audit'].forEach(function (phase) {
+    if (!state.nowLogOpen[phase]) return;
+    const pre = document.getElementById('now-log-' + phase + '-pre');
+    if (!pre) return;
+    const prior = priorScroll[phase];
+    if (!prior || prior.hidden || prior.atBottom) pre.scrollTop = pre.scrollHeight;  // follow the tail
+    else pre.scrollTop = prior.top;                                                  // reader scrolled up — leave them be
   });
 }
 
@@ -884,6 +933,9 @@ function renderHarness(data) {
        knob('min samples', p.minN) +
        knob('audit taper', '100% until ' + p.auditStartN + ' → ' + Math.round((p.auditFloor || 0) * 100) + '% by ' + p.auditFloorN + ' audited') +
        knob('auditor', (p.auditorModel || '—') + ' / ' + (p.auditorEffort || '—')) +
+       knob('downward explore', (p.explorePM || 0) > 0
+            ? (Math.round(p.explorePM / 10) + '% chance · re-arm after ' + p.exploreCooldownN + ' rows / cell')
+            : 'off') +
        '</div></div>';
 
   h += '<div class="htitle">Per-facet calibration</div>';
@@ -892,9 +944,28 @@ function renderHarness(data) {
   if (!cells.length) {
     h += '<p class="note">No calibration data yet — the harness records an outcome each time it builds a task.</p>';
   } else {
+    const showExplore = (p.explorePM || 0) > 0;   // only surface the exploration column when it's enabled
+    const minN = p.minN || 6;
+    const exploreCell = function (c) {
+      const r = c.exploreRemain, tgt = L[c.exploreIdx];
+      const tl = tgt ? esc(tgt.model.replace(/^claude-/, '') + (tgt.effort ? '/' + tgt.effort : '')) : ('tier ' + c.exploreIdx);
+      if (r === -2) return '<span class="cold-tag">—</span>';                                             // already cheapest — nothing below
+      if (r === -1) return '<span class="pill done" title="a cheaper rung passed its probe and is now the Start model">↓ promoted</span>';
+      // shared probe stats: how far the current batch is + how it's doing
+      const eN = c.exploreN || 0, winN = Math.min(minN, eN), winOk = c.exploreWinOk || 0;
+      const rate = winN ? (winOk + '/' + winN + ' passed (' + Math.round((winOk / winN) * 100) + '%)') : 'no probes recorded yet';
+      const pct = Math.round((c.explorePMOut || 0) / 10);
+      if (r === 0) {
+        const left = eN < minN ? (minN - eN) : 0;
+        const leftTxt = left > 0 ? (left + ' more probe' + (left === 1 ? '' : 's') + ' complete this ' + minN + '-probe batch') : 'batch full — re-judged every run';
+        return '<span class="pill" title="probing the cheaper rung ' + tl + ' at ' + pct + '% on each eligible task · ' + rate + ' · ' + leftTxt + '">↓ ' + tl + ' · ' + pct + '%</span>';
+      }
+      return '<span class="cold-tag" title="rung ' + tl + ' failed its last batch (' + rate + '); re-offered after ' + r + ' more builds land in this cell">↓ ' + tl + ' · ' + r + ' left</span>';
+    };
     h += '<table class="ftable"><thead><tr>'
        + '<th>Facet <span class="qtip" tabindex="0" data-tip="The layer × work-type combination this row\\'s stats are calibrated for (e.g. backend/feature).">?</span></th>'
        + '<th>Start model <span class="qtip" tabindex="0" data-tip="The model/effort the policy would pick to START a task in this cell right now (it only escalates from here on real failure). \\'cold\\' = no build history yet, using the cold-start prior.">?</span></th>'
+       + (showExplore ? '<th>Explore ↓ <span class="qtip" tabindex="0" data-tip="Downward exploration for this cell: which cheaper rung the policy is probing, and whether it is armed now (with the % chance per eligible task), in cooldown (N more builds in THIS cell until it re-arms), promoted (the probe succeeded), or — (already the cheapest rung).">?</span></th>' : '')
        + '<th class="num">Audit (policy) <span class="qtip" tabindex="0" data-tip="The sampling probability the policy will use for the NEXT build in this cell">?</span></th>'
        + '<th class="num">Audited (observed) <span class="qtip" tabindex="0" data-tip="What actually happened: audited successes / all successes recorded in the ledger">?</span></th>'
        + '<th class="num">Builds <span class="qtip" tabindex="0" data-tip="Total tasks in this cell that reached a terminal outcome (success or blocked), per the outcomes ledger.">?</span></th>'
@@ -910,6 +981,7 @@ function renderHarness(data) {
       const failTip = Object.entries(c.kinds || {}).map(function (kv) { return kv[0] + ' ×' + kv[1]; }).join(', ');
       h += '<tr><td class="facet-name">' + esc(c.layer) + '/' + esc(c.workType) + '</td>' +
            '<td class="model-tag">' + model + cold + '</td>' +
+           (showExplore ? '<td>' + exploreCell(c) + '</td>' : '') +
            '<td class="num">' + audit + '</td>' +
            '<td class="num">' + observed + '</td>' +
            '<td class="num">' + c.builds + '</td>' +
@@ -936,10 +1008,17 @@ function renderHarness(data) {
     h += '<div class="recent">' + recent.map(function (e) {
       const when = (e.ts || '').slice(0, 16).replace('T', ' ');
       const cls = e.type === 'failure' ? 'pill blocked' : 'pill done';
-      return '<div class="ev"><span class="t">' + esc(when) + '</span><span class="eid mono">' + esc(e.id) + '</span>' +
-             '<span class="' + cls + '">' + esc(e.label) + '</span>' +
-             '<span class="t">' + esc(e.facet) + '</span>' +
-             (e.detail ? '<span>' + esc(e.detail) + '</span>' : '') + '</div>';
+      // Fixed grid columns (time · id · status · facet · model · detail) so each field lines up
+      // vertically across rows instead of shifting with the preceding pill's width. Every column cell
+      // is always emitted (empty when absent) to keep the grid aligned.
+      return '<div class="ev">' +
+             '<span class="t">' + esc(when) + '</span>' +
+             '<span class="eid mono">' + esc(e.id) + '</span>' +
+             '<span class="c-status"><span class="' + cls + '">' + esc(e.label) + '</span></span>' +
+             '<span class="c-facet t">' + esc(e.facet) + '</span>' +
+             '<span class="c-model">' + (e.model ? '<span class="pill model-tag" title="The model/effort behind this attempt (escalation makes a retried task\\'s rows differ here)">' + esc(e.model) + '</span>' : '') + '</span>' +
+             '<span class="c-detail">' + (e.detail ? esc(e.detail) : '') + '</span>' +
+             '</div>';
     }).join('') + '</div>';
   }
   el.innerHTML = h;
@@ -952,7 +1031,7 @@ function depLinks(ids) {
 }
 
 function failPill(task, bucketName) {
-  if (bucketName === 'done' || !task.buildFailures || !task.buildFailures.count) return '';
+  if (bucketName === 'done' || bucketName === 'donePendingReview' || bucketName === 'closedFailed' || !task.buildFailures || !task.buildFailures.count) return '';
   const bf = task.buildFailures, n = bf.count;
   const tip = esc((bf.latestKind || '') + (bf.latestDetail ? ': ' + bf.latestDetail : ''));
   return \`<span class="pill blocked" title="\${tip}">⚠ \${n} failed attempt\${n === 1 ? '' : 's'}</span>\`;
@@ -976,9 +1055,10 @@ function pillsFor(task, bucketName) {
     pills += task.status === 'blocked'
       ? '<span class="pill blocked">⚠ blocked (loop gave up)</span>'
       : '<span class="pill blocked">⚠ failed — awaiting review</span>';
-  } else if (bucketName === 'done') {
+  } else if (bucketName === 'done' || bucketName === 'donePendingReview' || bucketName === 'closedFailed') {
     pills += task.reviewed ? '<span class="pill reviewed">👁 reviewed</span>' : '<span class="pill">not reviewed</span>';
-    pills += task.failed ? '<span class="pill failed">✗ failed</span>' : '<span class="pill done">✓ done</span>';
+    pills += task.failed ? '<span class="pill failed">✗ failed</span>'
+           : (task.status === 'blocked' ? '<span class="pill blocked">⚠ blocked (loop gave up)</span>' : '<span class="pill done">✓ done</span>');
     if (task.completedWith) {
       const cw = task.completedWith;
       if (cw.human) {
@@ -1014,18 +1094,18 @@ function renderTask(task, bucketName) {
     if (task.audit) detail += lg('audit', 'audit', task.audit);
     detail += '<div class="bar" style="margin-top:10px">';
     if (bucketName === 'needsHuman') detail += \`<button class="act" onclick="markDone('\${task.id}')">Mark done</button>\`;
-    if (bucketName === 'done' && !task.failed) detail += \`<button class="act danger" onclick="markFailed('\${task.id}')">Mark failed</button>\`;
+    if ((bucketName === 'done' || bucketName === 'donePendingReview') && !task.failed) detail += \`<button class="act danger" onclick="markFailed('\${task.id}')">Mark failed</button>\`;
     if (!task.reviewed) detail += \`<button class="act" onclick="markReviewed('\${task.id}')">Mark reviewed</button>\`;
     detail += '</div></div>';
   }
   // Only offer a bulk-select checkbox where bulk actions exist: needsHuman (mark-done),
   // not-yet-reviewed done tasks, and failedPendingReview tasks (mark-reviewed) — mirrors the three
   // bulk-action groups.
-  const showCheckbox = bucketName === 'needsHuman' || (bucketName === 'done' && !task.reviewed) || bucketName === 'failedPendingReview';
+  const showCheckbox = bucketName === 'needsHuman' || bucketName === 'donePendingReview' || bucketName === 'failedPendingReview';
   const checkbox = showCheckbox
     ? \`<input type="checkbox" \${checked} data-id="\${task.id}" data-bucket="\${bucketName}" onclick="event.stopPropagation(); rangeSelect(event, this)" onchange="toggleSelect(this)">\`
     : '';
-  const hidden = (bucketName === 'done' && state.doneFilter !== 'all' && ((state.doneFilter === 'reviewed') !== !!task.reviewed)) ? ' style="display:none"' : '';
+  const hidden = '';
   return \`<div class="taskrow" id="task-\${task.id}"\${hidden}>
     <div class="row" onclick="toggleOpen('\${task.id}')">
       \${checkbox}<span class="caret">\${open ? '▾' : '▸'}</span>
@@ -1040,7 +1120,7 @@ function renderTask(task, bucketName) {
 function renderSection(name, emoji, label, desc, tasks, countStr) {
   const openAttr = state.closedSections.has(name) ? '' : ' open';
   let bar = '';
-  if (name === 'needsHuman' || name === 'done' || name === 'failedPendingReview') {
+  if (name === 'needsHuman' || name === 'donePendingReview' || name === 'failedPendingReview') {
     const selectable = tasks.filter(t => name === 'needsHuman' || !t.reviewed).map(t => t.id);
     const n = selectable.filter(id => state.selected.has(id)).length;
     const allSel = selectable.length > 0 && n === selectable.length;
@@ -1050,17 +1130,12 @@ function renderSection(name, emoji, label, desc, tasks, countStr) {
           + \`<button class="act" onclick="bulkAction('\${name}')" \${n ? '' : 'disabled'}>Mark \${n} \${verb}</button></div>\`;
     }
   }
-  let filterBar = '';
-  if (name === 'done') {
-    const mk = (mode, text) => \`<button class="barbtn\${state.doneFilter === mode ? ' on' : ''}" onclick="setDoneFilter('\${mode}')">\${text}</button>\`;
-    filterBar = \`<div class="section-toolbar"><span class="barlabel">Show</span>\${mk('all', 'All')}\${mk('reviewed', 'Reviewed')}\${mk('unreviewed', 'Not reviewed')}</div>\`;
-  }
   const rows = tasks.length ? tasks.map(t => renderTask(t, name)).join('') : '<p class="empty">None.</p>';
   const descHtml = desc ? \`<p class="section-desc">\${desc}</p>\` : '';
   return \`<details id="section-\${name}" class="section"\${openAttr} ontoggle="onSectionToggle('\${name}', this)">
     <summary class="section-heading">\${emoji} \${label} <span class="count">(\${countStr})</span></summary>
     <div class="section-body">
-      \${descHtml}\${filterBar}\${bar}
+      \${descHtml}\${bar}
       <div class="panel">\${rows}</div>
     </div>
   </details>\`;
@@ -1069,21 +1144,24 @@ function renderSection(name, emoji, label, desc, tasks, countStr) {
 function renderBacklog(data) {
   state.lastData = data;   // cache so pure-UI actions (expand, filter, select) re-render without a refetch
   const b = data.buckets, c = data.counts;
-  const total = b.ready.length + b.waiting.length + b.needsHuman.length + b.failedPendingReview.length + b.done.length;
-  const reviewed = b.done.filter(t => t.reviewed).length;
+  const total = b.ready.length + b.waiting.length + b.needsHuman.length + b.failedPendingReview.length + b.closedFailed.length + b.donePendingReview.length + b.done.length;
   document.getElementById('summary').innerHTML =
     'The harness task list (<span class="mono">.harness/tracking/TASKS.json</span>), rendered. '
-    + \`\${total} task(s) · \${c.ready} ready · \${c.waiting} waiting · \${c.needsHuman} need a human · \${c.failedPendingReview} failed (pending review) · \${c.done} done (\${reviewed} reviewed). Auto-refreshes.\`;
+    + \`\${total} task(s) · \${c.ready} ready · \${c.waiting} waiting · \${c.needsHuman} need a human · \${c.failedPendingReview} failed (pending review) · \${c.donePendingReview} pending review · \${c.done} done · \${c.closedFailed} closed (failed). Auto-refreshes.\`;
   document.getElementById('summary-chips').innerHTML =
     \`<button class="summary-chip action" onclick="scrollToSection('needsHuman')"><span class="n">\${c.needsHuman}</span><span class="lbl">need your action</span></button>\`
     + \`<button class="summary-chip review" onclick="scrollToSection('failedPendingReview')"><span class="n">\${c.failedPendingReview}</span><span class="lbl">failed, pending review</span></button>\`
-    + \`<button class="summary-chip done" onclick="scrollToSection('done')"><span class="n">\${c.done} <small>· \${reviewed} reviewed</small></span><span class="lbl">done</span></button>\`;
+    + \`<button class="summary-chip review" onclick="scrollToSection('donePendingReview')"><span class="n">\${c.donePendingReview}</span><span class="lbl">pending review</span></button>\`
+    + \`<button class="summary-chip done" onclick="scrollToSection('done')"><span class="n">\${c.done}</span><span class="lbl">done</span></button>\`
+    + \`<button class="summary-chip fail" onclick="scrollToSection('closedFailed')"><span class="n">\${c.closedFailed}</span><span class="lbl">closed (failed)</span></button>\`;
   document.getElementById('sections').innerHTML =
     renderSection('ready', '🤖', 'Ready', 'Everything the harness can build with no human involved — either right now, or once an earlier, equally-buildable task in its chain lands.', b.ready, b.ready.length)
-    + renderSection('waiting', '⏳', 'Waiting on Human Tasks', 'Buildable, but blocked somewhere upstream by a task a human still has to clear.', b.waiting, b.waiting.length)
     + renderSection('needsHuman', '🔒', 'Human Tasks', 'The loop skips these — a needs-human step, or a task it gave up on. Work them yourself, then mark done.', b.needsHuman, b.needsHuman.length)
+    + renderSection('waiting', '⏳', 'Waiting on Human Tasks', 'Buildable, but blocked somewhere upstream by a task a human still has to clear.', b.waiting, b.waiting.length)
     + renderSection('failedPendingReview', '🩹', 'Failed — Pending Review', 'The loop gave up on these, or the owner overturned a false success — nobody has confirmed the verdict yet. Investigate (or run /review-failed), then mark reviewed.', b.failedPendingReview, b.failedPendingReview.length)
-    + renderSection('done', '✅', 'Done', null, b.done, \`\${b.done.length} · \${reviewed} reviewed · \${b.done.length - reviewed} not reviewed\`);
+    + renderSection('donePendingReview', '👀', 'Pending Review', 'Built and integrated on green CI, but not yet human-reviewed. Look over the result, then mark it reviewed to move it into Done — un-reviewing a task moves it back here.', b.donePendingReview, b.donePendingReview.length)
+    + renderSection('done', '✅', 'Done', 'Built, integrated, and human-reviewed — closed out.', b.done, \`\${b.done.length}\`)
+    + renderSection('closedFailed', '🚫', 'Closed — failed', 'Failed or blocked, and reviewed — closed out. Kept OUT of Done so a failure never reads as a success. Anything that still depends on one of these is stranded (it can never build) until you rewire it to a replacement or abandon it — run /review-failed, or check pre-loop-checkin.', b.closedFailed, \`\${b.closedFailed.length}\`);
 }
 
 // Re-render from cached data (no network) — for expand/collapse, filter, and selection changes.
@@ -1129,7 +1207,6 @@ function scrollToSection(name) {
   setTimeout(() => el.classList.remove('flash'), 1500);
 }
 
-function setDoneFilter(mode) { state.doneFilter = mode; rerender(); }
 
 // Shift-click range-select: tracks the last checkbox clicked (by id + bucket). Shift-clicking a
 // second checkbox in the SAME bucket selects every checkbox in between to match the just-clicked
@@ -1180,7 +1257,7 @@ async function bulkAction(bucket) {
     if (!confirm('Mark ' + ids.length + ' task(s) done? Writes human-done.json, commits + pushes.')) return;
     ok = await post('/api/mark-done', { ids });
   }
-  if (bucket === 'done' || bucket === 'failedPendingReview') ok = await post('/api/mark-reviewed', { ids });
+  if (bucket === 'donePendingReview' || bucket === 'failedPendingReview') ok = await post('/api/mark-reviewed', { ids });
   if (ok) { state.selected.clear(); refreshActive(); }
 }
 
@@ -1190,23 +1267,69 @@ async function bulkAction(bucket) {
 // open-ended color input — picking a good palette from unlimited options is fiddly; a small
 // curated set is not.
 const THEME_STORAGE_KEY = 'harness-dashboard-theme:' + HARNESS_PROJECT_KEY;
-const THEME_NAMES = ['ink', 'forest', 'plum', 'amber'];
-function markActiveTheme(name) {
-  document.querySelectorAll('.swatch').forEach(function (b) {
-    b.classList.toggle('active', b.dataset.theme === name);
-  });
+const LIGHT_LIFT = 10;   // fixed lightness lift for the light theme variants (surfaces only — see deriveLight); hardcoded, no longer user-tunable
+const BASE_THEMES = ['ink', 'forest', 'plum', 'amber'];
+const THEME_VARS = ['--bg','--panel','--panel-2','--border','--text','--muted','--accent','--green','--red','--yellow','--amber','--human'];
+// The dark palettes, mirrored from the [data-theme] CSS blocks above (KEEP IN SYNC) — needed in JS so
+// each theme's LIGHT variant can be derived from its OWN dark palette. The light variant is NOT a new
+// baseline: it is the SAME dark theme with its SURFACE colours lifted lighter by a fixed amount (LIGHT_LIFT; see
+// deriveLight); text and accent colours are left exactly as the dark theme has them. A light theme is
+// applied as inline CSS vars on <html> (overriding the dark CSS block); switching back removes them.
+const DARK_PALETTES = {
+  ink:    {'--bg':'#1a2b45','--panel':'#203453','--panel-2':'#273d65','--border':'#3c537a','--text':'#e9eefb','--muted':'#9fafcd','--accent':'#ff7a54','--green':'#4ad991','--red':'#ff5c6e','--yellow':'#ffcf5c','--amber':'#ff9d4d','--human':'#b98bff'},
+  forest: {'--bg':'#1e3c2e','--panel':'#254435','--panel-2':'#2c513d','--border':'#426953','--text':'#e7f2ea','--muted':'#94b5a1','--accent':'#f2b53c','--green':'#4fd1a5','--red':'#ff6b5c','--yellow':'#e0c34a','--amber':'#f2b53c','--human':'#6fa8ff'},
+  plum:   {'--bg':'#2f1f45','--panel':'#362553','--panel-2':'#402c63','--border':'#584180','--text':'#f1e9f8','--muted':'#b8a5cf','--accent':'#ff5ec4','--green':'#5fd18a','--red':'#ff5c6e','--yellow':'#f0c14a','--amber':'#f2b53c','--human':'#6fa8ff'},
+  amber:  {'--bg':'#3d2a15','--panel':'#483414','--panel-2':'#543717','--border':'#73511d','--text':'#f5e9d6','--muted':'#ba9a69','--accent':'#ffa629','--green':'#6bd453','--red':'#ff5c5c','--yellow':'#f0c33e','--amber':'#ffa629','--human':'#5b9bff'},
+};
+function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function hexToHsl(hex) {
+  const m = hex.replace('#', '');
+  const r = parseInt(m.slice(0,2),16)/255, g = parseInt(m.slice(2,4),16)/255, bl = parseInt(m.slice(4,6),16)/255;
+  const mx = Math.max(r,g,bl), mn = Math.min(r,g,bl), l = (mx+mn)/2; let h = 0, s = 0;
+  if (mx !== mn) { const d = mx-mn; s = l > 0.5 ? d/(2-mx-mn) : d/(mx+mn);
+    if (mx===r) h = (g-bl)/d + (g<bl ? 6 : 0); else if (mx===g) h = (bl-r)/d + 2; else h = (r-g)/d + 4; h *= 60; }
+  return { h: h, s: s*100, l: l*100 };
 }
-function setTheme(name) {
-  document.documentElement.setAttribute('data-theme', name);
-  localStorage.setItem(THEME_STORAGE_KEY, name);
-  markActiveTheme(name);
+function hslToHex(h, s, l) {
+  h /= 360; s /= 100; l /= 100;
+  const f = function(n){ const k = (n + h*12) % 12, a = s*Math.min(l, 1-l); return l - a*Math.max(-1, Math.min(k-3, 9-k, 1)); };
+  const to = function(x){ return ('0' + Math.round(clamp(x,0,1)*255).toString(16)).slice(-2); };
+  return '#' + to(f(0)) + to(f(8)) + to(f(4));
+}
+// deriveLight(base, lift): a LIGHTER rendition of the DARK theme — NOT a new light baseline. "lift" is
+// how many lightness points (0..~40) to ADD to the theme's SURFACE colours (bg / panel / panel-2 /
+// border), keeping each theme's own hue + saturation; text, muted, and accent colours are left exactly
+// as the dark theme has them (they stay readable as the surfaces lighten within the bounded range).
+// lift 0 == the dark theme unchanged; higher == progressively lighter, still a dark-with-light-text theme.
+function deriveLight(base, lift) {
+  const p = DARK_PALETTES[base], out = {};
+  const SURFACE = { '--bg': 1, '--panel': 1, '--panel-2': 1, '--border': 1 };
+  THEME_VARS.forEach(function(k){
+    if (SURFACE[k]) { const c = hexToHsl(p[k]); out[k] = hslToHex(c.h, c.s, clamp(c.l + lift, 0, 100)); }
+    else out[k] = p[k];
+  });
+  return out;
+}
+function markActiveTheme(sel) {
+  document.querySelectorAll('.swatch').forEach(function (b) { b.classList.toggle('active', b.dataset.sel === sel); });
+}
+function setTheme(sel) {
+  const isLight = /-light$/.test(sel), base = isLight ? sel.replace(/-light$/, '') : sel;
+  document.documentElement.setAttribute('data-theme', base);
+  document.documentElement.classList.toggle('lighttheme', isLight);
+  if (isLight) { const v = deriveLight(base, LIGHT_LIFT); THEME_VARS.forEach(function(k){ document.documentElement.style.setProperty(k, v[k]); }); }
+  else { THEME_VARS.forEach(function(k){ document.documentElement.style.removeProperty(k); }); }
+  localStorage.setItem(THEME_STORAGE_KEY, sel);
+  markActiveTheme(sel);
+}
+function updateLightSwatches() {
+  BASE_THEMES.forEach(function(base){ const btn = document.querySelector('.swatch[data-sel="' + base + '-light"]'); if (btn) btn.style.background = deriveLight(base, LIGHT_LIFT)['--bg']; });
 }
 function initThemePicker() {
   if (!document.querySelector('.swatch')) return;
+  updateLightSwatches();
   const saved = localStorage.getItem(THEME_STORAGE_KEY);
-  const theme = THEME_NAMES.includes(saved) ? saved : 'ink';
-  document.documentElement.setAttribute('data-theme', theme);
-  markActiveTheme(theme);
+  setTheme(/^(ink|forest|plum|amber)(-light)?$/.test(saved || '') ? saved : 'ink');
 }
 initThemePicker();
 

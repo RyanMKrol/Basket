@@ -157,12 +157,14 @@ NOT have `AskUserQuestion`, and never touches `tracking/TASKS.json`, `tasks/`, `
 >     {
 >       "tempId": "<SLUG>-a", "title": "...", "dependsOn": [],
 >       "gate": null, "tags": [...], "scope": ["files this unit should touch"],
->       "design": null, "verify": [], "expectsTest": false,
+>       "design": null, "verify": [], "expectsTest": false,   // true → the loop REQUIRES a test file in the diff; if you set it, say in specDoneWhen WHAT the test must assert (else the builder can only write a token one)
 >       "facets": { "layer": "...", "workType": "...", "risk": [] },
 >       "visualVerify": true,   // OPTIONAL — set only if the follow-up should be visually verified (see below); omit for auto-covered / non-visual.
 >       "specOverview": "Name what this re-attempts and WHY the first attempt didn't land — e.g. 'Re-attempt of <TNNN>, blocked because its scope excluded the client helper the Done-when required.' One or two sentences; this is the task's traceability back to the failure.",
 >       "specDo": "The corrected work — incorporate the actual lesson (see below), not a restatement of the original spec.",
->       "specDoneWhen": "The task-specific, runnable acceptance bar. Do NOT restate the universal DoD (format/lint/test/CI-green)."
+>       "specDoneWhen": "The task-specific, runnable acceptance bar. Do NOT restate the universal DoD (format/lint/test/CI-green).",
+>       "rewireFrom": "<TNNN>",              // OPTIONAL (step 4d) — the failed task this unit re-attempts; consolidation swaps it…
+>       "rewireDependents": ["<dep id>", …]  // …for this unit's new id in each of these existing tasks' dependsOn. Omit both if no dependents.
 >     }
 >   ]
 > }
@@ -180,7 +182,9 @@ NOT have `AskUserQuestion`, and never touches `tracking/TASKS.json`, `tasks/`, `
 >   that passed on a broken render is exactly the case this catches).
 > - **Do NOT set `dependsOn` to the original failed/blocked task** — it's terminal, nothing should wait
 >   on it. Traceability lives in the `specOverview` (which names the re-attempt). Atomise into multiple
->   units if the review surfaces more than one separable follow-up.
+>   units if the review surfaces more than one separable follow-up. (Tasks that ALREADY depended on the
+>   failed task are a separate problem — the loop never re-attempts it, so they're stranded; step 4d
+>   detects and re-points them onto this replacement.)
 > - `needs-human` units omit `facets` entirely. Omit `ideaIds` entirely too — a review-derived
 >   follow-up has no real idea in `IDEAS.jsonl` to remove; the consolidation script simply does
 >   nothing idea-side for a unit set with no `ideaIds` (see Stage 3).
@@ -215,6 +219,30 @@ NOT have `AskUserQuestion`, and never touches `tracking/TASKS.json`, `tasks/`, `
 > resume your agent (or the coordinator folds it in directly) back to step 4 to shape one, same as any
 > other pending-questions answer that opens new work.
 >
+> **4d. Handle the failed task's EXISTING dependents (closes the abandonment gap).** Authoring a
+> replacement does NOT help tasks that already depend on the task you're reviewing: the replacement gets a
+> new id, the original stays terminal-failed, and the loop never re-attempts it — so any dependent left
+> pointing at it can **never build**, silently. Find them (read-only):
+> ```bash
+> jq -r --arg f "<TNNN>" '.tasks[]
+>   | select((.dependsOn // []) | index($f))
+>   | select(.status != "done" and .status != "failed" and .status != "blocked")
+>   | "\(.id): \(.title)"' .harness/tracking/TASKS.json
+> ```
+> - **No dependents → nothing to do** (omit the rewire fields and this question).
+> - **Dependents exist AND you authored a follow-up (step 4):** on the unit those dependents should now
+>   depend on (usually the primary re-attempt; choose per-dependent if you atomised into several), set
+>   `"rewireFrom": "<TNNN>"` and `"rewireDependents": ["<dep id>", …]`. Consolidation (Stage 3) swaps the
+>   dead `<TNNN>` for the replacement's new id in each dependent's `dependsOn`, keeping their other deps.
+>   Because this **changes what gets built**, CONFIRM it — add to this slug's `.pending-questions/<SLUG>.json`
+>   `questions`:
+>   `{ "topic": "rewire-dependents", "question": "<TNNN> failed; I'm re-attempting it as <unit title>. These tasks depend on <TNNN> and are otherwise stranded: <dep ids + titles>. Rewire them onto the re-attempt, abandon them, or leave them?" }`
+> - **Dependents exist but the outcome is 'already resolved' / 'not worth pursuing' (no replacement):**
+>   there is nothing to rewire onto, so those dependents are stranded by design. Do NOT set rewire fields;
+>   surface them so the owner decides (abandon them too / re-scope / leave):
+>   `{ "topic": "rewire-dependents", "question": "<TNNN> is being closed with no rebuild. These tasks depend on it and can no longer build: <dep ids + titles>. Abandon them as well, re-scope, or leave them?" }`
+> Name the dependents you found in your step-5 report either way.
+>
 > **5. Report back**: the root cause you found, which step-3 outcome you reached, the slug you used, and
 > what you wrote (both files). The coordinator reads your files, not your prose.
 
@@ -223,27 +251,29 @@ NOT have `AskUserQuestion`, and never touches `tracking/TASKS.json`, `tasks/`, `
 Every authored follow-up left a `.pending-questions/<slug>.json` (Stage 2 step 4b or 4c), so this relay
 runs on essentially every sweep. Read them all, then:
 
-**Publish a reference Artifact before asking anything** — the owner can't confirm a definition of done
-they can't see. Load the `artifact-design` skill first (its own required process), then build ONE page
-covering every currently-unresolved `.pending-questions/<slug>.json`: one section per review, headed by
-its `ideaText` (the `<TNNN>` + original title) and `ideaSummary` (the root cause + proposed follow-up),
-then every unit from that slug's matching `.pending-tasks/<slug>.json` in full — title, `specOverview`,
-`specDo`, and `specDoneWhen` called out visually distinct from the rest — followed by that slug's own
-pending `questions` text, so the owner reads the exact draft (or, for a `close-without-followup`
-question, the exact investigation report) a question refers to right next to the question itself. This
-is a **utilitarian reference doc for a decision in progress**, not a landing page — clean hierarchy and
-real spacing, no hero, no marketing framing; build it from the REAL current content, never placeholder
-text. **Give it a persistent left-hand outline to navigate by** — a sweep can span many reviews, and a
-single long scroll is hard to move around in. Render a sidebar (table of contents) listing one entry per
-review (its `<TNNN>` + title, with that review's unit titles nested under it), each anchor-linking
-(`href="#<slug>"`) to the matching section — give every review section a corresponding `id="<slug>"`.
-Keep the outline visible while the content scrolls (a sticky/fixed sidebar that itself scrolls when the
-list is long), and on a narrow screen let it collapse above the content rather than overlapping it or
-forcing horizontal scroll. These are plain in-page `#id` anchors — no external requests, so they're
-CSP-safe inside an Artifact; no JavaScript is required for the jump-to behavior. Write the page to your
-own scratchpad directory and call the `Artifact` tool (favicon 🔍) to publish it. **If the relay loops across multiple rounds**, regenerate and redeploy to the SAME file path
-each round — the owner keeps one tab open for the whole sweep instead of chasing a new link every round.
-Zero pending questions → skip this entirely, nothing to relay.
+**Publish a plain-Markdown reference Artifact before asking anything** — the owner can't confirm a
+definition of done they can't see. Do NOT hand-author an HTML page and do NOT load `artifact-design`:
+write a structured **Markdown** file and hand it straight to the `Artifact` tool (favicon 🔍). A Markdown
+Artifact renders, **auto-opens, and takes focus exactly like an HTML one** — the owner gets the same "it
+opens itself" reading experience for a fraction of the effort (no CSS, no bespoke layout, no design pass).
+Build it from the REAL current content, never placeholder text, with this shape:
+- An `#` H1 title, then one italic line of intro (what this is — confirm each follow-up's Done-when or a
+  close-without-followup; the questions are also asked directly, this page is the full context).
+- **A top "On this page" list** — the navigation, since a Markdown Artifact has no sticky sidebar. One
+  bullet per review (its `<TNNN>` + title) with that review's unit titles nested beneath, each a
+  `[title](#anchor)` jump link. Anchors are the GitHub-style lowercased-hyphenated heading slug, so give
+  each review an `## <TNNN> — <title>` heading and each unit a `### <title>` heading and the links resolve.
+- **One `##` section per review**, covering every currently-unresolved `.pending-questions/<slug>.json`:
+  its `ideaText` + `ideaSummary` (the root cause + proposed follow-up), then every unit from that slug's
+  matching `.pending-tasks/<slug>.json` in full — each a `###` heading with its `specOverview` and
+  `specDo`, and its **`specDoneWhen` on its own bolded "✅ Done when" line** (keep it visually distinct) —
+  followed by that slug's own pending `questions` text, so the owner reads the exact draft (or, for a
+  `close-without-followup` question, the exact investigation report) a question refers to right next to it.
+
+Write the `.md` to your own scratchpad directory and publish it. **If the relay loops across multiple
+rounds**, regenerate and redeploy to the SAME file path each round — the owner keeps one tab open for the
+whole sweep instead of chasing a new link every round. Zero pending questions → skip this entirely,
+nothing to relay.
 
 **Summarize before asking**: emit a short markdown recap — one line per review: its `ideaSummary` (and
 the `<TNNN>` it concerns) — plus the artifact URL from above ("Full drafted context: `<url>` — keep this
@@ -256,7 +286,13 @@ the owner adjusted it (resume the agent via `SendMessage`, or edit the file your
 draft; for a `close-without-followup` answer, either leave the `{ "units": [] }` draft as-is (owner
 confirmed closing with no follow-up) or, if the owner asked for a follow-up instead, fold that request in
 and shape one per Stage 2 step 4 (the outcome moves from "not worth pursuing" to "follow-up authored");
-for a `topic: "other"` answer, fold it in the same way. If an answer opens a NEW question, **append** it
+for a `topic: "other"` answer, fold it in the same way;
+for a `rewire-dependents` answer, edit the matching unit's `rewireDependents` in `.pending-tasks/<slug>.json`
+to hold ONLY the dep ids the owner confirmed to rewire (drop any they chose to leave). For any dependent
+the owner chose to **abandon**, mark it failed in the git stage below with
+`.harness/scripts/mark-failed.sh <dep id>` (it then shows under "Closed — failed"; if it in turn has its
+own dependents they resurface via the pre-loop-checkin stranded-scan / a later sweep) — and drop it from
+`rewireDependents` too. If an answer opens a NEW question, **append** it
 to the same file's `questions` array and relay again (no cap); delete a `.pending-questions/<slug>.json`
 only once ALL its questions resolve.
 
@@ -267,7 +303,8 @@ bash .harness/scripts/consolidate-ideas.sh      # NO_PUSH=1 … to commit locall
 ```
 
 It allocates real task ids, resolves `tempId` references, writes each unit's `tasks/TNNN.md` spec,
-appends the tasks to `TASKS.json`, and commits + pushes under the repo lock. Since a review-derived
+appends the tasks to `TASKS.json`, applies any `rewireFrom`/`rewireDependents` (re-pointing each stranded
+dependent off the dead id onto its replacement's new id), and commits + pushes under the repo lock. Since a review-derived
 unit set carries no `ideaIds` (Stage 2 step 4), the script's `IDEAS.jsonl` cleanup is simply a no-op
 for these units — no warning, nothing to "clean up."
 

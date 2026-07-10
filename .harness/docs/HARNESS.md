@@ -298,7 +298,9 @@ A task is **done** only when **all** of the following hold. The loop will **not*
    A red run is a `failed:soft` → the model inspects `gh run view --log-failed`, fixes, repeats.
 5. **Structural + audit gate** *(see `designs/audit-verification.md`)*. Before marking done the loop
    also enforces **structural checks** (the diff touches the task's `scope`; if `expectsTest: true`, a
-   test file changed) and — when the task is **sampled** (per-cell audit decay) — a **blocking audit**
+   test file changed — both the `scope` and the `expectsTest` requirement are injected into the build
+   prompt, so the builder is *told* each up front, not just judged on it after) and — when the task is
+   **sampled** (per-cell audit decay) — a **blocking audit**
    by a fresh stronger agent (`max(opus-medium, builder tier)`) verifying the diff against the spec's
    `## Done when`, which must return PASS. A structural/audit FAIL is a `failed:soft` → cold retry /
    escalate. Each outcome is logged to `outcomes.jsonl` tagged `audited`/`ci-only`.
@@ -359,7 +361,7 @@ Therefore:
 - **A concurrency lock** in the shared `.git` (`<repo>-loop.lock`, PID-stamped with stale
   reclamation) ensures only one `loop.sh` runs at once — a second invocation exits immediately
   rather than racing.
-- **When the loop finishes** (backlog drained / idle) it optionally leaves the **primary checkout on
+- **When the loop finishes** (backlog drained) it optionally leaves the **primary checkout on
   the latest `main`**, so your local copy reflects everything that just landed instead of sitting
   stale on an old commit or branch (`sync_primary_checkout`). This is the *only* time it touches the
   primary checkout, and it's safe + best-effort: it **skips a dirty tree** (never stashes or clobbers
@@ -429,8 +431,13 @@ deploy/restart command run after each task integrates, so the running product ma
 
 - **Result vocabulary:** `done` · `failed:soft` (transient/partial — retry) ·
   `failed:blocked` (needs-human / unmet prerequisite — do **not** retry) · `waiting` (a dep
-  isn't merged yet) · `idle` (no eligible task left). The worker writes exactly one of these
-  to `worklog/.result` as its final action; the loop acts on it.
+  isn't merged yet) · `idle` (**this task's** Done-when is already met on main — nothing to build
+  for it). The worker writes exactly one of these to `worklog/.result` as its final action; the
+  loop acts on it. An `idle` is **per-task**, not a drained backlog: the loop reconciles that one
+  task to `done` (its work reached main in a prior attempt but the status flip was lost) and
+  **continues** — it does not end the run. The only clean stop-on-nothing-to-do is the
+  backlog-drained exit (no eligible task left). A task that keeps reporting `idle` — its status
+  won't persist — is **blocked** after 2, never spun on.
 - **Caps & escalation:** `MAX_ATTEMPTS` per **rung** (default 2) of `failed:soft` → the loop
   **escalates** up the global tier ladder (the policy sets the start rung from the task's facets; §3)
   and resets the counter; only after the **top** rung is exhausted is the task `failed:blocked`. A
@@ -555,7 +562,7 @@ logged and ignored), with `HARNESS_ROOT`, `HARNESS_DIR`, `HARNESS_MAIN_BRANCH` e
 
 | Hook file | Fires when | Args (`$1 …`) |
 |---|---|---|
-| `on-drained.sh` | the loop finishes with nothing left to build | `drained` (backlog empty) or `idle` (agent had nothing to do) |
+| `on-drained.sh` | the loop finishes with nothing left to build (no eligible task) | `drained` |
 | `on-exhausted.sh` | the loop stops WITHOUT draining | `max-iters` or `rate-limit` |
 | `on-blocked.sh` | a task is blocked (needs-human / unmet prereq / guard-tripped) | task-id, reason |
 | `on-integrated.sh` | a task successfully integrates into main | task-id, verification (`audited`/`ci-only`) |
