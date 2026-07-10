@@ -278,6 +278,28 @@ task at a time, gated on the same CI suite above. Current backlog status:
 | Task | Title | Status |
 |------|-------|--------|
 | T001 | Fix tautological Seasonality assertion in the native harness | pending |
+| T002 | UI-test launch arguments accumulate across relaunches | pending |
+| T003 | flash() reads a possibly-deleted SwiftData model after 0.9s | pending |
+| T004 | Log silent try? failures in persistence paths | pending |
+| T005 | Model initializer defaults bypass AppClock | pending |
+| T006 | Theme.current is unprotected global mutable state | pending |
+| T007 | Stable tie-break in emoji keyword sort (generator) | pending |
+| T008 | Fix ~20 semantically wrong emoji mappings + generator duplicate warning | pending |
+| T009 | Exact-word matching for short emoji keywords (kills pap/paper class) | pending |
+| T010 | Head-noun preference in compound emoji matching | pending |
+| T011 | Household/toiletries/pharmacy/baby/pet/brands vocabulary + corpus files | pending |
+| T012 | Golden-subset correctness mode for the emoji coverage audit | pending |
+| T013 | Port Measure/Seasonality/Formatting checks into XCTest | pending |
+| T014 | Measure.parse rejects negative and malformed input | pending |
+| T015 | SwiftLint config + CI lint step | pending |
+| T016 | Delete superseded icon/art generator tools (~1,900 lines) | pending |
+| T017 | Shared A11yID constants between app and UI tests | pending |
+| T018 | Delete an unchecked item (swipe/context affordance) | pending |
+| T019 | Rename/edit an item | pending |
+| T020 | Undo toast for Clear all and delete | pending |
+| T021 | 'Usuals' suggestion chips on empty add-bar focus | pending |
+| T022 | Share-sheet export of the list as plain text | pending |
+| T023 | Success haptic on the All done! celebration + restore haptic | pending |
 
 Preview with `DRY_RUN=1 .harness/scripts/loop.sh`; run with
 `.harness/scripts/supervise.sh` (from a real terminal).

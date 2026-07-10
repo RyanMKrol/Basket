@@ -8,12 +8,578 @@
       "status": "pending",
       "dependsOn": [],
       "gate": null,
-      "tags": ["testing"],
-      "scope": ["tools/main.swift"],
+      "tags": [
+        "testing"
+      ],
+      "scope": [
+        "tools/main.swift"
+      ],
       "design": null,
       "verify": [],
       "spec": ".harness/tasks/T001.md",
-      "facets": { "layer": "tests", "workType": "bugfix", "risk": [] }
+      "facets": {
+        "layer": "tests",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T002",
+      "title": "UI-test launch arguments accumulate across relaunches",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "testing"
+      ],
+      "facets": {
+        "layer": "tests",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "UITests/BasketUITestCase.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T002.md"
+    },
+    {
+      "id": "T003",
+      "title": "flash() reads a possibly-deleted SwiftData model after 0.9s",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "bugfix"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/ShoppingListView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T003.md"
+    },
+    {
+      "id": "T004",
+      "title": "Log silent try? failures in persistence paths",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "robustness"
+      ],
+      "facets": {
+        "layer": "models",
+        "workType": "logging",
+        "risk": []
+      },
+      "scope": [
+        "Sources/BasketApp.swift",
+        "Sources/Services/KnownItems.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T004.md"
+    },
+    {
+      "id": "T005",
+      "title": "Model initializer defaults bypass AppClock",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "testing"
+      ],
+      "facets": {
+        "layer": "models",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Models/GroceryItem.swift",
+        "Sources/Models/KnownItem.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T005.md"
+    },
+    {
+      "id": "T006",
+      "title": "Theme.current is unprotected global mutable state",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "concurrency"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Theme/Theme.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T006.md"
+    },
+    {
+      "id": "T007",
+      "title": "Stable tie-break in emoji keyword sort (generator)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "emoji"
+      ],
+      "facets": {
+        "layer": "generators",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "tools/gen_emoji.py",
+        "Sources/Services/EmojiTable.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T007.md"
+    },
+    {
+      "id": "T008",
+      "title": "Fix ~20 semantically wrong emoji mappings + generator duplicate warning",
+      "status": "pending",
+      "dependsOn": [
+        "T007"
+      ],
+      "gate": null,
+      "tags": [
+        "emoji"
+      ],
+      "facets": {
+        "layer": "generators",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "tools/gen_emoji.py",
+        "tools/emoji_supplement.txt",
+        "tools/gen_suggestions.py",
+        "Sources/Services/EmojiTable.swift",
+        "Sources/Services/SuggestionDictionary.swift",
+        "tools/main.swift",
+        "Tests/BasketTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T008.md"
+    },
+    {
+      "id": "T009",
+      "title": "Exact-word matching for short emoji keywords (kills pap/paper class)",
+      "status": "pending",
+      "dependsOn": [
+        "T008"
+      ],
+      "gate": null,
+      "tags": [
+        "emoji"
+      ],
+      "facets": {
+        "layer": "generators",
+        "workType": "bugfix",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "tools/gen_emoji.py",
+        "Sources/Services/EmojiTable.swift",
+        "tools/main.swift",
+        "Tests/BasketTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T009.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T010",
+      "title": "Head-noun preference in compound emoji matching",
+      "status": "pending",
+      "dependsOn": [
+        "T009"
+      ],
+      "gate": null,
+      "tags": [
+        "emoji"
+      ],
+      "facets": {
+        "layer": "generators",
+        "workType": "feature",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "tools/gen_emoji.py",
+        "Sources/Services/EmojiTable.swift",
+        "tools/main.swift",
+        "Tests/BasketTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T010.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T011",
+      "title": "Household/toiletries/pharmacy/baby/pet/brands vocabulary + corpus files",
+      "status": "pending",
+      "dependsOn": [
+        "T010"
+      ],
+      "gate": null,
+      "tags": [
+        "emoji"
+      ],
+      "facets": {
+        "layer": "generators",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "tools/gen_emoji.py",
+        "tools/emoji_supplement.txt",
+        "tools/gen_suggestions.py",
+        "tools/corpus/",
+        "Sources/Services/EmojiTable.swift",
+        "Sources/Services/SuggestionDictionary.swift",
+        "tools/main.swift",
+        "Tests/BasketTests.swift",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T011.md"
+    },
+    {
+      "id": "T012",
+      "title": "Golden-subset correctness mode for the emoji coverage audit",
+      "status": "pending",
+      "dependsOn": [
+        "T011"
+      ],
+      "gate": null,
+      "tags": [
+        "emoji",
+        "testing"
+      ],
+      "facets": {
+        "layer": "generators",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "tools/audit_coverage.swift",
+        "tools/corpus/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T012.md"
+    },
+    {
+      "id": "T013",
+      "title": "Port Measure/Seasonality/Formatting checks into XCTest",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "testing"
+      ],
+      "facets": {
+        "layer": "tests",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T013.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T014",
+      "title": "Measure.parse rejects negative and malformed input",
+      "status": "pending",
+      "dependsOn": [
+        "T013"
+      ],
+      "gate": null,
+      "tags": [
+        "bugfix"
+      ],
+      "facets": {
+        "layer": "services",
+        "workType": "bugfix",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Services/Measure.swift",
+        "Tests/",
+        "tools/main.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T014.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T015",
+      "title": "SwiftLint config + CI lint step",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tooling"
+      ],
+      "facets": {
+        "layer": "build",
+        "workType": "config",
+        "risk": []
+      },
+      "scope": [
+        ".swiftlint.yml",
+        ".github/workflows/ci.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T015.md"
+    },
+    {
+      "id": "T016",
+      "title": "Delete superseded icon/art generator tools (~1,900 lines)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "cleanup"
+      ],
+      "facets": {
+        "layer": "build",
+        "workType": "refactor",
+        "risk": []
+      },
+      "scope": [
+        "tools/",
+        "CLAUDE.md",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T016.md"
+    },
+    {
+      "id": "T017",
+      "title": "Shared A11yID constants between app and UI tests",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "testing"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "refactor",
+        "risk": [
+          "cross-cutting"
+        ]
+      },
+      "scope": [
+        "Sources/Support/",
+        "Sources/Views/",
+        "UITests/",
+        "project.yml"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T017.md"
+    },
+    {
+      "id": "T018",
+      "title": "Delete an unchecked item (swipe/context affordance)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/",
+        "Sources/Services/",
+        "UITests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T018.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T019",
+      "title": "Rename/edit an item",
+      "status": "pending",
+      "dependsOn": [
+        "T018"
+      ],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/",
+        "Sources/Services/",
+        "UITests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T019.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T020",
+      "title": "Undo toast for Clear all and delete",
+      "status": "pending",
+      "dependsOn": [
+        "T018"
+      ],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/",
+        "Sources/Services/",
+        "UITests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T020.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T021",
+      "title": "'Usuals' suggestion chips on empty add-bar focus",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Services/Suggestions.swift",
+        "Sources/Views/",
+        "Tests/",
+        "UITests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T021.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T022",
+      "title": "Share-sheet export of the list as plain text",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/",
+        "Sources/Services/",
+        "Tests/",
+        "UITests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T022.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T023",
+      "title": "Success haptic on the All done! celebration + restore haptic",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "polish"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Services/Haptics.swift",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T023.md"
     }
   ]
 }
