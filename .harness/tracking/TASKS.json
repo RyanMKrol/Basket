@@ -1,5 +1,5 @@
 {
-  "_doc": "Implementation backlog for the single sequential Ralph loop. SOURCE OF TRUTH for done/not-done + dependency order; docs/HARNESS.md §8.1 = schema. Each task's `do` + `done-when` live in a per-task Markdown spec at the `spec` path (.harness/tasks/TNNN.md, sections '## Do' / '## Done when'); every BUILDABLE task carries `facets` (difficulty auto-tuning) — a needs-human gated task is carved out and carries none. `gate` is `null` (buildable) or `needs-human` (a one-time human step). To require a human to review a deliverable BEFORE dependents proceed, author the work as a normal buildable task plus a separate `needs-human` review task that dependsOn it, and point the dependents at the review task.",
+  "_doc": "Implementation backlog for the single sequential Ralph loop. SOURCE OF TRUTH for done/not-done + dependency order; docs/HARNESS.md \u00a78.1 = schema. Each task's `do` + `done-when` live in a per-task Markdown spec at the `spec` path (.harness/tasks/TNNN.md, sections '## Do' / '## Done when'); every BUILDABLE task carries `facets` (difficulty auto-tuning) \u2014 a needs-human gated task is carved out and carries none. `gate` is `null` (buildable) or `needs-human` (a one-time human step). To require a human to review a deliverable BEFORE dependents proceed, author the work as a normal buildable task plus a separate `needs-human` review task that dependsOn it, and point the dependents at the review task.",
   "version": 1,
   "tasks": [
     {
@@ -111,23 +111,30 @@
     },
     {
       "id": "T006",
-      "title": "Theme.current is unprotected global mutable state",
+      "title": "Remove non-default themes; hardcode the Pastel Dots look",
       "status": "pending",
       "dependsOn": [],
       "gate": null,
       "tags": [
-        "concurrency"
+        "cleanup"
       ],
       "facets": {
         "layer": "views",
-        "workType": "bugfix",
-        "risk": []
+        "workType": "refactor",
+        "risk": [
+          "touches-core"
+        ]
       },
       "scope": [
-        "Sources/Theme/Theme.swift"
+        "Sources/Theme/",
+        "Sources/BasketApp.swift",
+        "UITests/AccessibilityAuditTests.swift",
+        "README.md"
       ],
       "design": null,
-      "verify": [],
+      "verify": [
+        "run-app"
+      ],
       "spec": ".harness/tasks/T006.md"
     },
     {
@@ -418,39 +425,10 @@
       "spec": ".harness/tasks/T017.md"
     },
     {
-      "id": "T018",
-      "title": "Delete an unchecked item (swipe/context affordance)",
+      "id": "T019",
+      "title": "Rename an item by tapping its name",
       "status": "pending",
       "dependsOn": [],
-      "gate": null,
-      "tags": [
-        "feature"
-      ],
-      "facets": {
-        "layer": "views",
-        "workType": "feature",
-        "risk": []
-      },
-      "scope": [
-        "Sources/Views/",
-        "Sources/Services/",
-        "UITests/",
-        "README.md"
-      ],
-      "design": null,
-      "verify": [
-        "run-app"
-      ],
-      "spec": ".harness/tasks/T018.md",
-      "expectsTest": true
-    },
-    {
-      "id": "T019",
-      "title": "Rename/edit an item",
-      "status": "pending",
-      "dependsOn": [
-        "T018"
-      ],
       "gate": null,
       "tags": [
         "feature"
@@ -475,11 +453,9 @@
     },
     {
       "id": "T020",
-      "title": "Undo toast for Clear all and delete",
+      "title": "Undo toast for Clear all",
       "status": "pending",
-      "dependsOn": [
-        "T018"
-      ],
+      "dependsOn": [],
       "gate": null,
       "tags": [
         "feature"
@@ -531,34 +507,6 @@
       "expectsTest": true
     },
     {
-      "id": "T022",
-      "title": "Share-sheet export of the list as plain text",
-      "status": "pending",
-      "dependsOn": [],
-      "gate": null,
-      "tags": [
-        "feature"
-      ],
-      "facets": {
-        "layer": "views",
-        "workType": "feature",
-        "risk": []
-      },
-      "scope": [
-        "Sources/Views/",
-        "Sources/Services/",
-        "Tests/",
-        "UITests/",
-        "README.md"
-      ],
-      "design": null,
-      "verify": [
-        "run-app"
-      ],
-      "spec": ".harness/tasks/T022.md",
-      "expectsTest": true
-    },
-    {
       "id": "T023",
       "title": "Success haptic on the All done! celebration + restore haptic",
       "status": "pending",
@@ -580,6 +528,57 @@
       "design": null,
       "verify": [],
       "spec": ".harness/tasks/T023.md"
+    },
+    {
+      "id": "T024",
+      "title": "Formatting cleanup: wrap over-long lines + consistent MARK usage",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "cleanup"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "refactor",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Services/TipJar.swift",
+        "Sources/BasketApp.swift",
+        "Sources/Services/Measure.swift",
+        "Sources/Views/QuantityEditor.swift",
+        "Sources/Views/AboutView.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T024.md"
+    },
+    {
+      "id": "T025",
+      "title": "Refactor ShoppingListView (extract sections + quantity handlers)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "refactor"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "refactor",
+        "risk": [
+          "touches-core"
+        ]
+      },
+      "scope": [
+        "Sources/Views/"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T025.md"
     }
   ]
 }
