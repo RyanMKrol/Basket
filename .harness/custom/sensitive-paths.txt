@@ -1,0 +1,13 @@
+# sensitive-paths.txt — extra pre-push secret-guard patterns for Basket.
+# One extended-regex (ERE) fragment per line; blank lines and #-comments ignored. OR-appended to the
+# built-in guard (can only ADD protection). Check a path with:
+#   .harness/scripts/loop.sh --guard-selftest <path>
+
+# Local signing identity (DEVELOPMENT_TEAM) — gitignored, but belt-and-braces.
+(^|/)Signing\.local\.xcconfig$
+
+# App Store Connect API keys and Apple signing material — should never live in the repo at all.
+\.p8$
+\.p12$
+\.mobileprovision$
+\.cer$
