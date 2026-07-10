@@ -579,6 +579,164 @@
         "run-app"
       ],
       "spec": ".harness/tasks/T025.md"
+    },
+    {
+      "id": "T026",
+      "title": "App Group + shared SwiftData container (foundation for Siri/widgets)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": "needs-human",
+      "tags": [
+        "infra"
+      ],
+      "scope": [
+        "project.yml",
+        "Sources/BasketApp.swift",
+        "Sources/Support/"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T026.md"
+    },
+    {
+      "id": "T027",
+      "title": "'Add to Basket' App Intent + App Shortcut (Siri add)",
+      "status": "pending",
+      "dependsOn": [
+        "T026"
+      ],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "services",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/",
+        "Tests/",
+        "project.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T027.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T028",
+      "title": "Quick-add deep link (basket://add focuses the add bar + keyboard)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/",
+        "UITests/",
+        "project.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "spec": ".harness/tasks/T028.md",
+      "expectsTest": true
+    },
+    {
+      "id": "T029",
+      "title": "View-only Home Screen widget (small + medium)",
+      "status": "pending",
+      "dependsOn": [
+        "T026"
+      ],
+      "gate": null,
+      "tags": [
+        "feature",
+        "widget"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/",
+        "project.yml",
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T029.md",
+      "expectsTest": true,
+      "visualVerify": false
+    },
+    {
+      "id": "T030",
+      "title": "Interactive widget: tap an item to check it off",
+      "status": "pending",
+      "dependsOn": [
+        "T029"
+      ],
+      "gate": null,
+      "tags": [
+        "feature",
+        "widget"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/",
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T030.md",
+      "expectsTest": true,
+      "visualVerify": false
+    },
+    {
+      "id": "T031",
+      "title": "Quick-add '+' widget button + add/combined widget variants",
+      "status": "pending",
+      "dependsOn": [
+        "T028",
+        "T029"
+      ],
+      "gate": null,
+      "tags": [
+        "feature",
+        "widget"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/",
+        "Tests/",
+        "project.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "spec": ".harness/tasks/T031.md",
+      "visualVerify": false
     }
   ]
 }

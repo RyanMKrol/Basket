@@ -300,6 +300,12 @@ task at a time, gated on the same CI suite above. Current backlog status:
 | T023 | Success haptic on the All done! celebration + restore haptic | pending |
 | T024 | Formatting cleanup: wrap over-long lines + consistent MARK usage | pending |
 | T025 | Refactor ShoppingListView (extract sections + quantity handlers) | pending |
+| T026 | App Group + shared SwiftData container (foundation for Siri/widgets) 🔒 | pending |
+| T027 | 'Add to Basket' App Intent + App Shortcut (Siri add) | pending |
+| T028 | Quick-add deep link (basket://add focuses the add bar + keyboard) | pending |
+| T029 | View-only Home Screen widget (small + medium) | pending |
+| T030 | Interactive widget: tap an item to check it off | pending |
+| T031 | Quick-add '+' widget button + add/combined widget variants | pending |
 
 Preview with `DRY_RUN=1 .harness/scripts/loop.sh`; run with
 `.harness/scripts/supervise.sh` (from a real terminal).
