@@ -280,7 +280,7 @@
     {
       "id": "T012",
       "title": "Golden-subset correctness mode for the emoji coverage audit",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T011"
       ],
