@@ -27,6 +27,24 @@ final class EmojiTests: XCTestCase {
         XCTAssertEqual(Emoji.forName("Apples"), "🍎")
     }
 
+    func testShortKeywordsRequireExactWordMatch() {
+        // Regression: short keywords ("pap", "carp", "ham") used to match any
+        // word starting with them, causing "toilet paper" → 🥣, "carpet
+        // cleaner" → 🐠, "hamper" → 🍖.
+        XCTAssertNotEqual(Emoji.forName("Toilet paper"), "🥣")
+        XCTAssertNotEqual(Emoji.forName("Paper towels"), "🥣")
+        XCTAssertNotEqual(Emoji.forName("Carpet cleaner"), "🐠")
+        XCTAssertNotEqual(Emoji.forName("Hamper"), "🍖")
+        XCTAssertEqual(Emoji.forName("Pap"), "🥣")
+        XCTAssertEqual(Emoji.forName("Ham"), "🍖")
+        XCTAssertEqual(Emoji.forName("Hams"), "🍖")
+        XCTAssertEqual(Emoji.forName("Carp"), "🐠")
+        XCTAssertEqual(Emoji.forName("Figs"), "🍇")
+        XCTAssertEqual(Emoji.forName("Peas"), "🫛")
+        XCTAssertEqual(Emoji.forName("Yams"), "🥔")
+        XCTAssertEqual(Emoji.forName("Strawberries"), "🍓")
+    }
+
     func testBroadCategoryCoverage() {
         XCTAssertEqual(Emoji.forName("Cheddar"), "🧀")
         XCTAssertEqual(Emoji.forName("Salmon fillet"), "🐟")

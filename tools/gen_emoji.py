@@ -115,7 +115,7 @@ RAW = r"""
 ("pudding rice", "🍚"),("risotto rice", "🍚"),("sushi rice", "🍚"),("rice", "🍚"),("rice ball", "🍙"),("spaghetti", "🍝"),("penne", "🍝"),("fusilli", "🍝"),("macaroni", "🍝"),
 ("lasagne", "🍝"),("lasagna", "🍝"),("tagliatelle", "🍝"),("orzo", "🍝"),("gnocchi", "🍝"),("rigatoni", "🍝"),
 ("farfalle", "🍝"),("linguine", "🍝"),("conchiglie", "🍝"),("cannelloni", "🍝"),("ravioli", "🍝"),
-("tortellini", "🍝"),("pasta", "🍝"),("couscous", "🍝"),("noodle", "🍜"),("egg noodle", "🍜"),
+("tortellini", "🍝"),("rotini", "🍝"),("pasta", "🍝"),("couscous", "🍝"),("noodle", "🍜"),("egg noodle", "🍜"),
 ("rice noodle", "🍜"),("udon", "🍜"),("ramen", "🍜"),("soba", "🍜"),("vermicelli", "🍜"),("glass noodle", "🍜"),
 ("quinoa", "🥣"),("bulgur", "🥣"),("barley", "🥣"),("pearl barley", "🥣"),("polenta", "🥣"),("semolina", "🥣"),
 ("cornmeal", "🥣"),("buckwheat", "🥣"),("millet", "🥣"),("farro", "🥣"),("freekeh", "🥣"),("spelt", "🥣"),
@@ -255,6 +255,13 @@ RAW = r"""
 # Middle Eastern / Mediterranean
 ("shawarma", "🥙"),("doner", "🥙"),("souvlaki", "🍢"),("dolma", "🥬"),
 ("borek", "🥧"),("manti", "🥟"),("labneh", "🥛"),("ayran", "🥛"),("harira", "🍲"),
+# T009: coverage lost when short-keyword prefix matching (e.g. "pie"->pierogi,
+# "jam"->jamon, "corn"->cornichon) was tightened to exact-word/plural matching.
+("pierogi", "🥟"),("jamon iberico", "🥓"),("jambon de bayonne", "🥓"),
+("linguica", "🌭"),("rollmops", "🐟"),("cornichon", "🥒"),("tarte tatin", "🥧"),
+("tealight", "🕯️"),("wrapping paper", "🎁"),("bungeoppang", "🥞"),
+("suspiro a la lime", "🍮"),("sabudana", "🍚"),("gulab jamun", "🍡"),
+("milkfish", "🐟"),("bangus", "🐟"),("beancurd sheet", "🫘"),("sago pearl", "🍚"),
 """
 
 # Corrections to a few researched entries.
@@ -302,9 +309,14 @@ enum EmojiTable {
     ]
 
     // Keywords with a space or hyphen are matched as substrings (more specific,
-    // checked first); plain single words match when a word in the name starts
-    // with them. Each group is sorted longest-first so specific terms win
-    // (e.g. "peach" before "pea", "eggplant" before "egg", "hamburger" before "ham").
+    // checked first); plain single words match against words in the name. Each
+    // group is sorted longest-first so specific terms win (e.g. "peach" before
+    // "pea", "eggplant" before "egg", "hamburger" before "ham"). Short keywords
+    // (length <= 4) require an exact-word or simple-plural match — a bare
+    // prefix match on a short stem produces too many false positives (e.g.
+    // "pap" matching "paper", "carp" matching "carpet"); longer keywords (>= 5)
+    // keep prefix matching, which powers deliberate truncated stems like
+    // "strawberr", "anchov", "pastr".
     private static let complexKeywords: [(String, String)] =
         entries.filter { $0.0.contains(where: { !$0.isLetter }) }
                .sorted { $0.0.count > $1.0.count || ($0.0.count == $1.0.count && $0.0 < $1.0) }
@@ -320,7 +332,12 @@ enum EmojiTable {
         }
         let words = lower.split { !$0.isLetter }.map(String.init)
         for (keyword, glyph) in simpleKeywords
-        where words.contains(where: { $0.hasPrefix(keyword) }) {
+        where words.contains(where: { word in
+            if keyword.count <= 4 {
+                return word == keyword || word == keyword + "s" || word == keyword + "es"
+            }
+            return word.hasPrefix(keyword)
+        }) {
             return glyph
         }
         return nil
