@@ -157,10 +157,6 @@ App Store submission.
   - `gen_suggestions.py` → `Sources/Services/SuggestionDictionary.swift` (unifies
     `corpus/*.txt` with the emoji table's keyword vocabulary).
   - `audit_coverage.swift` — audits emoji coverage over `corpus/*.txt`.
-  - `make_icon.swift` / `make_icon_options.swift` — legacy programmatic icon
-    renderer, **superseded**: `Sources/Assets.xcassets/AppIcon.appiconset/icon-1024.png`
-    is now the design agency's artwork, not generator output. Don't run these
-    against the appiconset without checking with the user first.
   - `main.swift` — the native logic test harness.
   - `export_ui_screenshots.sh` / `rename_ui_screenshots.py` — run `UITests/`
     and export their `XCTAttachment` screenshots as plain PNGs into
