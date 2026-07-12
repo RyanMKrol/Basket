@@ -112,7 +112,7 @@
     {
       "id": "T006",
       "title": "Remove non-default themes; hardcode the Pastel Dots look",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
