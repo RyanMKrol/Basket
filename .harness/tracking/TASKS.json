@@ -306,7 +306,7 @@
     {
       "id": "T013",
       "title": "Port Measure/Seasonality/Formatting checks into XCTest",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
