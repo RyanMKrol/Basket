@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 /// Long-term memory of things you've bought, powering typing suggestions.
 /// Separate from `GroceryItem` (the live list) so the suggestion pool outlives
@@ -13,7 +14,7 @@ final class KnownItem {
     var timesAdded: Int
     var lastAddedAt: Date
 
-    init(key: String, displayName: String, timesAdded: Int = 1, lastAddedAt: Date = .now) {
+    init(key: String, displayName: String, timesAdded: Int = 1, lastAddedAt: Date = AppClock.now) {
         self.key = key
         self.displayName = displayName
         self.timesAdded = timesAdded

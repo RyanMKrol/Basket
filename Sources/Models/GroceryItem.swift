@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import SwiftUI
 
 /// One row on the active shopping list.
 /// When checked off it is animated out and deleted; the name lives on in
@@ -25,7 +26,7 @@ final class GroceryItem {
         set { unitRaw = newValue?.rawValue }
     }
 
-    init(name: String, isChecked: Bool = false, createdAt: Date = .now, checkedAt: Date? = nil,
+    init(name: String, isChecked: Bool = false, createdAt: Date = AppClock.now, checkedAt: Date? = nil,
          quantity: Double? = nil, unitRaw: String? = nil) {
         self.name = name
         self.isChecked = isChecked
