@@ -1790,13 +1790,17 @@ enum EmojiTable {
         entries.filter { !$0.0.contains(where: { !$0.isLetter }) }
                .sorted { $0.0.count > $1.0.count || ($0.0.count == $1.0.count && $0.0 < $1.0) }
 
-    /// Curated match, or nil if nothing in the table applies.
-    static func match(_ name: String) -> String? {
-        let lower = name.lowercased()
-        for (keyword, glyph) in complexKeywords where lower.contains(keyword) {
-            return glyph
-        }
-        let words = lower.split { !$0.isLetter }.map(String.init)
+    // English compounds are head-final, so when several simple keywords match
+    // different words of a multi-word name, the RIGHTMOST word wins (e.g.
+    // "ginger beer" → beer, "carrot cake" → cake), with keyword length only
+    // breaking ties within the same word. Prepositions like "in"/"of" start a
+    // trailing modifier phrase (e.g. "tuna in spring water") that isn't part
+    // of the head-noun compound, so only the words before the first such
+    // stopword are considered "head words"; if none of those match anything,
+    // fall back to the longest match anywhere (the pre-T010 behaviour).
+    private static let stopwords: Set<String> = ["in", "of"]
+
+    private static func simpleMatch(in words: [String]) -> String? {
         for (keyword, glyph) in simpleKeywords
         where words.contains(where: { word in
             if keyword.count <= 4 {
@@ -1807,5 +1811,24 @@ enum EmojiTable {
             return glyph
         }
         return nil
+    }
+
+    /// Curated match, or nil if nothing in the table applies.
+    static func match(_ name: String) -> String? {
+        let lower = name.lowercased()
+        for (keyword, glyph) in complexKeywords where lower.contains(keyword) {
+            return glyph
+        }
+        let words = lower.split { !$0.isLetter }.map(String.init)
+        let stopIndex = words.firstIndex { stopwords.contains($0) } ?? words.count
+        let headWords = words[..<stopIndex]
+        var index = headWords.endIndex
+        while index > headWords.startIndex {
+            index -= 1
+            if let glyph = simpleMatch(in: [headWords[index]]) {
+                return glyph
+            }
+        }
+        return simpleMatch(in: words)
     }
 }

@@ -45,6 +45,21 @@ final class EmojiTests: XCTestCase {
         XCTAssertEqual(Emoji.forName("Strawberries"), "🍓")
     }
 
+    func testHeadNounPreferredOverModifierWord() {
+        // T010: when several simple keywords match different words of a
+        // compound, the rightmost word (the head noun) wins.
+        XCTAssertEqual(Emoji.forName("Ginger beer"), "🍺")
+        XCTAssertEqual(Emoji.forName("Carrot cake"), "🎂")
+        XCTAssertEqual(Emoji.forName("Mince pies"), "🥧")
+        XCTAssertEqual(Emoji.forName("Assam tea"), "🍵")
+        // "in"/"of" start a trailing modifier phrase excluded from the head
+        // noun search, so "tuna" (not "water") wins here.
+        XCTAssertEqual(Emoji.forName("Tuna in spring water"), "🐟")
+        // Complex (multi-word) keyword matches keep absolute priority.
+        XCTAssertEqual(Emoji.forName("Peanut butter"), "🥜")
+        XCTAssertEqual(Emoji.forName("Sugar snap peas"), "🫛")
+    }
+
     func testBroadCategoryCoverage() {
         XCTAssertEqual(Emoji.forName("Cheddar"), "🧀")
         XCTAssertEqual(Emoji.forName("Salmon fillet"), "🐟")

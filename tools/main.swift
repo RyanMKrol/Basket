@@ -103,6 +103,16 @@ check(Emoji.forName("Peas") == "🫛", "peas (plural) still → 🫛")
 check(Emoji.forName("Yams") == "🥔", "yams (plural) still → 🥔")
 check(Emoji.forName("Strawberries") == "🍓", "strawberries (>=5 char stem) unaffected")
 
+print("Emoji — T010 head-noun (rightmost word) preference:")
+check(Emoji.forName("Ginger beer") == "🍺", "ginger beer → 🍺 (head noun 'beer', not 'ginger')")
+check(Emoji.forName("Carrot cake") == "🎂", "carrot cake → 🎂 (head noun 'cake', not 'carrot')")
+check(Emoji.forName("Mince pies") == "🥧", "mince pies → 🥧 (head noun 'pies', not 'mince')")
+check(Emoji.forName("Assam tea") == "🍵", "assam tea → 🍵 (head noun 'tea')")
+check(Emoji.forName("Tuna in spring water") == "🐟", "tuna in spring water → 🐟 (stopword 'in' excludes trailing 'water')")
+check(Emoji.forName("Peanut butter") == "🥜", "peanut butter unaffected (complex keyword)")
+check(Emoji.forName("Sugar snap peas") == "🫛", "sugar snap peas unaffected (complex keyword)")
+check(Emoji.forName("Ginger") == "🫚", "single-word ginger unaffected")
+
 print("Suggestions (history ranking, via combined with an empty dictionary):")
 func ranked(_ query: String, _ candidates: [SuggestionCandidate], onList: Set<String> = []) -> [Suggestion] {
     Suggestions.combined(query: query, history: candidates, dictionary: [], onList: onList, now: now)
