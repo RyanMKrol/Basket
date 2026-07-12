@@ -29,9 +29,10 @@ class BasketUITestCase: XCTestCase {
     /// choreography covered.
     @discardableResult
     func launchApp(seeded: Bool = true, realTiming: Bool = false) -> XCUIApplication {
-        app.launchArguments += ["-uiTesting"]
-        if !seeded { app.launchArguments += ["-uiTestingEmpty"] }
-        if !realTiming { app.launchArguments += ["-uiTestingDisableAnimations"] }
+        var args = ["-uiTesting"]
+        if !seeded { args.append("-uiTestingEmpty") }
+        if !realTiming { args.append("-uiTestingDisableAnimations") }
+        app.launchArguments = args
         app.launchEnvironment["UITEST_FROZEN_DATE"] = Self.frozenDate
         // Pin the zone too, or the frozen instant still renders differently
         // (time-of-day tint, day-of-year line) across machines.
