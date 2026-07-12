@@ -43,7 +43,7 @@ final class EmojiTests: XCTestCase {
     func testPrefixCollisionsResolveToLongestMatch() {
         XCTAssertEqual(Emoji.forName("Peach"), "🍑")       // not "pea"
         XCTAssertEqual(Emoji.forName("Cornflour"), "🥣")   // not "corn"
-        XCTAssertEqual(Emoji.forName("Ginger"), "🥔")      // not "gin"
+        XCTAssertEqual(Emoji.forName("Ginger"), "🫚")      // corrected in T008
         XCTAssertEqual(Emoji.forName("Brandy"), "🥃")      // not "bran"
         XCTAssertEqual(Emoji.forName("Pineapple"), "🍍")   // not "apple"
         XCTAssertEqual(Emoji.forName("T-bone steak"), "🥩") // hyphenated keyword

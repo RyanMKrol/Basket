@@ -12,7 +12,7 @@ RAW = r"""
 # --- produce ---
 ("apple", "🍎"),("green apple", "🍏"),("pear", "🍐"),("quince", "🍐"),("crabapple", "🍎"),
 ("orange", "🍊"),("mandarin", "🍊"),("clementine", "🍊"),("satsuma", "🍊"),("tangerine", "🍊"),
-("lemon", "🍋"),("lime", "🍋"),("grapefruit", "🍊"),("kumquat", "🍊"),("pomelo", "🍊"),("yuzu", "🍋"),
+("lemon", "🍋"),("lemon curd", "🍋"),("lime", "🍋"),("grapefruit", "🍊"),("kumquat", "🍊"),("pomelo", "🍊"),("yuzu", "🍋"),
 ("banana", "🍌"),("plantain", "🍌"),("strawberr", "🍓"),("blueberr", "🫐"),("raspberr", "🍓"),
 ("blackberr", "🫐"),("cranberr", "🍒"),("gooseberr", "🍏"),("elderberr", "🫐"),("mulberr", "🫐"),
 ("redcurrant", "🍒"),("blackcurrant", "🫐"),("currant", "🫐"),("grape", "🍇"),("cherr", "🍒"),
@@ -27,19 +27,19 @@ RAW = r"""
 ("beef tomato", "🍅"),("tomatillo", "🍅"),("potato", "🥔"),("sweet potato", "🥔"),("yam", "🥔"),
 ("cassava", "🥔"),("taro", "🥔"),("carrot", "🥕"),("parsnip", "🥕"),("turnip", "🥔"),("swede", "🥔"),
 ("rutabaga", "🥔"),("beetroot", "🥔"),("beet", "🥔"),("radish", "🥕"),("daikon", "🥕"),("celeriac", "🥔"),
-("ginger", "🥔"),("turmeric", "🥕"),("galangal", "🥔"),("horseradish", "🥕"),("kohlrabi", "🥬"),
+("ginger", "🫚"),("turmeric", "🫚"),("galangal", "🫚"),("horseradish", "🥕"),("kohlrabi", "🥬"),
 ("salsify", "🥕"),("jicama", "🥔"),("onion", "🧅"),("red onion", "🧅"),("shallot", "🧅"),("garlic", "🧄"),
 ("leek", "🧅"),("spring onion", "🧅"),("scallion", "🧅"),("chive", "🌿"),("pak choi", "🥬"),("bok choy", "🥬"),
 ("broccoli", "🥦"),("broccolini", "🥦"),("tenderstem", "🥦"),("cauliflower", "🥦"),("romanesco", "🥦"),
 ("cabbage", "🥬"),("red cabbage", "🥬"),("savoy", "🥬"),("kale", "🥬"),("cavolo nero", "🥬"),
 ("brussels sprout", "🥬"),("sprout", "🥬"),("collard", "🥬"),("lettuce", "🥬"),("romaine", "🥬"),
 ("iceberg", "🥬"),("spinach", "🥬"),("rocket", "🥬"),("arugula", "🥬"),("watercress", "🥬"),("chard", "🥬"),
-("endive", "🥬"),("chicory", "🥬"),("radicchio", "🥬"),("pumpkin", "🎃"),("squash", "🥒"),("butternut", "🥒"),
+("endive", "🥬"),("chicory", "🥬"),("radicchio", "🥬"),("pumpkin", "🎃"),("squash", "🎃"),("butternut", "🎃"),
 ("courgette", "🥒"),("zucchini", "🥒"),("cucumber", "🥒"),("marrow", "🥒"),("gourd", "🥒"),
 ("aubergine", "🍆"),("eggplant", "🍆"),("bell pepper", "🫑"),("pepper", "🫑"),("capsicum", "🫑"),
 ("chilli", "🌶️"),("chili", "🌶️"),("jalapeno", "🌶️"),("habanero", "🌶️"),("serrano", "🌶️"),
 ("scotch bonnet", "🌶️"),("poblano", "🌶️"),("birds eye", "🌶️"),("ghost pepper", "🌶️"),("pea", "🫛"),
-("petit pois", "🫛"),("green bean", "🫛"),("french bean", "🫛"),("runner bean", "🫛"),("edamame", "🫛"),
+("petit pois", "🫛"),("green bean", "🫛"),("french bean", "🫛"),("runner bean", "🫛"),
 ("broad bean", "🫘"),("fava", "🫘"),("mangetout", "🫛"),("snap pea", "🫛"),("snow pea", "🫛"),
 ("corn", "🌽"),("sweetcorn", "🌽"),("baby corn", "🌽"),("button mushroom", "🍄"),("mushroom", "🍄"),
 ("chestnut mushroom", "🍄"),("portobello", "🍄"),("shiitake", "🍄"),("oyster mushroom", "🍄"),
@@ -82,7 +82,7 @@ RAW = r"""
 ("omelette", "🍳"),("egg white", "🥚"),("tofu", "🫘"),("tempeh", "🫘"),("seitan", "🫘"),("quorn", "🫘"),
 ("veggie sausage", "🌭"),("vegetarian sausage", "🌭"),("veggie burger", "🍔"),("soy mince", "🫘"),
 ("burger", "🍔"),("hamburger", "🍔"),("beefburger", "🍔"),("patty", "🍔"),("meatball", "🥩"),
-("nugget", "🍗"),("schnitzel", "🥩"),("kebab", "🥩"),("deli meat", "🍖"),("cold cut", "🍖"),
+("nugget", "🍗"),("chicken nugget", "🍗"),("schnitzel", "🥩"),("kebab", "🥙"),("deli meat", "🍖"),("cold cut", "🍖"),
 ("bone broth", "🦴"),("marrow bone", "🦴"),
 # --- dairy / bakery / grains ---
 ("whole milk", "🥛"),("skimmed milk", "🥛"),("semi-skimmed", "🥛"),("milk", "🥛"),("oat milk", "🥛"),
@@ -112,8 +112,7 @@ RAW = r"""
 ("porridge", "🥣"),("oat", "🥣"),("bran", "🥣"),("shreddies", "🥣"),("shredded wheat", "🥣"),("cereal", "🥣"),
 ("cheerios", "🥣"),("rice krispies", "🥣"),("grits", "🥣"),("basmati", "🍚"),("jasmine rice", "🍚"),
 ("long grain", "🍚"),("arborio", "🍚"),("brown rice", "🍚"),("wild rice", "🍚"),("white rice", "🍚"),
-("pudding rice", "🍚"),("risotto rice", "🍚"),("sushi rice", "🍚"),("rice", "🍚"),("rice ball", "🍙"),
-("onigiri", "🍙"),("spaghetti", "🍝"),("penne", "🍝"),("fusilli", "🍝"),("macaroni", "🍝"),
+("pudding rice", "🍚"),("risotto rice", "🍚"),("sushi rice", "🍚"),("rice", "🍚"),("rice ball", "🍙"),("spaghetti", "🍝"),("penne", "🍝"),("fusilli", "🍝"),("macaroni", "🍝"),
 ("lasagne", "🍝"),("lasagna", "🍝"),("tagliatelle", "🍝"),("orzo", "🍝"),("gnocchi", "🍝"),("rigatoni", "🍝"),
 ("farfalle", "🍝"),("linguine", "🍝"),("conchiglie", "🍝"),("cannelloni", "🍝"),("ravioli", "🍝"),
 ("tortellini", "🍝"),("pasta", "🍝"),("couscous", "🍝"),("noodle", "🍜"),("egg noodle", "🍜"),
@@ -147,7 +146,7 @@ RAW = r"""
 ("herbes", "🧂"),("vanilla", "🧂"),("seasoning", "🧂"),("chilli flake", "🌶️"),("chilli powder", "🌶️"),
 ("chili powder", "🌶️"),("cayenne", "🌶️"),("chipotle", "🌶️"),("garlic powder", "🧄"),
 ("garlic granule", "🧄"),("onion powder", "🧅"),("red lentil", "🫘"),("green lentil", "🫘"),
-("brown lentil", "🫘"),("puy lentil", "🫘"),("lentil", "🫘"),("chickpea", "🫘"),("kidney bean", "🫘"),
+("brown lentil", "🫘"),("puy lentil", "🫘"),("chickpea", "🫘"),("kidney bean", "🫘"),
 ("black bean", "🫘"),("cannellini", "🫘"),("butter bean", "🫘"),("haricot", "🫘"),("borlotti", "🫘"),
 ("pinto", "🫘"),("mung bean", "🫘"),("split pea", "🫘"),("marrowfat", "🫘"),("soya bean", "🫘"),
 ("bean", "🫘"),("pulse", "🫘"),("peanut butter", "🥜"),("peanut", "🥜"),("almond", "🥜"),("cashew", "🥜"),
@@ -156,8 +155,8 @@ RAW = r"""
 ("chestnut", "🌰"),("sesame seed", "🥜"),("sunflower seed", "🥜"),("pumpkin seed", "🥜"),("chia seed", "🥜"),
 ("flaxseed", "🥜"),("linseed", "🥜"),("poppy seed", "🥜"),("hemp seed", "🥜"),("nigella", "🥜"),
 ("honey", "🍯"),("maple syrup", "🍯"),("golden syrup", "🍯"),("agave", "🍯"),("treacle", "🍯"),
-("molasses", "🍯"),("syrup", "🍯"),("jam", "🍓"),("marmalade", "🍓"),("conserve", "🍓"),("compote", "🍓"),
-("lemon curd", "🍓"),("nutella", "🍫"),("chocolate spread", "🍫"),("marmite", "🥫"),("yeast extract", "🥫"),
+("molasses", "🍯"),("syrup", "🍯"),("jam", "🍓"),("marmalade", "🍊"),("conserve", "🍓"),("compote", "🍓"),
+("nutella", "🍫"),("chocolate spread", "🍫"),("marmite", "🥫"),("yeast extract", "🥫"),
 ("bovril", "🥫"),("sweetener", "🍬"),
 # --- snacks / drinks / frozen / prepared / non-food ---
 ("ready salted", "🍟"),("salt and vinegar", "🍟"),("cheese and onion", "🍟"),("crisp", "🍟"),
@@ -181,7 +180,7 @@ RAW = r"""
 ("gin", "🍸"),("whisky", "🥃"),("rum", "🥃"),("brandy", "🥃"),("tequila", "🥃"),("sherry", "🍷"),
 ("port", "🍷"),("liqueur", "🥃"),("cocktail", "🍹"),("frozen pizza", "🍕"),("pizza", "🍕"),
 # NB: "fish finger" is mapped to 🐟 in the proteins block above (first match wins).
-("chicken nugget", "🍱"),("oven chip", "🍟"),
+("oven chip", "🍟"),
 ("sandwich", "🥪"),("sub", "🥪"),("taco", "🌮"),("burrito", "🌯"),("tamale", "🫔"),
 ("gyro", "🥙"),("falafel", "🧆"),("ready meal", "🍱"),("bento", "🍱"),("curry", "🍛"),("stir fry", "🥘"),
 ("paella", "🥘"),("casserole", "🥘"),("pad thai", "🍜"),("pot noodle", "🍜"),("soup", "🍲"),("stew", "🍲"),
@@ -228,10 +227,10 @@ RAW = r"""
 ("nopal", "🥬"),("nopales", "🥬"),
 # pulses / dals
 ("dal", "🫘"),("daal", "🫘"),("dhal", "🫘"),("toor", "🫘"),("urad", "🫘"),("moong", "🫘"),
-("masoor", "🫘"),("chana", "🫘"),("rajma", "🫘"),("besan", "🥣"),("lentil", "🫘"),
+("masoor", "🫘"),("chana", "🫘"),("rajma", "🫘"),("besan", "🥣"),
 # East Asian pastes / seasonings / stocks
 ("gochujang", "🥫"),("gochugaru", "🌶️"),("doenjang", "🥫"),("ssamjang", "🥫"),
-("doubanjiang", "🥫"),("miso", "🥫"),("dashi", "🥫"),("mirin", "🥫"),("ponzu", "🥫"),
+("doubanjiang", "🥫"),("miso", "🥫"),("dashi", "🥫"),("mirin", "🍶"),("ponzu", "🥫"),
 ("tamari", "🥫"),("furikake", "🍙"),("wasabi", "🌶️"),("teriyaki", "🥫"),("kewpie", "🥫"),
 # seaweed
 ("kombu", "🥬"),("wakame", "🥬"),("kelp", "🥬"),("kaiso", "🥬"),
@@ -239,22 +238,22 @@ RAW = r"""
 ("tteok", "🍡"),("tteokbokki", "🍡"),("bulgogi", "🥩"),("bibimbap", "🍚"),("japchae", "🍜"),
 ("kimbap", "🍙"),("banchan", "🥗"),("jjigae", "🍲"),("samgyeopsal", "🥓"),("bingsu", "🍧"),
 # Chinese / dim sum
-("bao", "🥟"),("baozi", "🥟"),("wonton", "🥟"),("mantou", "🥟"),("congee", "🍚"),
+("bao", "🥟"),("baozi", "🥟"),("wonton", "🥟"),("mantou", "🥟"),
 ("jook", "🍚"),("mapo", "🍲"),("chow mein", "🍜"),("lo mein", "🍜"),("char siu", "🍖"),
 # Japanese
-("onigiri", "🍙"),("takoyaki", "🍡"),("okonomiyaki", "🥞"),("katsu", "🍱"),("donburi", "🍚"),
-("yakitori", "🍢"),("sashimi", "🍣"),("nigiri", "🍣"),("maki", "🍣"),("edamame", "🫛"),
+("takoyaki", "🍡"),("okonomiyaki", "🥞"),("katsu", "🍱"),("donburi", "🍚"),
+("yakitori", "🍢"),("sashimi", "🍣"),("nigiri", "🍣"),("maki", "🍣"),
 # South / SE Asian
 ("idli", "🍚"),("vada", "🍩"),("upma", "🥣"),("poha", "🍚"),("biryani", "🍚"),("pulao", "🍚"),
-("banh mi", "🥪"),("banh xeo", "🥞"),("pho", "🍜"),("congee", "🍚"),("roti", "🫓"),
+("banh mi", "🥪"),("banh xeo", "🥞"),("pho", "🍜"),
 # Latin American / Caribbean
 ("arepa", "🫓"),("pupusa", "🫓"),("tostada", "🫓"),("mole", "🥫"),("sofrito", "🥫"),
-("chimichurri", "🥫"),("plantain", "🍌"),("yuca", "🥔"),("cassava", "🥔"),("ackee", "🍐"),
+("chimichurri", "🥫"),("yuca", "🥔"),
 # African
-("injera", "🫓"),("berbere", "🌶️"),("mitmita", "🌶️"),("egusi", "🥜"),("garri", "🥣"),
+("berbere", "🌶️"),("mitmita", "🌶️"),("egusi", "🥜"),("garri", "🥣"),
 ("fufu", "🥣"),("jollof", "🍚"),("suya", "🍢"),("biltong", "🥩"),("ugali", "🥣"),
 # Middle Eastern / Mediterranean
-("injera", "🫓"),("shawarma", "🥙"),("doner", "🥙"),("souvlaki", "🍢"),("dolma", "🥬"),
+("shawarma", "🥙"),("doner", "🥙"),("souvlaki", "🍢"),("dolma", "🥬"),
 ("borek", "🥧"),("manti", "🥟"),("labneh", "🥛"),("ayran", "🥛"),("harira", "🍲"),
 """
 
@@ -271,6 +270,7 @@ if os.path.exists(_supp):
 
 pairs = re.findall(r'\("([^"]+)",\s*"([^"]+)"\)', RAW)
 seen, table = set(), []
+duplicates = []
 for kw, emoji in pairs:
     kw = kw.strip().lower()
     if kw in FIX:
@@ -278,9 +278,14 @@ for kw, emoji in pairs:
             continue
         emoji = FIX[kw]
     if kw in seen:
+        duplicates.append(kw)
         continue
     seen.add(kw)
     table.append((kw, emoji))
+
+if duplicates:
+    import sys
+    print(f"⚠️  WARNING: Found duplicate keywords in RAW data: {', '.join(sorted(set(duplicates)))}", file=sys.stderr)
 
 lines = ",\n".join(f'        ("{kw}", "{e}")' for kw, e in table)
 swift = '''import Foundation
