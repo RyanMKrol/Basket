@@ -329,7 +329,7 @@
     {
       "id": "T014",
       "title": "Measure.parse rejects negative and malformed input",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T013"
       ],
