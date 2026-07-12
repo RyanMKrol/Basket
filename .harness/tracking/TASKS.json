@@ -68,7 +68,7 @@
     {
       "id": "T004",
       "title": "Log silent try? failures in persistence paths",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
