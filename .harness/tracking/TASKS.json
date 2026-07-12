@@ -220,7 +220,7 @@
     {
       "id": "T010",
       "title": "Head-noun preference in compound emoji matching",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T009"
       ],
