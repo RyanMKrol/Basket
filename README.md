@@ -162,6 +162,24 @@ top:
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
 
+- `tools/audit_coverage.swift` — two modes for emoji emoji mapping quality:
+  - **Coverage audit** (default): counts how many of the ~3900-item corpus resolve
+    via curated table vs semantic embedding vs fall back to the basket default.
+    ```sh
+    mkdir -p /tmp/ab && cp tools/audit_coverage.swift /tmp/ab/main.swift
+    swiftc Sources/Services/EmojiTable.swift Sources/Services/SemanticEmoji.swift \
+           Sources/Services/Emoji.swift /tmp/ab/main.swift -o /tmp/audit && /tmp/audit
+    ```
+  - **Correctness mode** (`-correctness` flag): regression testing. Runs ~180 golden
+    item → emoji pairs spanning 8+ categories (food staples, UK/US synonyms,
+    household, toiletries, pharmacy, baby, pet, brands, and fixed regressions
+    from earlier tasks) through the real cascade and fails non-zero if any
+    expectation mismatches. Use this to ensure semantic changes don't regress
+    prior emoji assignments:
+    ```sh
+    /tmp/audit -correctness
+    ```
+
 - `UITests/` — XCUITest flow tests (add an item, suggestions, check one off,
   restore/clear "Got it", edit quantity, empty state, "All done!"
   celebration, keyboard dismiss, persistence across relaunch) driving a real
