@@ -162,7 +162,7 @@
     {
       "id": "T008",
       "title": "Fix ~20 semantically wrong emoji mappings + generator duplicate warning",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T007"
       ],
