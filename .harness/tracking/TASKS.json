@@ -442,7 +442,8 @@
         "Sources/Views/",
         "Sources/Services/",
         "UITests/",
-        "README.md"
+        "README.md",
+        "Sources/Support/A11yIDs.swift"
       ],
       "design": null,
       "verify": [
