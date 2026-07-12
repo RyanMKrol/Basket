@@ -7,11 +7,8 @@ section that clears itself after an hour.
 
 Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
 
-The look is a **theme** (`Theme` / `ThemeStyle`): the default is **Pastel Dots**
-— creamy cards on a soft green pixel-dot backdrop, with pixel fonts (VT323 +
-Silkscreen) and fresh fruity accents. Other themes ship in code and can be tried
-via the `BASKET_THEME` env var (`soft`, `pixel`, `dive`, `cozy`, `arcade`,
-`fresh1`…`fresh10`).
+The look is **Pastel Dots** — creamy cards on a soft green pixel-dot backdrop,
+with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
 
 ## Features
 
@@ -202,9 +199,9 @@ top:
   window (`xcrun simctl boot` without opening `Simulator.app`).
 
   - `AccessibilityAuditTests.swift` runs XCTest's built-in
-    `performAccessibilityAudit()` over the main list (in the default theme
-    and each alternate `BASKET_THEME`), quantity editor, empty state, and
-    About sheet — catching hit-region/label/trait regressions automatically.
+    `performAccessibilityAudit()` over the main list, quantity editor, empty
+    state, and About sheet — catching hit-region/label/trait regressions
+    automatically.
     `.contrast`, `.textClipped`, and `.dynamicType` are excluded (with
     reasons documented inline: the soft/pastel palette and colour emoji
     don't fit those heuristics, and the pixel fonts are deliberately

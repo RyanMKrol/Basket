@@ -63,20 +63,6 @@ final class AccessibilityAuditTests: BasketUITestCase {
         try app.performAccessibilityAudit(for: auditTypes, handleIssue)
     }
 
-    /// The other themes share the layout but swap palette + fonts; sweep the
-    /// main list under each so a theme-specific regression can't hide behind
-    /// the default theme's passing audit.
-    func testMainListPassesAuditInEveryTheme() throws {
-        for theme in ["pixel", "dive", "cozy", "arcade"] {
-            app.launchEnvironment["BASKET_THEME"] = theme
-            launchApp()
-            XCTAssertTrue(app.buttons["itemRow.Milk"].waitForExistence(timeout: 5))
-            attachScreenshot("theme-\(theme)")
-            try app.performAccessibilityAudit(for: auditTypes, handleIssue)
-            app.terminate()
-        }
-    }
-
     /// Returning `true` marks an issue as handled (suppressed); `false` lets
     /// it fail the test. Every issue is printed either way, so a failure's
     /// log always shows the full list, not just the first one XCTest reports.

@@ -12,8 +12,6 @@ struct BasketApp: App {
 
     init() {
         Self.registerFonts()
-        // Pick a theme: BASKET_THEME env var (soft | pixel | dive | cozy | arcade).
-        Theme.select(id: ProcessInfo.processInfo.environment["BASKET_THEME"])
         // UI tests ask for deterministic rendering: no animations, so tests
         // wait on state changes rather than choreography (see TestHooks).
         if TestHooks.disableAnimations {
@@ -52,7 +50,7 @@ struct BasketApp: App {
     var body: some Scene {
         WindowGroup {
             ShoppingListView()
-                .preferredColorScheme(Theme.current.isDark ? .dark : .light)
+                .preferredColorScheme(.light)
                 .environment(tipJar)
                 // SwiftData's autosave is debounced, so a force-quit right
                 // after a change can lose it — flush explicitly on the way
