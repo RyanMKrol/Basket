@@ -1766,10 +1766,10 @@ enum EmojiTable {
     // (e.g. "peach" before "pea", "eggplant" before "egg", "hamburger" before "ham").
     private static let complexKeywords: [(String, String)] =
         entries.filter { $0.0.contains(where: { !$0.isLetter }) }
-               .sorted { $0.0.count > $1.0.count }
+               .sorted { $0.0.count > $1.0.count || ($0.0.count == $1.0.count && $0.0 < $1.0) }
     private static let simpleKeywords: [(String, String)] =
         entries.filter { !$0.0.contains(where: { !$0.isLetter }) }
-               .sorted { $0.0.count > $1.0.count }
+               .sorted { $0.0.count > $1.0.count || ($0.0.count == $1.0.count && $0.0 < $1.0) }
 
     /// Curated match, or nil if nothing in the table applies.
     static func match(_ name: String) -> String? {
