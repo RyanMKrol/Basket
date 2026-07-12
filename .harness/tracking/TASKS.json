@@ -249,7 +249,7 @@
     {
       "id": "T011",
       "title": "Household/toiletries/pharmacy/baby/pet/brands vocabulary + corpus files",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T010"
       ],
