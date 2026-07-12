@@ -355,7 +355,7 @@
     {
       "id": "T015",
       "title": "SwiftLint config + CI lint step",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
