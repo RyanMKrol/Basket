@@ -1,12 +1,14 @@
 import SwiftUI
 import SwiftData
 import CoreText
+import os
 
 @main
 struct BasketApp: App {
     let container: ModelContainer
     /// The tip jar lives for the app's lifetime and is shared via the environment.
     @State private var tipJar = TipJar()
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.ryankrol.basket", category: "persistence")
 
     init() {
         Self.registerFonts()
@@ -56,7 +58,13 @@ struct BasketApp: App {
                 // after a change can lose it — flush explicitly on the way
                 // to the background, the last reliable moment we get.
                 .onChange(of: scenePhase) { _, phase in
-                    if phase == .background { try? container.mainContext.save() }
+                    if phase == .background {
+                        do {
+                            try container.mainContext.save()
+                        } catch {
+                            Self.logger.error("Failed to save context on background: \(error)")
+                        }
+                    }
                 }
         }
         .modelContainer(container)
@@ -76,7 +84,13 @@ struct BasketApp: App {
     /// unit tests can exercise the seed against an in-memory container.)
     @MainActor
     static func seedIfEmpty(_ context: ModelContext) {
-        let count = (try? context.fetchCount(FetchDescriptor<GroceryItem>())) ?? 0
+        let count: Int
+        do {
+            count = try context.fetchCount(FetchDescriptor<GroceryItem>())
+        } catch {
+            Self.logger.error("Failed to fetch item count: \(error)")
+            count = 0
+        }
         guard count == 0 else { return }
         let now = AppClock.now
         for (i, name) in SharedFixtures.starterItems.enumerated() {
@@ -84,6 +98,10 @@ struct BasketApp: App {
             context.insert(GroceryItem(name: name,
                                        createdAt: now.addingTimeInterval(Double(i))))
         }
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            Self.logger.error("Failed to save seeded items: \(error)")
+        }
     }
 }
