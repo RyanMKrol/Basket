@@ -446,9 +446,10 @@ struct ShoppingListView: View {
 
     /// Briefly highlight a row (used when an add resolves to an existing item).
     private func flash(_ item: GroceryItem) {
-        flashID = item.persistentModelID
+        let id = item.persistentModelID
+        flashID = id
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
-            if flashID == item.persistentModelID {
+            if flashID == id {
                 withAppAnimation(.easeOut(duration: 0.3)) { flashID = nil }
             }
         }
