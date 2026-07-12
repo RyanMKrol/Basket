@@ -141,9 +141,27 @@ enum Measure {
     /// never be typed down to nothing), and a generous ceiling guards runaway
     /// input. Pairs with `numberString` (which seeds the field).
     static func parse(_ text: String, unit: MeasureUnit) -> Double? {
-        let normalised = text.replacingOccurrences(of: ",", with: ".")
-        let cleaned = normalised.filter { $0.isNumber || $0 == "." }
-        guard let raw = Double(cleaned), raw > 0 else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return nil }
+
+        let normalised = trimmed.replacingOccurrences(of: ",", with: ".")
+        var numberString = ""
+        var seenDecimal = false
+
+        for char in normalised {
+            if char == "-" {
+                return nil
+            } else if char.isNumber {
+                numberString.append(char)
+            } else if char == "." && !seenDecimal {
+                numberString.append(char)
+                seenDecimal = true
+            } else {
+                break
+            }
+        }
+
+        guard let raw = Double(numberString), raw > 0 else { return nil }
         let capped = min(raw, 100_000)
         return unit == .count ? max(1, capped.rounded()) : capped
     }

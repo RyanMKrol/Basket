@@ -105,4 +105,26 @@ final class MeasureTests: XCTestCase {
         XCTAssertNil(Measure.parse("abc", unit: .gram))
         XCTAssertEqual(Measure.parse("999999", unit: .gram), 100_000)
     }
+
+    func testParsingRejectsNegative() {
+        XCTAssertNil(Measure.parse("-5", unit: .gram))
+    }
+
+    func testParsingFirstNumberOnly() {
+        XCTAssertEqual(Measure.parse("2x500", unit: .gram), 2)
+        XCTAssertEqual(Measure.parse("750 ml", unit: .milliliter), 750)
+    }
+
+    func testParsingDecimalVariants() {
+        XCTAssertEqual(Measure.parse("1.5", unit: .gram), 1.5)
+        XCTAssertEqual(Measure.parse("1,5", unit: .gram), 1.5)
+    }
+
+    func testParsingLeadingDecimal() {
+        XCTAssertEqual(Measure.parse(".5", unit: .gram), 0.5)
+    }
+
+    func testParsingEmptyInput() {
+        XCTAssertNil(Measure.parse("", unit: .gram))
+    }
 }
