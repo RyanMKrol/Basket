@@ -378,7 +378,7 @@
     {
       "id": "T016",
       "title": "Delete superseded icon/art generator tools (~1,900 lines)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
