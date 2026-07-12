@@ -191,7 +191,7 @@
     {
       "id": "T009",
       "title": "Exact-word matching for short emoji keywords (kills pap/paper class)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T008"
       ],
