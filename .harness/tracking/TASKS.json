@@ -90,7 +90,7 @@
     {
       "id": "T005",
       "title": "Model initializer defaults bypass AppClock",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
