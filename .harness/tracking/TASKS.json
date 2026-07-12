@@ -47,7 +47,7 @@
     {
       "id": "T003",
       "title": "flash() reads a possibly-deleted SwiftData model after 0.9s",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
