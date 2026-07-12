@@ -5,7 +5,7 @@
     {
       "id": "T001",
       "title": "Fix tautological Seasonality assertion in the native harness",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [

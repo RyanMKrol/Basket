@@ -1,0 +1,1 @@
+{"id":"T001","ts":"2026-07-12T02:01:36Z","facets":{"layer":"tests","workType":"bugfix","risk":[]},"scopeSize":1,"startModel":"claude-haiku-4-5","startEffort":null,"finalModel":"claude-haiku-4-5","finalEffort":null,"succeededRung":0,"topRung":0,"attemptsAtRung":1,"totalSoftFails":1,"blocked":false,"reason":"","verification":"audited"}

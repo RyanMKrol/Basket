@@ -1,0 +1,2 @@
+{"id":"T001","ts":"2026-07-10T21:52:49Z","kind":"audit-fail","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"tests","workType":"bugfix","risk":[]},"detail":""}
+{"id":"T001","ts":"2026-07-12T01:38:00Z","kind":"ci-red","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"tests","workType":"bugfix","risk":[]},"detail":"CI checks failed on the branch"}
