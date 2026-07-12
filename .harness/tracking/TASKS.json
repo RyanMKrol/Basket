@@ -140,7 +140,7 @@
     {
       "id": "T007",
       "title": "Stable tie-break in emoji keyword sort (generator)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
