@@ -1,0 +1,143 @@
+pepsi
+coke
+coca cola
+dr pepper
+fanta
+sprite
+7up
+irn bru
+lucozade
+red bull
+monster
+gatorade
+powerade
+vitaminwater
+tropicana
+minute maid
+orange juice
+apple juice
+ribena
+root beer
+ginger ale
+lemonade
+iced tea
+kombucha
+colgate
+oral b
+sensodyne
+aquafresh
+crest
+toothbrush
+floss
+mouthwash
+dove
+lux
+palmolive
+dial
+aveeno
+cetaphil
+cerave
+eucerin
+olay
+neutrogena
+lurpak
+flora
+kerrygold
+butter
+spread
+dairylea
+philadelphia
+kraft
+velveeta
+cheese
+cream cheese
+heinz
+lea perrins
+worcestershire sauce
+frank's hot sauce
+tabasco
+mustard
+ketchup
+mayonnaise
+pepsi
+cola
+soda
+soft drink
+lager
+ale
+beer
+cider
+wine
+spirits
+vodka
+gin
+rum
+whiskey
+brandy
+tequila
+margarita
+beer
+starbucks
+nescafe
+instant coffee
+coffee
+tea
+black tea
+green tea
+herbal tea
+pg tips
+yorkshire tea
+twinings
+chamomile
+peppermint
+coffee beans
+espresso
+cappuccino
+latte
+americano
+flat white
+macchiato
+iced coffee
+hot chocolate
+oreo
+cookies
+chips
+cheetos
+doritos
+lay's
+popcorn
+crackers
+pretzels
+chocolate bar
+candy
+sweets
+lollipops
+gum
+mint
+chewing gum
+protein bar
+energy bar
+cereal
+oats
+granola
+breakfast
+yogurt
+milk
+cream
+ice cream
+yoghurt
+greek yoghurt
+crème fraîche
+mayo
+aioli
+hummus
+pesto
+salsa
+jam
+marmalade
+honey
+peanut butter
+nutella
+chocolate spread
+marmite
+vegemite
