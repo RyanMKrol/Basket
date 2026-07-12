@@ -194,8 +194,12 @@ check(Seasonality.timeOfDay(seasonDate(2026, 6, 1, 2), calendar: utc) == .night,
 check(Seasonality.holidayAccent(seasonDate(2026, 10, 31), calendar: utc) == "🎃", "Oct 31 → 🎃")
 check(Seasonality.holidayAccent(seasonDate(2026, 12, 20), calendar: utc) == "🎄", "mid-December → 🎄")
 check(Seasonality.holidayAccent(seasonDate(2026, 7, 4), calendar: utc) == nil, "ordinary July day → no accent")
-check(Seasonality.emptyStateLine(seasonDate(2026, 3, 10), calendar: utc)
-      == Seasonality.emptyStateLine(seasonDate(2026, 3, 10), calendar: utc), "empty-state line stable within a day")
+check(Seasonality.emptyStateLine(seasonDate(2026, 3, 10, 8), calendar: utc)
+      == Seasonality.emptyStateLine(seasonDate(2026, 3, 10, 22), calendar: utc), "empty-state line stable within a day")
+let march10Line = Seasonality.emptyStateLine(seasonDate(2026, 3, 10), calendar: utc)
+let lineRotates = Seasonality.emptyStateLine(seasonDate(2026, 3, 11), calendar: utc) != march10Line
+      || Seasonality.emptyStateLine(seasonDate(2026, 3, 15), calendar: utc) != march10Line
+check(lineRotates, "empty-state line rotates across days")
 
 print(failures == 0 ? "\nALL PASSED" : "\n\(failures) FAILED")
 exit(failures == 0 ? 0 : 1)
