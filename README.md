@@ -104,6 +104,20 @@ xcodegen generate
 `Signing.xcconfig` (committed) optionally includes `Signing.local.xcconfig`, so
 without the local file the build still works for the simulator.
 
+## Lint
+
+[SwiftLint](https://github.com/realm/SwiftLint) (`brew install swiftlint`) checks style
+consistency, configured in `.swiftlint.yml`:
+
+```sh
+swiftlint lint
+```
+
+Generated files (`Sources/Services/EmojiTable.swift`,
+`Sources/Services/SuggestionDictionary.swift`), `tools/`, `build/`, and
+`Tests/__Snapshots__/` are excluded. Errors fail the build (CI runs `swiftlint lint`
+before the build/test steps); warnings are advisory.
+
 ## Tests
 
 Coverage is layered like a pyramid — pure logic at the bottom (fast, no

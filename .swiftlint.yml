@@ -1,0 +1,26 @@
+excluded:
+  - Sources/Services/EmojiTable.swift
+  - Sources/Services/SuggestionDictionary.swift
+  - tools
+  - build
+  - Tests/__Snapshots__
+  - Basket.xcodeproj
+
+line_length:
+  warning: 130
+
+identifier_name:
+  min_length: 1
+
+# Relaxed/disabled to let the existing hand-maintained codebase pass with
+# zero errors without a mass rewrite; revisit individually over time.
+disabled_rules:
+  - trailing_comma
+  - implicit_optional_initialization
+  - shorthand_operator
+
+file_length:
+  warning: 500
+
+type_body_length:
+  warning: 350

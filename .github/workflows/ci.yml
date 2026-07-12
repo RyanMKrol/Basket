@@ -25,6 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Errors fail the merge gate; warnings (e.g. long comment lines) are
+      # advisory only. See .swiftlint.yml.
+      - name: Lint
+        run: |
+          brew install swiftlint
+          swiftlint lint
+
       - name: Select Xcode 26
         uses: ./.github/actions/select-xcode
 
