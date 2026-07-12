@@ -10,13 +10,13 @@ final class CheckOffFlowTests: BasketUITestCase {
     func testCheckingItemOffMovesToGotSection() {
         launchApp(realTiming: true)
 
-        XCTAssertTrue(app.buttons["itemRow.Milk"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.row("Milk")].waitForExistence(timeout: 5))
         waitForToGetCount(4)
         attachScreenshot("01-before-check")
 
-        app.buttons["itemRow.check.Milk"].tap()
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
         // Checked look (spark burst) applies immediately, before the section move.
-        waitForLabel(app.buttons["itemRow.check.Milk"], equals: "Got it")
+        waitForLabel(app.buttons[A11yID.ItemRow.check("Milk")], equals: "Got it")
         attachScreenshot("02-checking-spark")
 
         waitForToGetCount(3)
@@ -29,15 +29,15 @@ final class CheckOffFlowTests: BasketUITestCase {
     func testRestoringItemFromGotSection() {
         launchApp()
 
-        app.buttons["itemRow.check.Milk"].tap()
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
         XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
         attachScreenshot("01-checked")
 
-        app.buttons["itemRow.check.Milk"].tap()
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
         attachScreenshot("02-restored")
 
         waitForToGetCount(4)
-        waitForLabel(app.buttons["itemRow.check.Milk"], equals: "Not got yet")
+        waitForLabel(app.buttons[A11yID.ItemRow.check("Milk")], equals: "Not got yet")
     }
 
     /// Checking off every item plays the full-screen "All done!" celebration.
@@ -53,7 +53,7 @@ final class CheckOffFlowTests: BasketUITestCase {
         launchApp()
 
         for name in SharedFixtures.starterItems {
-            app.buttons["itemRow.check.\(name)"].tap()
+            app.buttons[A11yID.ItemRow.check(name)].tap()
         }
         attachScreenshot("01-all-checked")
 
@@ -66,14 +66,14 @@ final class CheckOffFlowTests: BasketUITestCase {
     func testClearAllEmptiesGotItSection() {
         launchApp()
 
-        app.buttons["itemRow.check.Milk"].tap()
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
         XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
         attachScreenshot("01-one-checked")
 
-        app.buttons["gotSection.clearAll"].tap()
+        app.buttons[A11yID.GotSection.clearAll].tap()
         attachScreenshot("02-cleared")
 
         waitForGone(gotSectionHeader)
-        XCTAssertFalse(app.buttons["itemRow.check.Milk"].exists)
+        XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
     }
 }

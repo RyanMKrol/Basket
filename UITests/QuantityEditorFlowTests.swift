@@ -6,26 +6,26 @@ final class QuantityEditorFlowTests: BasketUITestCase {
     func testOpeningEditorSteppingAndSwitchingUnit() {
         launchApp()
 
-        let milkRow = app.buttons["itemRow.Milk"]
+        let milkRow = app.buttons[A11yID.ItemRow.row("Milk")]
         XCTAssertTrue(milkRow.waitForExistence(timeout: 5))
         milkRow.tap()
 
-        let value = app.buttons["quantityEditor.value"]
+        let value = app.buttons[A11yID.QuantityEditor.value]
         XCTAssertTrue(value.waitForExistence(timeout: 3))
         waitForLabel(value, equals: "500 ml")
         attachScreenshot("01-editor-open-default")
 
-        app.buttons["quantityEditor.increase"].tap()
+        app.buttons[A11yID.QuantityEditor.increase].tap()
         waitForLabel(value, equals: "550 ml")
         attachScreenshot("02-after-increase")
 
-        app.buttons["quantityEditor.decrease"].tap()
+        app.buttons[A11yID.QuantityEditor.decrease].tap()
         waitForLabel(value, equals: "500 ml")
-        app.buttons["quantityEditor.decrease"].tap()
+        app.buttons[A11yID.QuantityEditor.decrease].tap()
         waitForLabel(value, equals: "450 ml")
         attachScreenshot("03-after-decrease")
 
-        app.buttons["quantityEditor.unit.L"].tap()
+        app.buttons[A11yID.QuantityEditor.unit("L")].tap()
         waitForLabel(value, equals: "0.45 L")
         attachScreenshot("04-switched-to-liters")
     }
@@ -35,12 +35,12 @@ final class QuantityEditorFlowTests: BasketUITestCase {
     func testTypingExactAmount() {
         launchApp()
 
-        app.buttons["itemRow.Milk"].tap()
-        let value = app.buttons["quantityEditor.value"]
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        let value = app.buttons[A11yID.QuantityEditor.value]
         XCTAssertTrue(value.waitForExistence(timeout: 3))
         value.tap()
 
-        let field = app.textFields["quantityEditor.field"]
+        let field = app.textFields[A11yID.QuantityEditor.field]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
 
         // The field seeds with the current amount ("500"), cursor at the end —
@@ -53,9 +53,9 @@ final class QuantityEditorFlowTests: BasketUITestCase {
         // Committing happens when focus leaves the field — tapping another
         // row's body moves focus there (and closes Milk's editor, since only
         // one can be expanded at a time).
-        app.buttons["itemRow.Eggs"].tap()
+        app.buttons[A11yID.ItemRow.row("Eggs")].tap()
 
-        let row = app.buttons["itemRow.Milk"]
+        let row = app.buttons[A11yID.ItemRow.row("Milk")]
         XCTAssertTrue(row.waitForExistence(timeout: 3))
         waitForLabel(row, equals: "Milk, 750 ml")
         attachScreenshot("02-committed")
@@ -65,14 +65,14 @@ final class QuantityEditorFlowTests: BasketUITestCase {
     func testClearingQuantity() {
         launchApp()
 
-        app.buttons["itemRow.Milk"].tap()
-        XCTAssertTrue(app.buttons["quantityEditor.value"].waitForExistence(timeout: 3))
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        XCTAssertTrue(app.buttons[A11yID.QuantityEditor.value].waitForExistence(timeout: 3))
         attachScreenshot("01-editor-open")
 
-        app.buttons["quantityEditor.clear"].tap()
+        app.buttons[A11yID.QuantityEditor.clear].tap()
         attachScreenshot("02-cleared")
 
-        waitForGone(app.buttons["quantityEditor.value"])
+        waitForGone(app.buttons[A11yID.QuantityEditor.value])
     }
 
     /// Typing an amount that doesn't parse to a positive number (here, just
@@ -80,21 +80,21 @@ final class QuantityEditorFlowTests: BasketUITestCase {
     func testTypingInvalidAmountKeepsOldValue() {
         launchApp()
 
-        app.buttons["itemRow.Milk"].tap()
-        let value = app.buttons["quantityEditor.value"]
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        let value = app.buttons[A11yID.QuantityEditor.value]
         XCTAssertTrue(value.waitForExistence(timeout: 3))
         value.tap()
 
-        let field = app.textFields["quantityEditor.field"]
+        let field = app.textFields[A11yID.QuantityEditor.field]
         XCTAssertTrue(field.waitForExistence(timeout: 3))
         let seeded = (field.value as? String) ?? ""
         field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: seeded.count))
         field.typeText("0")
         attachScreenshot("01-typed-zero")
 
-        app.buttons["itemRow.Eggs"].tap()
+        app.buttons[A11yID.ItemRow.row("Eggs")].tap()
 
-        let row = app.buttons["itemRow.Milk"]
+        let row = app.buttons[A11yID.ItemRow.row("Milk")]
         XCTAssertTrue(row.waitForExistence(timeout: 3))
         waitForLabel(row, equals: "Milk, 500 ml")
         attachScreenshot("02-unchanged")

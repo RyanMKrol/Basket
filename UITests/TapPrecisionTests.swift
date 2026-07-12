@@ -23,8 +23,8 @@ final class TapPrecisionTests: BasketUITestCase {
     /// control in the app to fail under an imprecise tap.
     func testJitteredStepperTaps() {
         launchApp()
-        app.buttons["itemRow.Milk"].tap()
-        let value = app.buttons["quantityEditor.value"]
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        let value = app.buttons[A11yID.QuantityEditor.value]
         XCTAssertTrue(value.waitForExistence(timeout: 3))
 
         var jitter = SeededJitter(seed: 0xBA5C_E7A1)
@@ -35,7 +35,7 @@ final class TapPrecisionTests: BasketUITestCase {
         for i in 0..<trialsPerControl {
             let dx = jitter.next() * jitterMagnitude
             let dy = jitter.next() * jitterMagnitude
-            app.buttons["quantityEditor.increase"].tapJittered(dx: dx, dy: dy)
+            app.buttons[A11yID.QuantityEditor.increase].tapJittered(dx: dx, dy: dy)
             if !waitUntilLabel(value, equals: expected[i], timeout: trialTimeout) {
                 misses.append("trial \(i) (dx: \(String(format: "%.2f", dx)), dy: \(String(format: "%.2f", dy))): got '\(value.label)', want '\(expected[i])'")
             }
@@ -49,8 +49,8 @@ final class TapPrecisionTests: BasketUITestCase {
     /// change rather than a no-op re-tap of the same selection.
     func testJitteredUnitPillTaps() {
         launchApp()
-        app.buttons["itemRow.Milk"].tap()
-        let value = app.buttons["quantityEditor.value"]
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        let value = app.buttons[A11yID.QuantityEditor.value]
         XCTAssertTrue(value.waitForExistence(timeout: 3))
 
         var jitter = SeededJitter(seed: 0xBA5C_E7B2)
@@ -58,7 +58,7 @@ final class TapPrecisionTests: BasketUITestCase {
 
         for i in 0..<trialsPerControl {
             let toLiters = i % 2 == 0
-            let identifier = toLiters ? "quantityEditor.unit.L" : "quantityEditor.unit.ml"
+            let identifier = toLiters ? A11yID.QuantityEditor.unit("L") : A11yID.QuantityEditor.unit("ml")
             let want = toLiters ? "0.5 L" : "500 ml"
 
             let dx = jitter.next() * jitterMagnitude
@@ -77,7 +77,7 @@ final class TapPrecisionTests: BasketUITestCase {
     /// stepper buttons' risk.
     func testJitteredCheckCircleTaps() {
         launchApp()
-        let check = app.buttons["itemRow.check.Milk"]
+        let check = app.buttons[A11yID.ItemRow.check("Milk")]
         XCTAssertTrue(check.waitForExistence(timeout: 5))
 
         var jitter = SeededJitter(seed: 0xBA5C_E7C3)

@@ -105,14 +105,14 @@ class BasketUITestCase: XCTestCase {
     /// `waitForToGetCount(3)`, not `staticTexts["3 to get"]`.
     func waitForToGetCount(_ count: Int, timeout: TimeInterval = 3,
                            file: StaticString = #filePath, line: UInt = #line) {
-        waitForLabel(app.staticTexts["header.count"],
-                     equals: count == 1 ? "1 to get" : "\(count) to get",
+        waitForLabel(app.staticTexts[A11yID.Header.count],
+                     equals: A11yID.toGetCountText(count),
                      timeout: timeout, file: file, line: line)
     }
 
     /// The "Got it" section header — its presence means at least one checked
     /// item has fully committed into the section.
-    var gotSectionHeader: XCUIElement { app.staticTexts["gotSection.header"] }
+    var gotSectionHeader: XCUIElement { app.staticTexts[A11yID.GotSection.header] }
 
     // MARK: - Screenshots
 

@@ -31,18 +31,18 @@ final class PersistenceFlowTests: BasketUITestCase {
         app.launchEnvironment["UITEST_STORE_URL"] = storePath
         launchApp(seeded: false)
 
-        let field = app.textFields["addBar.textField"]
+        let field = app.textFields[A11yID.AddBar.textField]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         field.tap()
         field.typeText("Bananas")
-        app.buttons["addBar.addButton"].tap()
-        XCTAssertTrue(app.buttons["itemRow.Bananas"].waitForExistence(timeout: 5))
+        app.buttons[A11yID.AddBar.addButton].tap()
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.row("Bananas")].waitForExistence(timeout: 5))
         attachScreenshot("01-before-relaunch")
 
         backgroundThenTerminate()
         app.launch()   // same arguments + environment → same store file
 
-        XCTAssertTrue(app.buttons["itemRow.Bananas"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.row("Bananas")].waitForExistence(timeout: 5))
         waitForToGetCount(1)
         attachScreenshot("02-after-relaunch")
     }
@@ -54,7 +54,7 @@ final class PersistenceFlowTests: BasketUITestCase {
         app.launchEnvironment["UITEST_STORE_URL"] = storePath
         launchApp()
 
-        app.buttons["itemRow.check.Milk"].tap()
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
         XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
         attachScreenshot("01-checked-at-0900")
 
@@ -64,7 +64,7 @@ final class PersistenceFlowTests: BasketUITestCase {
 
         waitForToGetCount(3)
         waitForGone(gotSectionHeader, timeout: 5)
-        XCTAssertFalse(app.buttons["itemRow.Milk"].exists,
+        XCTAssertFalse(app.buttons[A11yID.ItemRow.row("Milk")].exists,
                        "expired item should be deleted, not restored to the list")
         attachScreenshot("02-purged-at-1130")
     }

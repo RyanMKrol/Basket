@@ -40,7 +40,7 @@ struct QuantityEditor: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Clear quantity")
-                .accessibilityIdentifier("quantityEditor.clear")
+                .accessibilityIdentifier(A11yID.QuantityEditor.clear)
             }
 
             HStack(spacing: 8) {
@@ -87,7 +87,7 @@ struct QuantityEditor: View {
                     // amount is silently dropped.
                     .onDisappear(perform: commit)
                     .accessibilityLabel("Quantity, \(unitName(unit))")
-                    .accessibilityIdentifier("quantityEditor.field")
+                    .accessibilityIdentifier(A11yID.QuantityEditor.field)
                 if !unit.symbol.isEmpty {
                     Text(unit.symbol)
                         .font(Theme.body(16, weight: .semibold))
@@ -108,7 +108,7 @@ struct QuantityEditor: View {
                 .onTapGesture(perform: beginEditing)
                 .accessibilityAddTraits(.isButton)
                 .accessibilityHint("Double tap to type an exact amount")
-                .accessibilityIdentifier("quantityEditor.value")
+                .accessibilityIdentifier(A11yID.QuantityEditor.value)
         }
     }
 
@@ -154,7 +154,7 @@ struct QuantityEditor: View {
         .buttonStyle(.plain)
         .accessibilityLabel(unitName(u))
         .accessibilityAddTraits(selected ? [.isButton, .isSelected] : .isButton)
-        .accessibilityIdentifier("quantityEditor.unit.\(u == .count ? "units" : u.symbol)")
+        .accessibilityIdentifier(A11yID.QuantityEditor.unit(u == .count ? "units" : u.symbol))
     }
 
     /// Plus / minus. While the keyboard is up, step from the *typed* amount — so a
@@ -180,6 +180,6 @@ struct QuantityEditor: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(up ? "Increase quantity" : "Decrease quantity")
-        .accessibilityIdentifier(up ? "quantityEditor.increase" : "quantityEditor.decrease")
+        .accessibilityIdentifier(up ? A11yID.QuantityEditor.increase : A11yID.QuantityEditor.decrease)
     }
 }

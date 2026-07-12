@@ -34,7 +34,7 @@ final class AccessibilityAuditTests: BasketUITestCase {
 
     func testMainListPassesAccessibilityAudit() throws {
         launchApp()
-        XCTAssertTrue(app.buttons["itemRow.Milk"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.row("Milk")].waitForExistence(timeout: 5))
         try app.performAccessibilityAudit(for: auditTypes, handleIssue)
     }
 
@@ -46,14 +46,14 @@ final class AccessibilityAuditTests: BasketUITestCase {
 
     func testQuantityEditorPassesAccessibilityAudit() throws {
         launchApp()
-        app.buttons["itemRow.Milk"].tap()
-        XCTAssertTrue(app.buttons["quantityEditor.value"].waitForExistence(timeout: 3))
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        XCTAssertTrue(app.buttons[A11yID.QuantityEditor.value].waitForExistence(timeout: 3))
         try app.performAccessibilityAudit(for: auditTypes, handleIssue)
     }
 
     func testAboutSheetPassesAccessibilityAudit() throws {
         launchApp()
-        app.buttons["header.aboutButton"].tap()
+        app.buttons[A11yID.Header.aboutButton].tap()
         XCTAssertTrue(app.staticTexts["about.title"].waitForExistence(timeout: 3))
         // The tip section opens as a loading spinner and settles async
         // (unavailable or loaded, depending on whether StoreKit products

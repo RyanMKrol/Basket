@@ -182,12 +182,12 @@ struct ShoppingListView: View {
         HStack(alignment: .firstTextBaseline) {
             titleView
             Spacer()
-            Text(toGet.count == 1 ? "1 to get" : "\(toGet.count) to get")
+            Text(A11yID.toGetCountText(toGet.count))
                 .font(Theme.body(15, weight: .medium))
                 .foregroundStyle(Theme.onPaperSoft)
                 // Stable handle for tests, so they don't have to query the
                 // display copy itself ("3 to get") to find the counter.
-                .accessibilityIdentifier("header.count")
+                .accessibilityIdentifier(A11yID.Header.count)
             Button { showingAbout = true } label: {
                 Image(systemName: "info.circle")
                     .font(.system(size: 17))
@@ -202,7 +202,7 @@ struct ShoppingListView: View {
             .padding(.leading, 4)
             .accessibilityLabel("About Basket")
             .accessibilityHint("Shows app info and the tip jar")
-            .accessibilityIdentifier("header.aboutButton")
+            .accessibilityIdentifier(A11yID.Header.aboutButton)
         }
         .padding(.horizontal, 20)
         .padding(.top, 8)
@@ -217,7 +217,7 @@ struct ShoppingListView: View {
                 .accessibilityAddTraits(.isHeader)
                 // Distinct from the check circles' "Got it" *label*: tests use
                 // this to detect the section itself, unambiguously.
-                .accessibilityIdentifier("gotSection.header")
+                .accessibilityIdentifier(A11yID.GotSection.header)
             Rectangle()
                 .fill(Theme.onPaperSoft.opacity(0.25))
                 .frame(height: 1)
@@ -234,7 +234,7 @@ struct ShoppingListView: View {
             }
             .buttonStyle(.plain)
             .accessibilityHint("Removes everything in the Got it section")
-            .accessibilityIdentifier("gotSection.clearAll")
+            .accessibilityIdentifier(A11yID.GotSection.clearAll)
         }
         .padding(.horizontal, 6)
         .padding(.top, 14)

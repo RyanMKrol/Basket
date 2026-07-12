@@ -106,6 +106,8 @@ targets:
       # Compiled into both the app and this bundle, so seeded fixtures can't
       # drift from what the tests expect (see the file's comment).
       - path: Sources/Support/SharedFixtures.swift
+      # Same mechanism, for the shared accessibility-identifier constants.
+      - path: Sources/Support/A11yIDs.swift
     dependencies:
       - target: Basket
     settings:
