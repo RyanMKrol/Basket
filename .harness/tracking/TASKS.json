@@ -401,7 +401,7 @@
     {
       "id": "T017",
       "title": "Shared A11yID constants between app and UI tests",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
