@@ -159,7 +159,10 @@ command -v jq >/dev/null 2>&1 || { log "jq is required to parse TASKS.json — i
 # --- TASKS.json / worklog helpers (read from origin/main, NOT any working tree) -
 # TASKS.json is the structured backlog (schema: .harness/docs/HARNESS.md §8.1), parsed with jq.
 blob()         { git -C "$ROOT" show "$TASKS_REF:.harness/$1" 2>/dev/null || true; }
-tj()           { blob tracking/TASKS.json | jq "$@" 2>/dev/null; }        # query TASKS.json
+# tj — query TASKS.json. Normally reads the committed backlog from $TASKS_REF. When DRY_TASKS is set
+# (the DRY_RUN preview, see below), it queries THAT in-memory JSON instead, so the preview selects
+# against the SAME overlay-reconciled view the real run builds — without reconcile_overlays' write.
+tj()           { if [ -n "${DRY_TASKS:-}" ]; then jq "$@" <<<"$DRY_TASKS" 2>/dev/null; else blob tracking/TASKS.json | jq "$@" 2>/dev/null; fi; }
 all_tasks()    { tj -r '.tasks[].id'; }                                   # in array (=dependency) order
 task_done()    { tj -e --arg id "$1" '.tasks[]|select(.id==$id)|.status=="done"' >/dev/null; }
 deps_for()     { tj -r --arg id "$1" '.tasks[]|select(.id==$id)|.dependsOn[]?' | tr '\n' ' '; }
@@ -395,20 +398,28 @@ record_outcome() {
 # detached-worktree commit (mirrors record_outcome/block_task). Read-only inputs; run once per
 # iteration (after the fetch, before select_task) so an owner action taken mid-run takes effect
 # promptly. Cheap no-op when nothing changed — only touches a worktree if a flip is needed.
-reconcile_overlays() {
-  local hd md tasks new
+# overlay_apply <tasks-json> — PURE transform: echo TASKS.json with owner-overlay verdicts applied
+# in-memory (human-done "done" for a needs-human task; manual-fail "failed" for any not-yet-failed
+# task). NO writes, NO git. Shared by reconcile_overlays (which then persists) and the DRY_RUN preview
+# (which must NOT persist). human-done promotes ONLY a needs-human task (the gate guard stops a stray
+# entry marking an ordinary task done unbuilt); manual-fail is kept terminal by task_failed() in select_task.
+overlay_apply() {
+  local tasks="$1" hd md
+  [ -n "$tasks" ] || return 1
   hd="$(blob tracking/human-done.json)"; [ -n "$hd" ] || hd='{}'
   md="$(blob tracking/manual-fail.json)"; [ -n "$md" ] || md='{}'
-  tasks="$(blob tracking/TASKS.json)"; [ -n "$tasks" ] || return 0
-  # human-done promotes ONLY a needs-human task (the gate guard stops a stray entry marking an
-  # ordinary task done unbuilt); manual-fail overturns ANY not-yet-failed task, kept terminal by
-  # task_failed() in select_task.
-  new="$(jq -c --argjson hd "$hd" --argjson md "$md" '
+  jq -c --argjson hd "$hd" --argjson md "$md" '
     .tasks |= map(
       if (.status != "failed") and ($md[.id].failed == true) then .status = "failed"
       elif (.gate == "needs-human") and (.status != "done") and ($hd[.id].done == true) then .status = "done"
       else . end
-    )' <<<"$tasks" 2>/dev/null)"
+    )' <<<"$tasks" 2>/dev/null
+}
+
+reconcile_overlays() {
+  local tasks new
+  tasks="$(blob tracking/TASKS.json)"; [ -n "$tasks" ] || return 0
+  new="$(overlay_apply "$tasks")"
   [ -n "$new" ] || return 0
   [ "$new" = "$(jq -c '.' <<<"$tasks" 2>/dev/null)" ] && return 0
   remove_wt
@@ -511,6 +522,50 @@ cleanup_task() {   # tear down after a successful integrate
 }
 
 # --- GitHub CI gate ---------------------------------------------------------
+# ci_find_run <branch-or-empty> <sha> — echo the databaseId of the CI run for <sha>, matching the
+# workflow by NAME ($CI_WORKFLOW) first, then falling back to its FILE PATH. GitHub reports a run's
+# workflowName as ".github/workflows/…" (the raw path) instead of the resolved `name:` when the workflow
+# file itself can't be parsed — so a path-shaped workflowName is the signature of a MALFORMED workflow
+# (a valid-YAML-but-invalid-schema CI file). Without this fallback the exact-name match finds nothing and
+# the caller sits out the full CI_TIMEOUT then calls it "indeterminate". Sets CI_NAME_UNRESOLVED=1 when
+# the fallback matched (caller warns + treats as red), else 0. (Shared with ci_status_now / the idle guard.)
+CI_NAME_UNRESOLVED=0
+ci_find_run() {
+  local br="$1" sha="$2" id; local -a ba=(); [ -n "$br" ] && ba=(--branch "$br")
+  CI_NAME_UNRESOLVED=0
+  id="$(gh run list ${ba[@]+"${ba[@]}"} --limit 20 --json databaseId,headSha,workflowName \
+          --jq ".[] | select(.headSha==\"$sha\" and .workflowName==\"$CI_WORKFLOW\") | .databaseId" 2>/dev/null | head -1 || true)"
+  if [ -z "$id" ]; then
+    id="$(gh run list ${ba[@]+"${ba[@]}"} --limit 20 --json databaseId,headSha,workflowName \
+            --jq ".[] | select(.headSha==\"$sha\" and (.workflowName|startswith(\".github/workflows/\"))) | .databaseId" 2>/dev/null | head -1 || true)"
+    [ -n "$id" ] && CI_NAME_UNRESOLVED=1
+  fi
+  printf '%s' "$id"
+}
+
+# ci_conclusion <runid> — 0 green | 1 red | 2 indeterminate, from the run's SETTLED conclusion. Only a
+# real failure is RED; cancelled/skipped/stale/neutral is indeterminate (never revert good work over a
+# concurrency-cancel).
+ci_conclusion() {
+  local concl; concl="$(gh run view "$1" --json status,conclusion --jq '.status + "/" + (.conclusion // "")' 2>/dev/null || true)"
+  case "$concl" in
+    completed/success) return 0 ;;
+    completed/failure|completed/timed_out|completed/startup_failure|completed/action_required) return 1 ;;
+    *) return 2 ;;
+  esac
+}
+
+# ci_status_now <branch-or-empty> <sha> — POINT-IN-TIME CI status for <sha> (NO waiting): 0 green | 1 red
+# | 2 indeterminate/no-run. Used by the idle-reconcile guard so a task is never marked done while its
+# main-HEAD CI is red or was never confirmed.
+ci_status_now() {
+  command -v gh >/dev/null 2>&1 || return 2
+  local id; id="$(ci_find_run "$1" "$2")"
+  [ -n "$id" ] || return 2
+  [ "${CI_NAME_UNRESOLVED:-0}" = 1 ] && return 1
+  ci_conclusion "$id"
+}
+
 wait_ci_green() {   # 0=green 1=red 2=indeterminate
   local branch="$1" sha runid="" waited=0
   command -v gh >/dev/null 2>&1 || { log "gh not installed — cannot gate CI"; return 2; }
@@ -518,31 +573,26 @@ wait_ci_green() {   # 0=green 1=red 2=indeterminate
   [ -n "$sha" ] || { log "cannot resolve origin/$branch"; return 2; }
   log "waiting for CI ($CI_WORKFLOW) on $branch ($sha)…"
   while [ "$waited" -lt "$CI_TIMEOUT" ]; do
-    runid="$(gh run list --branch "$branch" --limit 20 \
-               --json databaseId,headSha,workflowName \
-               --jq ".[] | select(.headSha==\"$sha\" and .workflowName==\"$CI_WORKFLOW\") | .databaseId" \
-               2>/dev/null | head -1 || true)"
+    runid="$(ci_find_run "$branch" "$sha")"
     [ -n "$runid" ] && break
     sleep "$WAIT_SECONDS"; waited=$((waited + WAIT_SECONDS))
   done
   [ -n "$runid" ] || { log "no '$CI_WORKFLOW' run appeared for $sha within ${CI_TIMEOUT}s"; return 2; }
+  # A run GitHub reported by FILE PATH (name unresolved) is the signature of a malformed workflow file —
+  # treat as RED immediately (never wait it out or merge over it) with a loud, actionable warning.
+  if [ "${CI_NAME_UNRESOLVED:-0}" = 1 ]; then
+    log "⚠ CI RED (run $runid): GitHub could NOT resolve the workflow's name (reported it by file path) for $sha — the .github/workflows file is almost certainly MALFORMED. Run: gh run view $runid --log-failed"
+    return 1
+  fi
   # `gh run watch --exit-status`'s bare exit conflates a genuine CI failure with a watch hiccup and a
-  # run CANCELLED by a newer push. Watch to settle, then read the run's ACTUAL conclusion and classify
-  # on THAT — only a real failure is RED; cancelled/skipped/stale/neutral returns 2 (indeterminate).
+  # run CANCELLED by a newer push. Watch to settle, then read the run's ACTUAL conclusion via ci_conclusion.
   gh run watch "$runid" --exit-status >/dev/null 2>&1 || true
-  local latest concl
-  latest="$(gh run list --branch "$branch" --limit 20 --json databaseId,headSha,workflowName \
-              --jq ".[] | select(.headSha==\"$sha\" and .workflowName==\"$CI_WORKFLOW\") | .databaseId" \
-              2>/dev/null | head -1 || true)"
-  [ -n "$latest" ] && runid="$latest"
-  concl="$(gh run view "$runid" --json status,conclusion --jq '.status + "/" + (.conclusion // "")' 2>/dev/null || true)"
-  case "$concl" in
-    completed/success)
-      log "CI GREEN (run $runid)"; return 0 ;;
-    completed/failure|completed/timed_out|completed/startup_failure|completed/action_required)
-      log "CI RED (run $runid, $concl) — gh run view $runid --log-failed"; return 1 ;;
-    *)
-      log "CI INDETERMINATE (run $runid, conclusion='${concl:-unknown}') — NOT treating as red (likely concurrency-cancelled/skipped)"; return 2 ;;
+  local latest; latest="$(ci_find_run "$branch" "$sha")"; [ -n "$latest" ] && runid="$latest"
+  ci_conclusion "$runid"; local st=$?
+  case "$st" in
+    0) log "CI GREEN (run $runid)"; return 0 ;;
+    1) log "CI RED (run $runid) — gh run view $runid --log-failed"; return 1 ;;
+    *) log "CI INDETERMINATE (run $runid) — NOT treating as red (likely concurrency-cancelled/skipped)"; return 2 ;;
   esac
 }
 
@@ -765,7 +815,11 @@ head-less and unattended. First read CLAUDE.md (conventions) and README.md (the 
 2. DEFINITION OF DONE (.harness/docs/HARNESS.md §5 — all must hold before you report `done`):
    a. Run the project's full verification suite exactly as defined in CLAUDE.md /
       .harness/docs/HARNESS.md §5 (format, lint, tests, build). These MIRROR CI — if CI runs it,
-      run it locally first. Every check must pass.
+      run it locally first. Every check must pass. Run every check to COMPLETION and read its real
+      exit status: for a SLOW check (a multi-minute build/test), request an extended tool timeout or
+      run it in the background and POLL to completion — never fire it under a default-timeout blocking
+      call and assume it passed. A check that times out, is still running, or whose result you did not
+      OBSERVE is NOT a pass — that is `failed:soft` (retryable), never `done`.
    b. Run the task's relevant integration / end-to-end tests when their preconditions are
       met. Tests that need credentials, funds, or external resources you don't have: leave
       them as they are and record `failed:blocked` if the task's core needs them — never
@@ -780,11 +834,16 @@ head-less and unattended. First read CLAUDE.md (conventions) and README.md (the 
 4. COMMIT — produce EXACTLY ONE commit for the whole task, `<TASK>: <summary>` (INCLUDING
    `.harness/worklog/<TASK>.md` with a dated entry: what you did, checks run, what remains). If you iterate,
    fold changes into that SAME commit with `git commit --amend` — do NOT stack multiple commits (the loop
-   integrates a task as one commit). Then push THIS branch: `git push -u origin HEAD`. Do NOT merge
-   into `main` — the loop watches GitHub CI and fast-forwards main on green. If a previous
-   push's CI for this branch failed, run `gh run view --log-failed` and fix the cause first.
-5. As your FINAL action, OVERWRITE `.harness/worklog/.result` with exactly ONE line:
-     done <TASK> <branch>                 # built, committed, pushed — ready for CI + merge
+   integrates a task as one commit). Do NOT push and do NOT merge — **NEVER `git push`**, not ever, even if
+   your global git guidance says to always push after committing (that rule does NOT apply here). The loop is
+   the SOLE pusher: after you finish it runs your checks (structural + LOCAL_DOD), pushes your `<branch>`,
+   watches GitHub CI, and fast-forwards `main` on green — a push from you is BLOCKED by a git hook and
+   bypasses that local gate. `HARNESS_AGENT` is the loop's private env marker: never set, unset, or pass it
+   to any command. Your CI is LOCAL (step 2) — run it yourself; you never push to see CI.
+5. As your FINAL action, OVERWRITE `.harness/worklog/.result` with exactly ONE line. Report `done` ONLY
+   when every Definition-of-Done check has FINISHED and PASSED — never while a check is still running or its
+   outcome is unknown (that is `failed:soft`):
+     done <TASK> <branch>                 # built + committed on <branch> (NOT pushed) — loop pushes + gates CI
      failed:soft <TASK> <reason>          # transient / partial — retry is worthwhile
      failed:blocked <TASK> <reason>       # needs-human / unmet prereq — do NOT retry
      waiting <TASK> <unmet-deps>          # a dependency is not merged yet
@@ -907,12 +966,21 @@ rl_reset_wait() {
 # (Europe/London)") is NOT a text_delta — the CLI prints it on stderr / as a result event — so it never
 # lands in $out. Grepping $out alone silently misses the limit and the loop tight-loops on the generic
 # 30s crash backoff instead of sleeping until reset. The notice IS in $raw (the .jsonl, via 2>&1|tee).
-# RL_HARD_RE (the unambiguous "hit your session limit" wording) is trusted in the raw too; RL_RE (the
-# broad net) stays $out-only, so limit-ish words inside tool_result file contents on a crashed build
-# can't be misread as a limit.
+# RL_HARD_RE (the unambiguous "hit your session limit" wording) is trusted in the raw too — but ONLY over
+# CLI-origin lines: rl_cli_said strips type:"user" (tool_result) events first, because $raw carries the
+# CONTENTS of files the agent READ, and a repo whose own code contains the literal "usage limit reached"
+# (e.g. its rate-limit detector) would otherwise trip RL_HARD_RE on a genuinely SUCCESSFUL build — a soft
+# return 10 with no ledger row that cold-resets the good build and re-trips forever. Non-JSON stderr lines
+# are KEPT (a real CLI notice can arrive that way). RL_RE (the broad net) stays $out-only for the same
+# tool_result reason.
+rl_cli_said() {  # <raw> → stdout: raw lines minus type:"user"/tool_result events (keeps non-JSON stderr)
+  jq -Rr '. as $l | (fromjson? // null) as $o
+          | if ($o|type=="object") and ($o.type=="user") then empty else $l end' "$1" 2>/dev/null
+}
 rl_detect() {
   local out="$1" raw="$2" rc="$3"
-  grep -qiE "$RL_HARD_RE" "$out" "$raw" 2>/dev/null && return 0
+  rl_cli_said "$raw" | grep -qiE "$RL_HARD_RE" && return 0   # hard wording, CLI-origin only (not read files)
+  grep -qiE "$RL_HARD_RE" "$out" 2>/dev/null && return 0     # $out is text_delta-only, already safe
   [ "$rc" -ne 0 ] && grep -qiE "$RL_RE" "$out" 2>/dev/null && return 0
   return 1
 }
@@ -969,13 +1037,20 @@ run_claude() {
   # `${arr[@]+"${arr[@]}"}` (guard, NOT a bare "${arr[@]}") — on bash < 4.4 (macOS ships 3.2) expanding a
   # declared-but-EMPTY array under `set -u` throws `unbound variable` and crashes run_claude BEFORE claude
   # runs. That's exactly the effort-less cold-start floor (Haiku), so a fresh install crash-loops on task 1.
-  # NO push-block here (deliberate P9 divergence from loop.in-place.sh): the WORKTREE builder works in an
-  # isolated worktree on a feature branch and is REQUIRED to push THAT branch — CI gates the branch and the
-  # loop fast-forwards `main` only on green, so `main` never sees ungated work. The in-place variant blocks
-  # agent pushes (there the builder is on `main` directly and the loop is the sole pusher); that hazard
-  # simply doesn't exist in this isolation model, so we must NOT set HARNESS_AGENT / a hooks override here
-  # (it would block the branch push the builder legitimately needs to make — see prompt step 4).
-  ( cd "$LOOP_WT" && "$CLAUDE_BIN" -p "$pr" --model "$model" ${eff[@]+"${eff[@]}"} \
+  # PUSH BLOCK (both variants now) — the builder commits its `tNNN` branch in the worktree but must NOT
+  # push it; the LOOP is the sole pusher (P5), so the deterministic local gate (structural_checks / LOCAL_DOD)
+  # runs BEFORE the branch ever reaches origin/CI (see the done-path). We scope git's pre-push hook to THIS
+  # agent subprocess via GIT_CONFIG_* env — NOT a persistent `core.hooksPath`, which would disable the repo's
+  # own husky/pre-commit hooks for the loop and humans too. HARNESS_AGENT=1 is what .harness/scripts/pre-push
+  # checks; the loop's own pushes (the tNNN push + the ff to main) and human pushes never carry it, so they're
+  # never blocked. The hooks dir is the PRIMARY checkout's `.harness/scripts` (the worktree shares $ROOT's
+  # .git; core.hooksPath is an absolute path, not a worktree-relative ref, so it resolves correctly). chmod
+  # keeps the hook executable even if an install/copy dropped the bit (git silently ignores a non-executable
+  # hook = no enforcement).
+  chmod +x "$ROOT/.harness/scripts/pre-push" 2>/dev/null || true
+  ( cd "$LOOP_WT" \
+      && HARNESS_AGENT=1 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0="$ROOT/.harness/scripts" \
+         "$CLAUDE_BIN" -p "$pr" --model "$model" ${eff[@]+"${eff[@]}"} \
       --output-format stream-json --include-partial-messages --verbose ${FLAGS[@]+"${FLAGS[@]}"} ) 2>&1 \
     | tee "$raw" \
     | jq -Rrj 'fromjson? | select(.type=="stream_event" and .event.delta.type? == "text_delta") | .event.delta.text' \
@@ -1122,6 +1197,30 @@ CHANGED
   if [ "$want_test" = "true" ] && ! printf '%s\n' "$changed" | grep -qiE '(\.test\.|\.spec\.|_test\.|(^|/)test_|(^|/)tests?/)'; then
     STRUCT_FAIL_KIND="test-missing"; log "structural: $id has expectsTest=true but no test file changed — fail"; return 1
   fi
+  # GitHub Actions workflow validation (see ensure-actionlint.sh) — a change to .github/workflows/*.yml
+  # can be perfectly valid YAML yet REJECTED by GitHub's own schema (e.g. a flow-sequence where a scalar
+  # is required), which kills the whole run at parse time — something LOCAL_DOD (the project's own
+  # typecheck/test/build) can't catch. actionlint validates the schema LOCALLY, before the push. Fires
+  # ONLY when the diff touches a workflow file (the common task pays nothing). Best-effort: if the linter
+  # can't be fetched (offline / rate-limited) WARN + SKIP rather than block — the scaffolded
+  # lint-workflows.yml CI job is the authoritative catch. LINT_WORKFLOW_FILES=0 disables it.
+  if [ "${LINT_WORKFLOW_FILES:-1}" != 0 ]; then
+    local wf al allog
+    wf="$(printf '%s\n' "$changed" | grep -E '^\.github/workflows/.+\.(yml|yaml)$' | while IFS= read -r f; do [ -f "$LOOP_WT/$f" ] && printf '%s\n' "$f"; done)"
+    if [ -n "$wf" ]; then
+      if al="$("$ROOT/.harness/scripts/ensure-actionlint.sh" "$ROOT" 2>/dev/null)" && [ -x "$al" ]; then
+        allog="$LOOP_WT/.harness/worklog/.actionlint.log"
+        if ! ( cd "$LOOP_WT" && printf '%s\n' "$wf" | xargs "$al" ) >"$allog" 2>&1; then
+          STRUCT_FAIL_KIND="workflow-lint"; STRUCT_FAIL_DETAIL="$(tail -n 20 "$allog" 2>/dev/null | tr '\n' '⏎')"
+          log "structural: $id — actionlint REJECTED a .github/workflows change (invalid GitHub Actions schema) — fail (last lines:)"; tail -n 20 "$allog" 2>/dev/null | sed 's/^/    /' >&2
+          return 1
+        fi
+        log "structural: actionlint OK on changed workflow file(s)"
+      else
+        log "structural: WARN — actionlint unavailable (couldn't fetch); SKIPPING local workflow-YAML validation for $id. The lint-workflows.yml CI job still gates it; set LINT_WORKFLOW_FILES=0 to silence."
+      fi
+    fi
+  fi
   if [ -n "$LOCAL_DOD" ]; then
     log "structural: running LOCAL_DOD → $LOCAL_DOD"
     # Capture output so a LOCAL_DOD failure records a "why" instead of a silent >/dev/null.
@@ -1234,6 +1333,10 @@ unset _backlog_blob
 # --- Dry run: print the task SELECT would build next, then exit (no lock, no work) ---
 if [ "${DRY_RUN:-0}" = "1" ]; then
   git -C "$ROOT" fetch origin --quiet 2>/dev/null || true
+  # Match the real run's POST-reconcile view (an owner's human-done/manual-fail overlay takes effect on
+  # the next real iteration) WITHOUT reconcile_overlays' write/commit/push — apply the overlays in
+  # memory only, so a just-marked-done needs-human task's dependents show as eligible here too.
+  DRY_TASKS="$(overlay_apply "$(blob tracking/TASKS.json)" || true)"
   sel="$(select_task || true)"
   [ -n "$sel" ] && echo "DRY-RUN → would build: $sel" \
                 || echo "DRY-RUN → nothing eligible (backlog done or all gate/human-blocked)"
@@ -1408,12 +1511,27 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
   read -r status rtask extra <"$RESULT" || true
   case "$status" in
     done)
-      log "task $rtask built on branch $branch"
+      log "task $rtask built + committed on $branch (local — loop gates, then pushes)"
+      # DETERMINISTIC LOCAL GATE FIRST — structural_checks (scope/empty-diff/expectsTest + LOCAL_DOD) runs
+      # on the local branch HEAD in the worktree, BEFORE the branch ever reaches origin/CI. A build that
+      # fails it is a failed attempt that never pushed anything — no wasted CI run, no branch on origin.
+      # (This is the fix for LOCAL_DOD running post-CI; the LOOP — not the builder — now pushes, per P5.)
+      if ! structural_checks "$task"; then
+        log "structural checks failed for $task — discarding (never pushed) + cold retry."; cleanup_task "$branch"; record_failure "$task" "${STRUCT_FAIL_KIND:-structural}" "${STRUCT_FAIL_DETAIL:-}"; bump "$task"; board; continue
+      fi
+      # Local gate passed → the LOOP pushes the branch (sole pusher, P5) so CI can run and integrate can ff it.
+      # A PLAIN push (not throttled_push): PUSH_COOLDOWN_SECONDS throttles *main integration* pushes, not the
+      # per-attempt branch push. cleanup_task deletes any stale remote `tNNN` before each cold attempt, so a
+      # non-ff rejection here means a genuine race → soft-fail + cold retry (never force-clobber).
+      heartbeat pushing
+      if ! git -C "$LOOP_WT" push --quiet origin "$branch"; then
+        log "push of $branch rejected (remote moved / race) — tearing down for a COLD retry."; cleanup_task "$branch"; record_failure "$task" "push-race" "couldn't push $branch to origin"; bump "$task"; board; continue
+      fi
       # A [skip ci]-tagged build commit never creates a workflow run, so wait_ci_green would sit out
       # the full CI_TIMEOUT and then loop on indeterminate. Skip the CI wait for such commits (an
-      # operational / scope:[] task) and go straight to the structural + audit gates.
+      # operational / scope:[] task) and go straight to the audit gate.
       if [ "$REQUIRE_CI" = "1" ] && git -C "$ROOT" log -1 --format=%s "origin/$branch" 2>/dev/null | grep -qF '[skip ci]'; then
-        log "[skip ci] build on $branch — no CI run expected; proceeding to structural + audit gates."
+        log "[skip ci] build on $branch — no CI run expected; proceeding to audit gate."
       elif [ "$REQUIRE_CI" = "1" ]; then
         heartbeat awaiting-ci
         ci_rc=0; wait_ci_green "$branch" || ci_rc=$?
@@ -1436,11 +1554,9 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
           log "CI RED for $task — failed attempt; tearing down for a COLD retry."; cleanup_task "$branch"; record_failure "$task" "ci-red" "CI checks failed on the branch"; bump "$task"; board; continue
         fi
       fi
-      # Structural gate THEN the blocking audit, on the CI-green branch, BEFORE integrating — so
-      # nothing unaudited reaches main. Either fail = a failed attempt (tear down → cold retry).
-      if ! structural_checks "$task"; then
-        log "structural checks failed for $task — tearing down branch + cold retry."; cleanup_task "$branch"; record_failure "$task" "${STRUCT_FAIL_KIND:-structural}" "${STRUCT_FAIL_DETAIL:-}"; bump "$task"; board; continue
-      fi
+      # Blocking audit AFTER CI green (deliberate divergence from in-place: don't pay for the expensive
+      # audit until free CI confirms the build), BEFORE integrating — so nothing unaudited reaches main.
+      # (structural_checks/LOCAL_DOD already ran above, pre-push.) A fail = a failed attempt (cold retry).
       heartbeat auditing
       if ! audit_gate "$task"; then
         log "AUDIT FAILED for $task — tearing down branch (never integrated) + cold retry."; cleanup_task "$branch"; record_failure "$task" "audit-fail"; bump "$task"; board; continue
@@ -1470,9 +1586,21 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
         block_task "$task" "repeated idle: work appears on main but status never persisted to done — needs a human to mark it done or fix the divergence"
         idle_task=""; idle_count=0
       else
-        log "agent reports idle on $task — Done-when already met on main; reconciling status=done and continuing."
-        record_outcome "$task" false
-        heartbeat_clear; cur_task=""; cur_attempts=0; cur_rung=0; cur_base=0; cur_explored=0
+        # GUARD: "work already on main" is NOT proof CI verified it — a prior wait_ci_green that couldn't
+        # find a run (e.g. a malformed workflow file GitHub reported by path, not name) can leave a commit
+        # on main, unmarked and un-reverted; the next cold attempt then reads it as idle. Re-check the
+        # ACTUAL CI status for origin/main HEAD (point-in-time, no wait) before flipping status=done.
+        idle_sha="$(git -C "$ROOT" rev-parse "$TASKS_REF" 2>/dev/null || true)"
+        idle_ci=2; if [ -n "$idle_sha" ]; then idle_ci=0; ci_status_now "" "$idle_sha" || idle_ci=$?; fi
+        if [ "$idle_ci" = 1 ]; then
+          log "idle on $task but CI for origin/main ($idle_sha) is RED — refusing to reconcile done; BLOCKING for a human (a prior revert-on-red didn't happen, or the workflow file is broken)."
+          block_task "$task" "idle-but-ci-red: work is on main but its CI is failing — needs a human (check the latest CI run / the .github/workflows file)"
+          idle_task=""; idle_count=0
+        else
+          log "agent reports idle on $task — Done-when already met on main ($([ "$idle_ci" = 0 ] && echo 'CI green' || echo 'CI status unconfirmed — proceeding as before')); reconciling status=done and continuing."
+          record_outcome "$task" false
+          heartbeat_clear; cur_task=""; cur_attempts=0; cur_rung=0; cur_base=0; cur_explored=0
+        fi
       fi
       ;;
     *)              log "unrecognized result '$status' — backing off"; sleep "$WAIT_SECONDS" ;;
