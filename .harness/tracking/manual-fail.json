@@ -1,1 +1,7 @@
-{}
+{
+  "T019": {
+    "failed": true,
+    "reason": "review-failed: superseded by T032 - root cause was a harness test-missing gate regex bug (blind to UITests/), not builder capability; re-attempt tightens interaction-safety guidance and works around the gate bug with a companion Tests/ unit test",
+    "at": "2026-07-13T22:58:39Z"
+  }
+}
