@@ -427,7 +427,7 @@
     {
       "id": "T019",
       "title": "Rename an item by tapping its name",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [],
       "gate": null,
       "tags": [
