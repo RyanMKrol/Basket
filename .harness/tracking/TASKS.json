@@ -738,6 +738,35 @@
       "verify": [],
       "spec": ".harness/tasks/T031.md",
       "visualVerify": false
+    },
+    {
+      "id": "T032",
+      "title": "Rename an item by tapping its name (re-attempt of T019)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature"
+      ],
+      "scope": [
+        "Sources/Views/",
+        "Sources/Services/",
+        "UITests/",
+        "Tests/",
+        "README.md",
+        "Sources/Support/A11yIDs.swift"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T032.md",
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      }
     }
   ]
 }
