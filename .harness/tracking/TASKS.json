@@ -510,7 +510,7 @@
     {
       "id": "T023",
       "title": "Success haptic on the All done! celebration + restore haptic",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
