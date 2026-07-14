@@ -871,7 +871,10 @@ EOF
   # already AUTO-FAILS a diff that changes no test file (STRUCT_FAIL_KIND=test-missing), but nothing else
   # told the builder — so it would fail blind, and (since the SCOPE block frames tests as merely
   # "allowed") a cost-minimizing builder is if anything nudged to skip them. State it as mandatory and
-  # tie it back to scope so there's no ambiguity that tests belong in this task.
+  # tie it back to scope so there's no ambiguity that tests belong in this task. We also nudge TEST-FIRST
+  # here (write the test, watch it fail, then build to green) — ONLY for expectsTest tasks, where it
+  # directly guards the "wrote a token test that asserts nothing" failure mode; the general build path is
+  # left outcome-oriented (no blanket TDD mandate for config/docs/style work).
   if tj -e --arg id "$tid" '.tasks[]|select(.id==$id)|.expectsTest==true' >/dev/null 2>&1; then
     printf '\n--- TESTS — REQUIRED for this task (it is marked expectsTest) ---\n'
     printf 'You MUST add or change at least one TEST file that exercises the behaviour in "## Do" and pins the\n'
@@ -880,6 +883,10 @@ EOF
     printf 'AUTO-FAILS this task (structural gate: test-missing); a green run against the EXISTING tests only\n'
     printf 'is NOT sufficient. Write the test to what "## Done when" says it must assert, and keep it hermetic\n'
     printf '(a scratch/throwaway resource — never the real prod DB, live services, or real data).\n'
+    printf 'PREFER TEST-FIRST: write that test FROM "## Done when" and run it BEFORE you implement — confirm it\n'
+    printf 'FAILS first for the right reason (a test that is already green before you have written any code\n'
+    printf 'asserts nothing), then build until it passes. Re-run the suite as many times as you need while you\n'
+    printf 'iterate — there is NO per-attempt limit on how often you run the tests.\n'
   fi
   _custom_preamble build
   visual_verify_block "$tid"
@@ -1527,7 +1534,18 @@ for ((i = 1; i <= MAX_ITERS; i++)); do
       # fails it is a failed attempt that never pushed anything — no wasted CI run, no branch on origin.
       # (This is the fix for LOCAL_DOD running post-CI; the LOOP — not the builder — now pushes, per P5.)
       if ! structural_checks "$task"; then
-        log "structural checks failed for $task — discarding (never pushed) + cold retry."; cleanup_task "$branch"; record_failure "$task" "${STRUCT_FAIL_KIND:-structural}" "${STRUCT_FAIL_DETAIL:-}"; bump "$task"; board; continue
+        record_failure "$task" "${STRUCT_FAIL_KIND:-structural}" "${STRUCT_FAIL_DETAIL:-}"
+        if [ "${STRUCT_FAIL_KIND:-}" = scope-creep ]; then
+          # Scope-creep is NOT a difficulty signal — it means the task's declared `scope` is wrong/too
+          # narrow, which a retry or a stronger model can't fix (it would just burn the whole attempt
+          # budget on a doomed task AND poison the (layer×workType) calibration with a fake "hard cell").
+          # So block after ONE attempt for a human to correct the scope (or split the task). block_task
+          # tears the branch/worktree down itself, so no cleanup_task here.
+          log "structural: $task touched files OUTSIDE its declared scope (${STRUCT_FAIL_DETAIL:-}) — blocking after one attempt (a wrong scope isn't fixed by a retry or a stronger model)."
+          block_task "$task" "scope-creep: diff touched files outside declared scope (${STRUCT_FAIL_DETAIL:-}) — the task's scope is likely too narrow or wrong; fix the scope (or split the task), then re-open"
+          board; continue
+        fi
+        log "structural checks failed for $task — discarding (never pushed) + cold retry."; cleanup_task "$branch"; bump "$task"; board; continue
       fi
       # Local gate passed → the LOOP pushes the branch (sole pusher, P5) so CI can run and integrate can ff it.
       # A PLAIN push (not throttled_push): PUSH_COOLDOWN_SECONDS throttles *main integration* pushes, not the
