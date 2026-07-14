@@ -533,7 +533,7 @@
     {
       "id": "T024",
       "title": "Formatting cleanup: wrap over-long lines + consistent MARK usage",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
