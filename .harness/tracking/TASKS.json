@@ -656,7 +656,7 @@
     {
       "id": "T029",
       "title": "View-only Home Screen widget (small + medium)",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [
         "T026"
       ],

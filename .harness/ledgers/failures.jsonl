@@ -21,3 +21,4 @@
 {"id":"T021","ts":"2026-07-14T06:04:12Z","kind":"scope-creep","rung":0,"attempt":1,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"views","workType":"feature","risk":[]},"detail":"tools/main.swift"}
 {"id":"T027","ts":"2026-07-14T09:44:50Z","kind":"audit-fail","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"services","workType":"feature","risk":[]},"detail":""}
 {"id":"T027","ts":"2026-07-14T10:51:05Z","kind":"audit-fail","rung":0,"attempt":1,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"services","workType":"feature","risk":[]},"detail":""}
+{"id":"T029","ts":"2026-07-14T21:34:49Z","kind":"scope-creep","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"views","workType":"feature","risk":[]},"detail":"BasketWidget/BasketWidget.entitlements BasketWidget/BasketWidgetExtension.swift"}
