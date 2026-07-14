@@ -84,7 +84,8 @@ struct ShoppingListView: View {
                                 quantityText: quantityText(for:),
                                 editor: editor(for:),
                                 onToggle: toggle,
-                                onTapQuantity: quantity.toggle
+                                onTapQuantity: quantity.toggle,
+                                onRename: rename
                             )
 
                             // Faded "Got it" section.
@@ -330,6 +331,21 @@ struct ShoppingListView: View {
         Haptics.success()
         DispatchQueue.main.asyncAfter(deadline: .now() + TestHooks.checkCommitDelay) {
             if let batch = choreo.finishBurst(id) { commitChecked(batch) }
+        }
+    }
+
+    /// Name-tap rename: applies the trimmed new name (ListLogic.renamed
+    /// already rejected an empty one before calling this), re-derives the
+    /// emoji by virtue of the row reading `item.name` fresh next render, and
+    /// resets any quantity — a renamed item starts fresh since the old
+    /// amount may no longer make sense. List position and createdAt are
+    /// untouched since this mutates the existing item in place.
+    private func rename(_ item: GroceryItem, to newName: String) {
+        if expandedID == item.persistentModelID { expandedID = nil }
+        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+            item.name = newName
+            item.quantity = nil
+            item.unitRaw = nil
         }
     }
 

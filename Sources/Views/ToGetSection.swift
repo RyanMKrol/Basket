@@ -13,6 +13,7 @@ struct ToGetSection: View {
     let editor: (GroceryItem) -> AnyView?
     let onToggle: (GroceryItem) -> Void
     let onTapQuantity: (GroceryItem) -> Void
+    var onRename: (GroceryItem, String) -> Void = { _, _ in }
 
     var body: some View {
         ForEach(items) { item in
@@ -27,6 +28,7 @@ struct ToGetSection: View {
                 isExpanded: expandedID == item.persistentModelID,
                 onToggle: { onToggle(item) },
                 onTapQuantity: { onTapQuantity(item) },
+                onRename: { onRename(item, $0) },
                 quantityEditor: editor(item)
             )
             .transition(.asymmetric(

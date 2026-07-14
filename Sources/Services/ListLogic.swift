@@ -31,6 +31,15 @@ enum ListLogic {
         let cutoff = now.addingTimeInterval(-ttl)
         return items.filter { $0.isChecked && ($0.checkedAt ?? .distantPast) <= cutoff }
     }
+
+    /// The name-tap rename business rule: trim whitespace and reject an
+    /// empty result — the caller keeps the old name in that case. Doesn't
+    /// touch quantity/emoji itself; the caller applies those alongside the
+    /// name once it has a non-nil result.
+    static func renamed(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
 }
 
 /// The check-off choreography: a tapped item sparks in place (`checking`),

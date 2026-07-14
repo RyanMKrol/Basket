@@ -42,6 +42,13 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   numbers, and quietly keeps the old amount if you clear it or type nonsense. The
   amount shows as a small chip on the row; long names truncate so the chip keeps
   its place.
+- **Tap an item's name** to rename it inline — the name swaps for a prefilled
+  text field; commit with return. A mistyped or changed-your-mind item doesn't
+  need deleting and re-adding: the emoji re-derives for the new name, any set
+  quantity resets to unset (the old amount may no longer make sense), and the
+  item keeps its place in the list. An empty name is rejected, leaving the old
+  one in place. This tap target is additive — the rest of the row (and the
+  "+ Qty" chip) still opens the quantity editor exactly as before.
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
   tap **Clear all** in the section header to empty it immediately. Cleared items
   vanish right away, but a soft **"Cleared N items — Undo"** toast floats above
@@ -96,10 +103,11 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   curated, ~9% semantic).
 - A warm tri-colour (green/yellow/tomato) background bloom.
 - **VoiceOver support** — every interactive control (check circle, quantity
-  stepper and unit pills, add bar, tip buttons) has a proper label, hint, and
-  action, and purely decorative flourishes (sparkles, the launch splash, empty
-  state's basket emoji) are hidden from the accessibility tree instead of
-  cluttering it.
+  stepper and unit pills, add bar, tip buttons, an item's name — its own
+  "Rename <name>" stop, distinct from the row's quantity/restore action) has
+  a proper label, hint, and action, and purely decorative flourishes
+  (sparkles, the launch splash, empty state's basket emoji) are hidden from
+  the accessibility tree instead of cluttering it.
 
 ## Build & run (CLI, no Xcode GUI)
 
@@ -218,8 +226,9 @@ top:
     ```
 
 - `UITests/` — XCUITest flow tests (add an item, suggestions, check one off,
-  restore/clear "Got it", edit quantity, empty state, "All done!"
-  celebration, keyboard dismiss, persistence across relaunch) driving a real
+  restore/clear "Got it", edit quantity, rename an item, empty state,
+  "All done!" celebration, keyboard dismiss, persistence across relaunch)
+  driving a real
   simulator through the actual UI, backed by an isolated in-memory SwiftData
   store (see `-uiTesting` / `-uiTestingEmpty` in `BasketApp.init`; the
   persistence tests point `UITEST_STORE_URL` at their own temp file instead).

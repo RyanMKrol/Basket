@@ -14,6 +14,11 @@ enum A11yID {
     enum ItemRow {
         static func row(_ name: String) -> String { "itemRow.\(name)" }
         static func check(_ name: String) -> String { "itemRow.check.\(name)" }
+        static func nameLabel(_ name: String) -> String { "itemRow.name.\(name)" }
+        static func renameField(_ name: String) -> String { "itemRow.renameField.\(name)" }
+        /// Queryable so a rename can be asserted to have re-derived the emoji
+        /// (to-get rows only — see `ItemRow`).
+        static func emoji(_ name: String) -> String { "itemRow.emoji.\(name)" }
     }
 
     enum QuantityEditor {
