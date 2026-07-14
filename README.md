@@ -53,6 +53,13 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   VoiceOver.
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the
   existing row instead of creating a copy.
+- **"Hey Siri, add milk to my Basket"** — an `AddToBasketIntent` App Intent,
+  registered as an App Shortcut (`Sources/Services/AddToBasketIntent.swift`),
+  lets Siri and the Shortcuts app add an item without opening the app. It
+  writes through the same shared App Group SwiftData store the app reads
+  (`AppGroup`), derives the emoji and dedupe/bump behaviour exactly like
+  typing it into the add bar (`AddItem.perform`, shared with
+  `ShoppingListView`), and records the item in the suggestion memory.
 - **About sheet** — the ⓘ in the header opens a small sheet with the app version
   and an optional **tip jar** (☕ / 🥪 / 🎁, in-app purchases via StoreKit). Basket
   is free; tipping unlocks nothing — but once you've tipped, the **Basket** title

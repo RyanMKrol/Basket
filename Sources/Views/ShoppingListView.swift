@@ -414,27 +414,26 @@ struct ShoppingListView: View {
     private func addDraft() { add(draft) }
 
     private func add(_ rawName: String) {
-        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines).capitalisedFirstLetter
+        let name = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty else { return }
         let key = name.lowercased()
 
         // Duplicate: if it's already known to the list, don't create a second row.
         // Bump it back to the top of the to-get list (un-checking it if it was in
         // the "Got it" section) and give it a little flash instead.
-        if let existing = items.first(where: { $0.name.lowercased() == key }) {
-            withAppAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                existing.isChecked = false
-                existing.checkedAt = nil
-                existing.createdAt = AppClock.now
-            }
-            flash(existing)
-        } else {
-            withAppAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
-                context.insert(GroceryItem(name: name, createdAt: AppClock.now))
-            }
+        let wasExisting = items.contains { $0.name.lowercased() == key }
+        let animation = wasExisting
+            ? Animation.spring(response: 0.4, dampingFraction: 0.8)
+            : Animation.spring(response: 0.35, dampingFraction: 0.75)
+
+        var result: GroceryItem?
+        withAppAnimation(animation) {
+            result = AddItem.perform(name, context: context, now: AppClock.now)
+        }
+        if wasExisting, let result {
+            flash(result)
         }
 
-        KnownItems.rememberAdd(name, context: context, now: AppClock.now)
         Haptics.soft()
         draft = ""
     }
