@@ -482,7 +482,7 @@
     {
       "id": "T021",
       "title": "'Usuals' suggestion chips on empty add-bar focus",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
