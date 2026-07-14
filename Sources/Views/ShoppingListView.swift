@@ -378,6 +378,7 @@ struct ShoppingListView: View {
         if expandedID == item.persistentModelID { expandedID = nil }
         if item.isChecked {
             // Un-check from the "Got it" section → straight back to the list.
+            Haptics.restore()
             withAppAnimation(.spring(response: 0.4, dampingFraction: 0.82)) {
                 item.isChecked = false
                 item.checkedAt = nil
@@ -412,6 +413,7 @@ struct ShoppingListView: View {
     /// Play the one-shot "you got everything" celebration.
     private func celebrateCleared() {
         guard !celebrating else { return }
+        Haptics.success()
         withAppAnimation(.easeOut(duration: 0.3)) { celebrating = true }
         // Auto-dismiss after the product-timed flourish. Suppressed under UI
         // testing (nil) so the transient overlay can't vanish before the test
