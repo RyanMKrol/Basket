@@ -559,7 +559,7 @@
     {
       "id": "T025",
       "title": "Refactor ShoppingListView (extract sections + quantity handlers)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
