@@ -602,7 +602,7 @@
     {
       "id": "T027",
       "title": "'Add to Basket' App Intent + App Shortcut (Siri add)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T026"
       ],
