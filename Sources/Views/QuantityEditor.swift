@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - QuantityEditor
+
 /// The inline quantity editor that slides down inside a row's card when you tap
 /// it: a − / value / + stepper on top, and a row of unit pills below (every item
 /// can be counted in plain "units"; unrecognised items offer all of ml/L/g/kg).
@@ -52,6 +54,8 @@ struct QuantityEditor: View {
         }
         .padding(.top, 12)
     }
+
+    // MARK: - Private Views
 
     /// The number between the − / + buttons: a tappable label normally, swapping
     /// to a focused keyboard field while editing so an exact amount can be typed.
@@ -111,6 +115,8 @@ struct QuantityEditor: View {
                 .accessibilityIdentifier(A11yID.QuantityEditor.value)
         }
     }
+
+    // MARK: - Private Helpers
 
     /// Full unit name for VoiceOver, since the on-row symbol ("ml", "kg") isn't
     /// always clear read aloud.

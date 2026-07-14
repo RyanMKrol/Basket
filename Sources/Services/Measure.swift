@@ -1,5 +1,7 @@
 import Foundation
 
+// MARK: - Types
+
 /// How an item is measured. Drives the default unit and the stepper increments.
 enum MeasureType { case count, weight, volume }
 
@@ -27,6 +29,8 @@ enum MeasureUnit: String, CaseIterable {
         }
     }
 }
+
+// MARK: - Measure
 
 /// Smart-units helper: guesses how an item is measured from its name and owns
 /// the pure stepping/formatting logic the quantity editor leans on. All of this

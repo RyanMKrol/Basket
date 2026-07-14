@@ -67,10 +67,14 @@ final class TipJar {
                 // (products not "Approved", or Agreements/Tax/Banking incomplete),
                 // not a network or client-side problem. Logged distinctly from the
                 // catch below so Console.app can tell the two apart.
-                Self.logger.error("Product.products(for:) returned zero products for ids: \(TipJar.ids.joined(separator: ", "), privacy: .public)")
+                Self.logger.error(
+                    "Product.products(for:) returned zero products for ids: \(TipJar.ids.joined(separator: ", "), privacy: .public)"
+                )
             } else if fetched.count < TipJar.ids.count {
                 let missing = Set(TipJar.ids).subtracting(fetched.map(\.id))
-                Self.logger.error("Product.products(for:) returned only \(fetched.count, privacy: .public)/\(TipJar.ids.count, privacy: .public) products; missing: \(missing.joined(separator: ", "), privacy: .public)")
+                Self.logger.error(
+                    "Product.products(for:) returned only \(fetched.count, privacy: .public)/\(TipJar.ids.count, privacy: .public) products; missing: \(missing.joined(separator: ", "), privacy: .public)"
+                )
             }
             products = fetched
             state = fetched.isEmpty ? .unavailable : .loaded

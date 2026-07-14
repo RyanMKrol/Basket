@@ -114,7 +114,10 @@ struct ShoppingListView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 4)
                         .padding(.bottom, 12)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.82).unlessUITesting, value: items.map(\.isChecked))
+                        .animation(
+                            .spring(response: 0.4, dampingFraction: 0.82).unlessUITesting,
+                            value: items.map(\.isChecked)
+                        )
                     }
                 }
             }

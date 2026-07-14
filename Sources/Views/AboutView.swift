@@ -1,6 +1,8 @@
 import SwiftUI
 import StoreKit
 
+// MARK: - AboutView
+
 /// A small "about" sheet reached from the ⓘ in the list header: app name,
 /// version, and an in-app tip jar. The natural future home for a sound toggle or
 /// theme picker. Basket is free; tipping is entirely optional and unlocks nothing.
@@ -52,6 +54,8 @@ struct AboutView: View {
         .presentationDragIndicator(.visible)
         .task { await tipJar.load() }
     }
+
+    // MARK: - Private Views
 
     @ViewBuilder private var tipSection: some View {
         VStack(spacing: 10) {

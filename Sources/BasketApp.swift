@@ -23,17 +23,26 @@ struct BasketApp: App {
         do {
             if let url = TestHooks.storeURL {
                 let config = ModelConfiguration(url: url)
-                container = try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+                container = try ModelContainer(
+                    for: GroceryItem.self, KnownItem.self,
+                    configurations: config
+                )
             } else if TestHooks.isUITesting {
                 let config = ModelConfiguration(isStoredInMemoryOnly: true)
-                container = try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+                container = try ModelContainer(
+                    for: GroceryItem.self, KnownItem.self,
+                    configurations: config
+                )
             } else {
                 // Real store lives in the App Group container so the Siri intent
                 // and widget can read the same list (see AppGroup). The test
                 // paths above are untouched — they keep their in-memory / temp
                 // stores.
                 let config = ModelConfiguration(url: AppGroup.storeURL)
-                container = try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+                container = try ModelContainer(
+                    for: GroceryItem.self, KnownItem.self,
+                    configurations: config
+                )
             }
         } catch {
             fatalError("Failed to create SwiftData container: \(error)")
