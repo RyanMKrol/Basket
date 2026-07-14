@@ -51,6 +51,15 @@ final class AccessibilityAuditTests: BasketUITestCase {
         try app.performAccessibilityAudit(for: auditTypes, handleIssue)
     }
 
+    func testClearAllUndoToastPassesAccessibilityAudit() throws {
+        launchApp()
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
+        XCTAssertTrue(app.staticTexts[A11yID.GotSection.header].waitForExistence(timeout: 3))
+        app.buttons[A11yID.GotSection.clearAll].tap()
+        XCTAssertTrue(app.buttons["clearToast.undo"].waitForExistence(timeout: 2))
+        try app.performAccessibilityAudit(for: auditTypes, handleIssue)
+    }
+
     func testAboutSheetPassesAccessibilityAudit() throws {
         launchApp()
         app.buttons[A11yID.Header.aboutButton].tap()

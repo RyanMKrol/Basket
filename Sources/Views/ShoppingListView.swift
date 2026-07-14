@@ -22,6 +22,16 @@ struct ShoppingListView: View {
     @State private var showingAbout = false
     /// True briefly while the "you got everything" celebration plays.
     @State private var celebrating = false
+    /// "Clear all" soft-delete buffer: items are hidden immediately but only
+    /// actually deleted once the undo toast expires, so an accidental tap is
+    /// recoverable. Kept as IDs (not copies) so undo just un-hides the real
+    /// SwiftData objects — `persistentModelID` stays intact.
+    @State private var pendingClearIDs: Set<PersistentIdentifier> = []
+    @State private var showClearToast = false
+    @State private var clearedToastCount = 0
+    /// Invalidates an in-flight expiry timer when a newer "Clear all" or an
+    /// undo supersedes it, so a stale timer can't delete the wrong batch.
+    @State private var clearToken = 0
     /// Cold-start launch flourish — fires once per process, not on resume.
     /// Skipped under UI testing so tests don't have to wait out a splash that
     /// isn't part of the flow being verified.
@@ -42,8 +52,12 @@ struct ShoppingListView: View {
     }
 
     /// Checked items still within their TTL window, most-recently-got first.
+    /// Excludes anything buffered by a pending "Clear all" — those vanish
+    /// from view the instant "Clear all" is tapped, even though the actual
+    /// delete is deferred until the undo toast expires.
     private var recentlyGot: [GroceryItem] {
         ListLogic.recentlyGot(items, now: now, ttl: gotTTL)
+            .filter { !pendingClearIDs.contains($0.persistentModelID) }
     }
 
     /// Nothing to get and nothing recently got — the empty state is showing.
@@ -113,13 +127,20 @@ struct ShoppingListView: View {
             }
         }
         .safeAreaInset(edge: .bottom) {
-            AddBar(
-                text: $draft,
-                suggestions: liveSuggestions,
-                onSubmit: addDraft,
-                onPickSuggestion: { add($0.name) },
-                focused: $addBarFocused
-            )
+            VStack(spacing: 8) {
+                if showClearToast {
+                    ClearToast(count: clearedToastCount, onUndo: undoClear)
+                        .transition(reduceMotion ? .opacity
+                                                  : .move(edge: .bottom).combined(with: .opacity))
+                }
+                AddBar(
+                    text: $draft,
+                    suggestions: liveSuggestions,
+                    onSubmit: addDraft,
+                    onPickSuggestion: { add($0.name) },
+                    focused: $addBarFocused
+                )
+            }
         }
         .onAppear { now = AppClock.now; purgeExpired() }
         .onReceive(ticker) { _ in now = AppClock.now; purgeExpired() }
@@ -397,12 +418,51 @@ struct ShoppingListView: View {
         }
     }
 
-    /// Clear the whole "Got it" section now (manual tidy-up).
+    /// Clear the whole "Got it" section now (manual tidy-up). Items vanish
+    /// from view immediately but the SwiftData delete is deferred until the
+    /// undo toast expires (see `pendingClearIDs`), so a mis-tap is
+    /// recoverable without re-inserting copies (which would break
+    /// `persistentModelID`-based state like `expandedID`/`flashID`).
     private func clearGot() {
-        let checked = items.filter { $0.isChecked }
-        guard !checked.isEmpty else { return }
-        withAppAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
-            for item in checked { context.delete(item) }
+        let toClear = items.filter { $0.isChecked && !pendingClearIDs.contains($0.persistentModelID) }
+        guard !toClear.isEmpty else { return }
+        withAppAnimation(reduceMotion ? .easeInOut(duration: 0.25)
+                                       : .spring(response: 0.4, dampingFraction: 0.85)) {
+            pendingClearIDs.formUnion(toClear.map(\.persistentModelID))
+            clearedToastCount = pendingClearIDs.count
+            showClearToast = true
+        }
+        Haptics.soft()
+
+        clearToken += 1
+        let token = clearToken
+        DispatchQueue.main.asyncAfter(deadline: .now() + TestHooks.clearToastDuration) {
+            guard clearToken == token else { return }
+            commitClear()
+        }
+    }
+
+    /// The undo toast expired without being tapped: actually delete the
+    /// buffered items now.
+    private func commitClear() {
+        let ids = pendingClearIDs
+        guard !ids.isEmpty else { return }
+        for item in items where ids.contains(item.persistentModelID) {
+            context.delete(item)
+        }
+        pendingClearIDs.removeAll()
+        withAppAnimation(.easeOut(duration: 0.3)) { showClearToast = false }
+    }
+
+    /// Undo tapped: drop the buffer so the items reappear with their prior
+    /// state intact, and invalidate the pending expiry timer.
+    private func undoClear() {
+        guard !pendingClearIDs.isEmpty else { return }
+        clearToken += 1
+        withAppAnimation(reduceMotion ? .easeInOut(duration: 0.25)
+                                       : .spring(response: 0.4, dampingFraction: 0.82)) {
+            pendingClearIDs.removeAll()
+            showClearToast = false
         }
         Haptics.soft()
     }

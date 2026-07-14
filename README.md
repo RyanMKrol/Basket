@@ -39,7 +39,14 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   amount shows as a small chip on the row; long names truncate so the chip keeps
   its place.
 - **1-hour TTL** on the "Got it" section, so it tidies itself between shops — or
-  tap **Clear all** in the section header to empty it immediately.
+  tap **Clear all** in the section header to empty it immediately. Cleared items
+  vanish right away, but a soft **"Cleared N items — Undo"** toast floats above
+  the add bar for a few seconds in case that was a mis-tap: tap **Undo** to bring
+  everything back exactly as it was (name, quantity, checked state), or let the
+  toast expire to commit the clear. Under the hood the items are only *hidden*
+  until the toast expires, not deleted, so undo restores the real rows instead of
+  re-inserting copies. The toast respects Reduce Motion and announces itself to
+  VoiceOver.
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the
   existing row instead of creating a copy.
 - **About sheet** — the ⓘ in the header opens a small sheet with the app version

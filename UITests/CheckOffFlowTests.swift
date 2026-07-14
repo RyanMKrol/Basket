@@ -76,4 +76,55 @@ final class CheckOffFlowTests: BasketUITestCase {
         waitForGone(gotSectionHeader)
         XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
     }
+
+    /// "Clear all" is instantly recoverable: tapping the undo toast's Undo
+    /// button restores every cleared item, quantities included.
+    func testClearAllUndoRestoresItems() {
+        launchApp()
+
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
+        app.buttons[A11yID.ItemRow.check("Eggs")].tap()
+        XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
+        waitForToGetCount(2)
+        attachScreenshot("01-two-checked")
+
+        app.buttons[A11yID.GotSection.clearAll].tap()
+        waitForGone(gotSectionHeader)
+        attachScreenshot("02-cleared-toast-shown")
+
+        let undo = app.buttons["clearToast.undo"]
+        XCTAssertTrue(undo.waitForExistence(timeout: 2))
+        undo.tap()
+
+        XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.check("Milk")].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.check("Eggs")].waitForExistence(timeout: 3))
+        waitForToGetCount(2)
+        attachScreenshot("03-restored-after-undo")
+
+        // The undo toast itself dismisses along with the restore.
+        waitForGone(undo)
+    }
+
+    /// Letting the undo toast expire without tapping Undo commits the
+    /// clear: the toast dismisses on its own and the items stay gone.
+    func testClearAllExpiredToastLeavesItemsCleared() {
+        launchApp()
+
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
+        XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
+        attachScreenshot("01-one-checked")
+
+        app.buttons[A11yID.GotSection.clearAll].tap()
+        let undo = app.buttons["clearToast.undo"]
+        XCTAssertTrue(undo.waitForExistence(timeout: 2))
+        attachScreenshot("02-toast-shown")
+
+        // Let the shortened test-mode toast duration elapse without tapping Undo.
+        waitForGone(undo, timeout: 5)
+        attachScreenshot("03-toast-expired")
+
+        XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
+        XCTAssertFalse(gotSectionHeader.exists)
+    }
 }
