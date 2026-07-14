@@ -455,7 +455,7 @@
     {
       "id": "T020",
       "title": "Undo toast for Clear all",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
