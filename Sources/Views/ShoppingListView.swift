@@ -75,40 +75,21 @@ struct ShoppingListView: View {
                 } else {
                     ScrollView {
                         VStack(spacing: 12) {
-                            // To-get section.
-                            ForEach(toGet) { item in
-                                ItemRow(
-                                    name: item.name,
-                                    emoji: Emoji.forName(item.name),
-                                    isChecked: false,
-                                    isChecking: choreo.isInFlight(item.persistentModelID),
-                                    isFlashing: item.persistentModelID == flashID,
-                                    quantityText: quantityText(for: item),
-                                    showsQuantity: true,
-                                    isExpanded: expandedID == item.persistentModelID,
-                                    onToggle: { toggle(item) },
-                                    onTapQuantity: { toggleQuantityEditor(item) },
-                                    quantityEditor: editor(for: item)
-                                )
-                                .transition(.asymmetric(
-                                    insertion: .scale(scale: 0.92).combined(with: .opacity),
-                                    removal: .opacity
-                                ))
-                            }
+                            ToGetSection(
+                                items: toGet,
+                                choreo: choreo,
+                                flashID: flashID,
+                                expandedID: expandedID,
+                                quantityText: quantityText(for:),
+                                editor: editor(for:),
+                                onToggle: toggle,
+                                onTapQuantity: quantity.toggle
+                            )
 
                             // Faded "Got it" section.
                             if !recentlyGot.isEmpty {
                                 gotHeader
-                                ForEach(recentlyGot) { item in
-                                    ItemRow(
-                                        name: item.name,
-                                        emoji: Emoji.forName(item.name),
-                                        isChecked: true,
-                                        onToggle: { toggle(item) }
-                                    )
-                                    .opacity(0.5)
-                                    .transition(.opacity)
-                                }
+                                GotItSection(items: recentlyGot, onToggle: toggle)
                             }
                         }
                         .padding(.horizontal, 16)
@@ -289,6 +270,12 @@ struct ShoppingListView: View {
 
     // MARK: - Quantity
 
+    /// Wires the quantity editor's five actions onto a `GroceryItem`; see
+    /// `QuantityController`.
+    private var quantity: QuantityController {
+        QuantityController(expandedID: $expandedID, draft: $draft, addBarFocused: $addBarFocused)
+    }
+
     /// Formatted quantity for a row, or nil when none is set (shows "+ Qty").
     private func quantityText(for item: GroceryItem) -> String? {
         guard let q = item.quantity, let u = item.unit else { return nil }
@@ -304,73 +291,12 @@ struct ShoppingListView: View {
                 value: q,
                 unit: u,
                 units: Measure.units(for: Measure.typeForName(item.name)),
-                onStep: { up in stepQuantity(item, up: up) },
-                onPickUnit: { newUnit in pickQuantityUnit(item, newUnit) },
-                onSetValue: { value in setQuantity(item, value) },
-                onClear: { clearQuantity(item) }
+                onStep: { up in quantity.step(item, up: up) },
+                onPickUnit: { newUnit in quantity.pickUnit(item, newUnit) },
+                onSetValue: { value in quantity.setValue(item, value) },
+                onClear: { quantity.clear(item) }
             )
         )
-    }
-
-    /// Open/close a row's quantity editor. Opening for the first time seeds a
-    /// smart default (e.g. milk → 500 ml) inferred from the item name.
-    private func toggleQuantityEditor(_ item: GroceryItem) {
-        withAppAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-            if expandedID == item.persistentModelID {
-                expandedID = nil
-            } else {
-                // Clear any half-typed add-bar entry and drop its keyboard so the
-                // leftover text + suggestion stack don't linger behind the
-                // quantity editor.
-                draft = ""
-                addBarFocused = false
-                if item.quantity == nil || item.unit == nil {
-                    let u = Measure.defaultUnit(for: item.name)
-                    item.unit = u
-                    item.quantity = Measure.defaultValue(for: u)
-                }
-                expandedID = item.persistentModelID
-            }
-        }
-        Haptics.soft()
-    }
-
-    private func stepQuantity(_ item: GroceryItem, up: Bool) {
-        guard let u = item.unit else { return }
-        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
-            item.quantity = Measure.step(item.quantity ?? Measure.defaultValue(for: u), unit: u, up: up)
-        }
-        Haptics.soft()
-    }
-
-    private func pickQuantityUnit(_ item: GroceryItem, _ newUnit: MeasureUnit) {
-        guard let u = item.unit else { return }
-        let newValue = Measure.changeUnit(item.quantity ?? Measure.defaultValue(for: u),
-                                          from: u, to: newUnit)
-        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
-            item.quantity = newValue
-            item.unit = newUnit
-        }
-        Haptics.soft()
-    }
-
-    /// Apply an exact amount typed straight into the editor's value field — the
-    /// keyboard shortcut past tapping +/- many times for a large quantity. The
-    /// field only hands back values that already parsed sanely (see Measure.parse).
-    private func setQuantity(_ item: GroceryItem, _ value: Double) {
-        withAppAnimation(.spring(response: 0.3, dampingFraction: 0.9)) {
-            item.quantity = value
-        }
-        Haptics.soft()
-    }
-
-    private func clearQuantity(_ item: GroceryItem) {
-        withAppAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-            item.quantity = nil
-            item.unitRaw = nil
-            expandedID = nil
-        }
-        Haptics.soft()
     }
 
     // MARK: - Actions
