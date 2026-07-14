@@ -67,6 +67,9 @@ targets:
         # the app out of that multitasking mode instead, which is what Apple's
         # own App Store Connect validation expects for a portrait-only app.
         UIRequiresFullScreen: true
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - basket
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.basket

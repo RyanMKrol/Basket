@@ -37,6 +37,7 @@ struct ShoppingListView: View {
     /// isn't part of the flow being verified.
     @State private var showFlourish = TestHooks.isUITesting ? false : LaunchOnce.consume()
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.shouldFocusAddBar) private var shouldFocusAddBar
     @Environment(TipJar.self) private var tipJar
     /// Supporters tap the title to toggle the rainbow look. Defaults on after a
     /// tip and persists (UserDefaults) — even across relaunches — until toggled.
@@ -127,6 +128,11 @@ struct ShoppingListView: View {
             }
         }
         .onAppear { now = AppClock.now; purgeExpired() }
+        .onChange(of: shouldFocusAddBar) { _, newValue in
+            if newValue {
+                addBarFocused = true
+            }
+        }
         .onReceive(ticker) { _ in now = AppClock.now; purgeExpired() }
         .sheet(isPresented: $showingAbout) { AboutView() }
         // Full-screen so it covers the add bar too; only on a cold launch.

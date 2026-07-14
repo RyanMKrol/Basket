@@ -8,6 +8,8 @@ struct BasketApp: App {
     let container: ModelContainer
     /// The tip jar lives for the app's lifetime and is shared via the environment.
     @State private var tipJar = TipJar()
+    /// Whether to focus the add bar on next render (set by deep links).
+    @State private var shouldFocusAddBar = false
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.ryankrol.basket", category: "persistence")
 
     init() {
@@ -61,6 +63,7 @@ struct BasketApp: App {
             ShoppingListView()
                 .preferredColorScheme(.light)
                 .environment(tipJar)
+                .environment(\.shouldFocusAddBar, shouldFocusAddBar)
                 // SwiftData's autosave is debounced, so a force-quit right
                 // after a change can lose it — flush explicitly on the way
                 // to the background, the last reliable moment we get.
@@ -71,6 +74,11 @@ struct BasketApp: App {
                         } catch {
                             Self.logger.error("Failed to save context on background: \(error)")
                         }
+                    }
+                }
+                .onOpenURL { url in
+                    if url.scheme == "basket" && url.host == "add" {
+                        shouldFocusAddBar = true
                     }
                 }
         }

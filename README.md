@@ -60,6 +60,11 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   (`AppGroup`), derives the emoji and dedupe/bump behaviour exactly like
   typing it into the add bar (`AddItem.perform`, shared with
   `ShoppingListView`), and records the item in the suggestion memory.
+- **Deep-link quick-add** — the `basket://add` URL scheme opens the app with
+  the add bar focused and the keyboard up, ready to type. Works whether the app
+  is already running or launching cold. This is the target for the Home Screen
+  widget's quick-add button, letting you add an item with one tap and one swipe,
+  no app icons needed.
 - **About sheet** — the ⓘ in the header opens a small sheet with the app version
   and an optional **tip jar** (☕ / 🥪 / 🎁, in-app purchases via StoreKit). Basket
   is free; tipping unlocks nothing — but once you've tipped, the **Basket** title
