@@ -265,13 +265,17 @@ struct ShoppingListView: View {
     // Typing suggestions: your personal history first (last month, ranked by
     // frequency + recency), then a built-in food dictionary for autocomplete.
     // Only items still on the to-get list are excluded (checked-off ones can be
-    // re-suggested so you can re-add them).
+    // re-suggested so you can re-add them). Focusing an empty field surfaces
+    // "your usuals" instead, so the add bar isn't a dead end before you type.
     private var liveSuggestions: [Suggestion] {
         let onList = Set(items.filter { !$0.isChecked }.map { $0.name.lowercased() })
         let candidates = known.map {
             SuggestionCandidate(name: $0.displayName,
                                 timesAdded: $0.timesAdded,
                                 lastAddedAt: $0.lastAddedAt)
+        }
+        if draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && addBarFocused {
+            return Suggestions.usuals(history: candidates, onList: onList, now: now)
         }
         return Suggestions.combined(query: draft,
                                     history: candidates,

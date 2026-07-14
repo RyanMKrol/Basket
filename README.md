@@ -18,7 +18,11 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   food dictionary (`SuggestionDictionary`) for instant autocomplete. That
   dictionary unifies the grocery + regional corpora with the emoji table's whole
   vocabulary, so anything the app can put an emoji on it can also suggest (e.g.
-  "cord" → Cordial). Items already on the list are filtered out.
+  "cord" → Cordial). Items already on the list are filtered out. Focusing the
+  field before typing anything isn't a dead end either — it surfaces up to
+  `combinedMax` **"usuals"** chips, your most-frequent recent items ranked the
+  same frequency + recency way (`Suggestions.usuals`), in the same tappable
+  chip UI. Nothing shows for a fresh install with no history.
 - **Tap the check circle** to check an item off — the check pops with a burst of
   gold sparks while a strikethrough draws left-to-right, then the row glides into
   a dimmed **"Got it"** section (tap it to restore it). Check several off at once

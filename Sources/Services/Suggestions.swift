@@ -56,6 +56,34 @@ enum Suggestions {
         return ordered.prefix(combinedMax).map { Suggestion(name: $0, emoji: Emoji.forName($0)) }
     }
 
+    /// "Your usuals": the add bar's empty-query state. Surfaces the user's
+    /// most-frequent recent items (same frequency + recency ranking and
+    /// on-list exclusion as `combined`'s history path), so focusing an empty
+    /// field isn't a dead end. Nothing shows for users with no history.
+    static func usuals(history: [SuggestionCandidate],
+                       onList: Set<String>,
+                       now: Date) -> [Suggestion] {
+        let cutoff = now.addingTimeInterval(-memoryTTL)
+        let ranked = history
+            .filter { $0.lastAddedAt > cutoff && !onList.contains($0.name.lowercased()) }
+            .sorted { a, b in
+                let sa = score(a, query: "", now: now)
+                let sb = score(b, query: "", now: now)
+                if sa != sb { return sa > sb }
+                return a.name.lowercased() < b.name.lowercased()
+            }
+
+        var ordered: [String] = []
+        var seen = Set<String>()
+        for c in ranked {
+            let key = c.name.lowercased()
+            guard seen.insert(key).inserted else { continue }
+            ordered.append(c.name)
+        }
+
+        return ordered.prefix(combinedMax).map { Suggestion(name: $0, emoji: Emoji.forName($0)) }
+    }
+
     /// Blend of: prefix match (you're probably typing the start of it),
     /// frequency (you buy it a lot), and recency (you bought it lately).
     static func score(_ c: SuggestionCandidate, query q: String, now: Date) -> Double {

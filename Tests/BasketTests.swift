@@ -177,4 +177,32 @@ final class SuggestionsTests: XCTestCase {
         let r = Suggestions.combined(query: "har", history: hist, dictionary: dict, onList: [], now: now)
         XCTAssertEqual(r.first?.name, "Harissa")
     }
+
+    // MARK: - usuals (empty-query "your usuals" chips)
+
+    func testUsualsRanksByFrequencyAndRecency() {
+        let hist = [cand("Tortillas", times: 1, daysAgo: 20), cand("Tea", times: 8, daysAgo: 0)]
+        let r = Suggestions.usuals(history: hist, onList: [], now: now)
+        XCTAssertEqual(r.first?.name, "Tea")
+    }
+
+    func testUsualsExcludesItemsAlreadyOnList() {
+        let hist = [cand("Milk", times: 5, daysAgo: 0)]
+        let r = Suggestions.usuals(history: hist, onList: ["milk"], now: now)
+        XCTAssertTrue(r.isEmpty)
+    }
+
+    func testUsualsCapsAtCombinedMax() {
+        let many = (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }
+        XCTAssertEqual(Suggestions.usuals(history: many, onList: [], now: now).count, Suggestions.combinedMax)
+    }
+
+    func testUsualsEmptyWithNoHistory() {
+        XCTAssertTrue(Suggestions.usuals(history: [], onList: [], now: now).isEmpty)
+    }
+
+    func testUsualsForgetsThingsOlderThanAMonth() {
+        let hist = [cand("Tea", times: 9, daysAgo: 40)]
+        XCTAssertTrue(Suggestions.usuals(history: hist, onList: [], now: now).isEmpty)
+    }
 }
