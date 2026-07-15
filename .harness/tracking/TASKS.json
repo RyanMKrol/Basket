@@ -795,6 +795,186 @@
         "workType": "feature",
         "risk": []
       }
+    },
+    {
+      "id": "T034",
+      "title": "Add explicit 'salad' keyword to EmojiTable (fix canned-goods mismatch)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "emoji",
+        "bugfix"
+      ],
+      "scope": [
+        "tools/gen_emoji.py",
+        "tools/audit_coverage.swift",
+        "Sources/Services/EmojiTable.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T034.md",
+      "visualVerify": true,
+      "facets": {
+        "layer": "generators",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T035",
+      "title": "Audit SemanticEmoji anchor collisions across the corpus (condiment-cluster follow-up)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "emoji",
+        "investigation"
+      ],
+      "scope": [
+        "tools/audit_coverage.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T035.md",
+      "facets": {
+        "layer": "generators",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T036",
+      "title": "Add bar: dismiss-keyboard chevron also clears the draft text",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "views",
+        "bugfix"
+      ],
+      "scope": [
+        "Sources/Views/AddBar.swift",
+        "UITests/AddItemFlowTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T036.md",
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T037",
+      "title": "Got-it row: swap checkmark glyph for an up-arrow (undo affordance)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "views",
+        "ui-polish"
+      ],
+      "scope": [
+        "Sources/Views/ItemRow.swift",
+        "Tests/SnapshotTests.swift",
+        "Tests/__Snapshots__/"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T037.md",
+      "facets": {
+        "layer": "views",
+        "workType": "style",
+        "risk": []
+      }
+    },
+    {
+      "id": "T038",
+      "title": "Clear-all undo toast: halve duration + stop the Got-it section flickering back on expiry",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "views",
+        "bugfix"
+      ],
+      "scope": [
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Views/ClearToast.swift",
+        "Sources/Services/TestHooks.swift"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T038.md",
+      "visualVerify": true,
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T039",
+      "title": "Reduce live add-bar suggestion count cap from 4 to 3",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "bugfix",
+        "suggestions"
+      ],
+      "scope": [
+        "Sources/Services/Suggestions.swift",
+        "Tests/BasketTests.swift"
+      ],
+      "design": null,
+      "verify": [
+        "python3 -c \"import re; s=open('Sources/Services/Suggestions.swift').read(); assert 'static let combinedMax = 3' in s, 'combinedMax must be 3'\"",
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T039.md",
+      "visualVerify": true,
+      "facets": {
+        "layer": "services",
+        "workType": "config",
+        "risk": []
+      }
+    },
+    {
+      "id": "T040",
+      "title": "Fix ClearedCelebration dismiss: graceful fade-out, not a clip",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "bugfix",
+        "animation"
+      ],
+      "scope": [
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Views/ClearedCelebration.swift"
+      ],
+      "design": null,
+      "verify": [
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T040.md",
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      }
     }
   ]
 }
