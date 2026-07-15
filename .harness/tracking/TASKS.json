@@ -687,7 +687,7 @@
       "title": "Interactive widget: tap an item to check it off",
       "status": "pending",
       "dependsOn": [
-        "T029"
+        "T033"
       ],
       "gate": null,
       "tags": [
@@ -716,7 +716,7 @@
       "status": "pending",
       "dependsOn": [
         "T028",
-        "T029"
+        "T033"
       ],
       "gate": null,
       "tags": [
@@ -762,6 +762,34 @@
       ],
       "expectsTest": true,
       "spec": ".harness/tasks/T032.md",
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T033",
+      "title": "View-only Home Screen widget (small + medium)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature",
+        "widget"
+      ],
+      "scope": [
+        "Sources/",
+        "BasketWidget/",
+        "project.yml",
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T033.md",
+      "visualVerify": false,
       "facets": {
         "layer": "views",
         "workType": "feature",
