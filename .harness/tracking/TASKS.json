@@ -887,7 +887,7 @@
     {
       "id": "T036",
       "title": "Add bar: dismiss-keyboard chevron also clears the draft text",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
