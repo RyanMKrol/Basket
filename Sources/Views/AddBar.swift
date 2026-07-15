@@ -64,9 +64,10 @@ struct AddBar: View {
                 // While the keyboard is up, offer a way to put it away. Adding
                 // is the common case — submit and suggestion-pick keep focus —
                 // but there was no escape hatch, so the keyboard felt stuck. This
-                // tucks it down without touching the rapid-add flow.
+                // tucks it down and clears the draft text, so suggestions vanish too.
                 if focused.wrappedValue {
                     Button {
+                        text = ""
                         focused.wrappedValue = false
                         Haptics.soft()
                     } label: {

@@ -64,7 +64,7 @@ final class AddItemFlowTests: BasketUITestCase {
     }
 
     /// The keyboard-dismiss chevron only shows while the add bar is focused,
-    /// and drops the keyboard without touching the draft text.
+    /// and drops the keyboard while also clearing the draft text.
     func testDismissKeyboardButton() {
         launchApp(seeded: false)
 
@@ -81,6 +81,6 @@ final class AddItemFlowTests: BasketUITestCase {
         attachScreenshot("02-keyboard-dismissed")
 
         waitForGone(dismiss)
-        waitForValue(field, equals: "Bananas")
+        waitForValue(field, equals: "Add an item…")
     }
 }
