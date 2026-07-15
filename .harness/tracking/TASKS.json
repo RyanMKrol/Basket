@@ -742,7 +742,7 @@
     {
       "id": "T032",
       "title": "Rename an item by tapping its name (re-attempt of T019)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
