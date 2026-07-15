@@ -771,7 +771,7 @@
     {
       "id": "T044",
       "title": "Swift 6 strict-concurrency migration: fix unsafe statics, flip SWIFT_VERSION to 6.0",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [],
       "gate": null,
       "tags": [
