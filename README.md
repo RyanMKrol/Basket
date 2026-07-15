@@ -262,6 +262,23 @@ top:
   drive your physical mouse/trackpad, and can run with no visible Simulator
   window (`xcrun simctl boot` without opening `Simulator.app`).
 
+  For a fast or timing-sensitive animation (a spark burst, a fade, a flicker)
+  that a single screenshot can't prove one way or the other — and that
+  XCUITest's own "wait for app to idle" settling can cause a step screenshot
+  to land *after*, not during — record the simulator's own framebuffer while
+  a UI test drives the interaction, same no-real-input guarantee as above:
+
+  ```sh
+  ./tools/record_ui_test.sh "BasketUITests/CheckOffFlowTests/testCheckingItemOffMovesToGotSection"
+  # → screenshots/ui-tests/recordings/<test>.mov
+  swift tools/extract_video_frame.swift screenshots/ui-tests/recordings/<test>.mov 2.3 frame.png
+  ```
+
+  `extract_video_frame.swift` pulls one still frame at a given timestamp via
+  AVFoundation — call it a few times across the window you care about (every
+  0.2-0.3s) to build a flipbook, then inspect the PNGs like any other
+  screenshot.
+
   - `AccessibilityAuditTests.swift` runs XCTest's built-in
     `performAccessibilityAudit()` over the main list, quantity editor, empty
     state, and About sheet — catching hit-region/label/trait regressions

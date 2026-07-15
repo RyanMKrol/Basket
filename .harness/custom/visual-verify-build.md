@@ -19,4 +19,24 @@ What "renders correctly" means for Basket:
 - **The add bar stays pinned** at the bottom, above the keyboard, with suggestion chips floating
   above it when relevant.
 
-Record in the worklog which screenshots you captured (paths) and one line on what you observed.
+**Fast or timing-sensitive claims (an animation must fade gracefully, a section must never flash
+back, a burst must be visible) need more than one screenshot** — a still can't prove absence over
+time, and XCUITest's own "wait for app to idle" settling can land a step screenshot *after* the
+moment you actually needed, not during it. Never satisfy a claim like this by watching it happen
+live and eyeballing it — that requires taking over the real screen/cursor/keyboard, which this repo
+avoids (see README.md's UI-test section). Instead:
+
+```sh
+./tools/record_ui_test.sh "BasketUITests/<Suite>/<test>"   # → screenshots/ui-tests/recordings/<test>.mov
+swift tools/extract_video_frame.swift screenshots/ui-tests/recordings/<test>.mov 2.3 frame.png
+```
+
+Records the simulator's own framebuffer (same mechanism as `simctl io screenshot` /
+`app.screenshot()` — never the real host screen) while a UI test drives the interaction, then pull
+frames at several timestamps across the window that matters (every 0.2-0.3s) and look at the
+sequence for continuity — a smooth trend in opacity/scale/position across frames, not a sudden cut.
+If a test exercising the exact interaction doesn't exist yet, write one (or a temporary one) rather
+than reaching for anything that drives the real mouse/keyboard.
+
+Record in the worklog which screenshots (or recording + extracted frames) you captured and one line
+on what you observed.
