@@ -34,7 +34,7 @@ RAW = r"""
 ("cabbage", "🥬"),("red cabbage", "🥬"),("savoy", "🥬"),("kale", "🥬"),("cavolo nero", "🥬"),
 ("brussels sprout", "🥬"),("sprout", "🥬"),("collard", "🥬"),("lettuce", "🥬"),("romaine", "🥬"),
 ("iceberg", "🥬"),("spinach", "🥬"),("rocket", "🥬"),("arugula", "🥬"),("watercress", "🥬"),("chard", "🥬"),
-("endive", "🥬"),("chicory", "🥬"),("radicchio", "🥬"),("pumpkin", "🎃"),("squash", "🎃"),("butternut", "🎃"),
+("salad", "🥗"),("endive", "🥬"),("chicory", "🥬"),("radicchio", "🥬"),("pumpkin", "🎃"),("squash", "🎃"),("butternut", "🎃"),
 ("courgette", "🥒"),("zucchini", "🥒"),("cucumber", "🥒"),("marrow", "🥒"),("gourd", "🥒"),
 ("aubergine", "🍆"),("eggplant", "🍆"),("bell pepper", "🫑"),("pepper", "🫑"),("capsicum", "🫑"),
 ("chilli", "🌶️"),("chili", "🌶️"),("jalapeno", "🌶️"),("habanero", "🌶️"),("serrano", "🌶️"),

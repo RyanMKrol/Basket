@@ -24,6 +24,7 @@ let golden: [(String, String)] = [
     ("spinach", "🥬"),
     ("tomatoes", "🍅"),
     ("lettuce", "🥬"),
+    ("salad", "🥗"),
     ("cucumber", "🥒"),
     ("avocados", "🥑"),
     ("corn", "🌽"),
