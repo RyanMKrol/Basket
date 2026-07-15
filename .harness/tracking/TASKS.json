@@ -864,7 +864,7 @@
     {
       "id": "T035",
       "title": "Audit SemanticEmoji anchor collisions across the corpus (condiment-cluster follow-up)",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [],
       "gate": null,
       "tags": [
