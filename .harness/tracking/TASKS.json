@@ -975,6 +975,794 @@
         "workType": "bugfix",
         "risk": []
       }
+    },
+    {
+      "id": "T041",
+      "title": "assertStaysGone bounded stays-absent helper in BasketUITestCase + convert all XCTAssertFalse(.exists) sites",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "ui-tests",
+        "determinism",
+        "test-hygiene"
+      ],
+      "scope": [
+        "UITests/"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T041.md",
+      "facets": {
+        "layer": "tests",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T042",
+      "title": "Remove the nightly flake-hunt CI job (owner: nobody looks at it)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "ci",
+        "cleanup"
+      ],
+      "scope": [
+        ".github/workflows/ci.yml",
+        "CLAUDE.md",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T042.md",
+      "facets": {
+        "layer": "build",
+        "workType": "config",
+        "risk": []
+      }
+    },
+    {
+      "id": "T043",
+      "title": "Headless CPU profiling script (xcprof) + committed perf baseline + documented compare workflow",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tooling",
+        "performance",
+        "profiling",
+        "xcprof"
+      ],
+      "scope": [
+        "tools/",
+        "README.md",
+        ".gitignore"
+      ],
+      "design": null,
+      "verify": [
+        "bash -n tools/profile_app.sh",
+        "tools/profile_app.sh --help >/dev/null",
+        "jq -e . tools/perf-baseline/baseline.json >/dev/null"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T043.md",
+      "facets": {
+        "layer": "build",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T044",
+      "title": "Swift 6 strict-concurrency migration: fix unsafe statics, flip SWIFT_VERSION to 6.0",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "concurrency",
+        "swift6",
+        "build",
+        "migration"
+      ],
+      "scope": [
+        "project.yml",
+        "Sources/",
+        "Tests/",
+        ".github/workflows/ci.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "grep -n 'SWIFT_VERSION: \"6.0\"' project.yml",
+        "sh -c '! grep -rn \"nonisolated(unsafe)\" Sources/ || grep -rn -B3 \"nonisolated(unsafe)\" Sources/'",
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "swiftc -swift-version 6 Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift Sources/Services/Formatting.swift Sources/Services/Measure.swift Sources/Services/Seasonality.swift tools/main.swift -o /tmp/basket_check6 && /tmp/basket_check6"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T044.md",
+      "facets": {
+        "layer": "services",
+        "workType": "refactor",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
+    },
+    {
+      "id": "T045",
+      "title": "Tip jar: surface pending (Ask to Buy) and failed purchases as a quiet status line",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tip-jar",
+        "storekit",
+        "ux-polish"
+      ],
+      "scope": [
+        "Sources/Services/TipJar.swift",
+        "Sources/Views/AboutView.swift"
+      ],
+      "design": "A lightweight TipStatus enum on TipJar (@MainActor @Observable), e.g. case idle, purchasing, pendingApproval, failed(message: String), thanked. The state transitions live in a small StoreKit-free method (e.g. func resolve(_ outcome: TipOutcome) taking an internal enum success/cancelled/pending/failure) so unit tests can drive every transition directly without calling product.purchase(). purchase() and the Transaction.updates listener become thin callers of that method. AboutView renders the status as one quiet single line under the tip buttons, in the soft pastel palette (Theme.onPaperSoft, small Theme.body size, like the existing 'Thanks for supporting Basket' line). The pendingApproval line must NOT look like an error: no red, no warning icon.",
+      "verify": [
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T045.md",
+      "visualVerify": true,
+      "facets": {
+        "layer": "services",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T046",
+      "title": "Inert app startup when hosted by unit tests: in-memory store, no seeding",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "testing",
+        "startup",
+        "persistence"
+      ],
+      "scope": [
+        "Sources/Services/TestHooks.swift",
+        "Sources/BasketApp.swift",
+        "Tests/TestHostTests.swift",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T046.md",
+      "facets": {
+        "layer": "models",
+        "workType": "config",
+        "risk": [
+          "touches-core"
+        ]
+      }
+    },
+    {
+      "id": "T047",
+      "title": "Owner: update harness LOCAL_DOD so it survives the BasketCore extraction",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": "needs-human",
+      "tags": [
+        "harness-config",
+        "needs-human"
+      ],
+      "scope": [
+        ".harness/config/harness.env"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T047.md"
+    },
+    {
+      "id": "T048",
+      "title": "Extract pure logic into a local BasketCore SwiftPM package consumed by the app",
+      "status": "pending",
+      "dependsOn": [
+        "T047"
+      ],
+      "gate": null,
+      "tags": [
+        "refactor",
+        "spm",
+        "services",
+        "build"
+      ],
+      "scope": [
+        "BasketCore/",
+        "Sources/",
+        "Tests/",
+        "tools/gen_emoji.py",
+        "tools/gen_suggestions.py",
+        "tools/main.swift",
+        "project.yml",
+        ".swiftlint.yml",
+        ".github/workflows/ci.yml",
+        "README.md",
+        "CLAUDE.md"
+      ],
+      "design": "Local SwiftPM package at BasketCore/ wired into the XcodeGen project via `packages: BasketCore: {path: BasketCore}` + a `- package: BasketCore` dependency on the app target. Exactly these 10 files move (verified imports: Foundation only, except SemanticEmoji which adds NaturalLanguage — macOS-compatible, already compiled natively on macOS by the existing CI harness step): Sources/Services/{Emoji,EmojiTable,SemanticEmoji,Suggestions,SuggestionDictionary,Formatting,Measure,Seasonality,ListLogic}.swift and Sources/Models/Suggestion.swift. Everything importing SwiftUI/SwiftData/UIKit/StoreKit/AppIntents (TipJar, TestHooks, Haptics, KnownItems, AddItem, AddToBasketIntent, GroceryItem, KnownItem, Support/, Views/) stays in Sources/. tools/main.swift is NOT retired here — it is kept compiling against the new paths so every intermediate state stays green; retirement is the follow-up task.",
+      "verify": [
+        "swift build --package-path BasketCore",
+        "python3 tools/gen_emoji.py && python3 tools/gen_suggestions.py && git diff --exit-code -- BasketCore/Sources/BasketCore/EmojiTable.swift BasketCore/Sources/BasketCore/SuggestionDictionary.swift",
+        "test ! -f Sources/Services/Emoji.swift && test ! -f Sources/Services/Measure.swift && test ! -f Sources/Models/Suggestion.swift",
+        "swiftc BasketCore/Sources/BasketCore/*.swift tools/main.swift -o /tmp/basket_check && /tmp/basket_check",
+        "swiftlint lint",
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T048.md",
+      "facets": {
+        "layer": "services",
+        "workType": "refactor",
+        "risk": [
+          "cross-cutting",
+          "touches-core"
+        ]
+      }
+    },
+    {
+      "id": "T049",
+      "title": "Port the native harness to BasketCore `swift test` (parameterized Swift Testing) and retire tools/main.swift",
+      "status": "pending",
+      "dependsOn": [
+        "T048"
+      ],
+      "gate": null,
+      "tags": [
+        "tests",
+        "ci",
+        "refactor"
+      ],
+      "scope": [
+        "BasketCore/",
+        "tools/main.swift",
+        ".github/workflows/ci.yml",
+        "README.md",
+        "CLAUDE.md"
+      ],
+      "design": "New test target BasketCoreTests inside the package using Swift Testing (`import Testing`, @Test/@Suite), replacing the hand-rolled check() DSL in tools/main.swift (247 lines, manual failure counting, one giant pass/fail). Table-style groups become `@Test(arguments:)` parameterized cases so every (input, expected) pair reports individually. CI's \"Native logic harness\" step becomes `swift test --package-path BasketCore`. The existing Tests/ XCTest suites STAY in the simulator bundle unchanged — dedup/migration of those is deliberately out of scope (the research note says a general XCTest-to-Swift-Testing migration is not worth doing standalone).",
+      "verify": [
+        "swift test --package-path BasketCore",
+        "test ! -f tools/main.swift",
+        "! grep -rn 'tools/main.swift\\|basket_check' .github/workflows/ci.yml README.md CLAUDE.md",
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T049.md",
+      "facets": {
+        "layer": "tests",
+        "workType": "refactor",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
+    },
+    {
+      "id": "T050",
+      "title": "Gate the per-item SparkleBurst behind Reduce Motion in ItemRow",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "accessibility",
+        "bugfix",
+        "animation"
+      ],
+      "scope": [
+        "Sources/Views/ItemRow.swift",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./build_run.sh"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T050.md",
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T051",
+      "title": "Dynamic Type: thread relativeTo through Theme's font builders + a scaling UI test",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "accessibility",
+        "dynamic-type",
+        "theme"
+      ],
+      "scope": [
+        "Sources/Theme/Theme.swift",
+        "UITests/",
+        "Tests/SnapshotTests.swift",
+        "Tests/__Snapshots__/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./build_run.sh"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T051.md",
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
+    },
+    {
+      "id": "T052",
+      "title": "Re-enable the .dynamicType accessibility audit and fix the layout fallout (cap at accessibility2 authorized)",
+      "status": "pending",
+      "dependsOn": [
+        "T051"
+      ],
+      "gate": null,
+      "tags": [
+        "accessibility",
+        "dynamic-type",
+        "audit"
+      ],
+      "scope": [
+        "UITests/AccessibilityAuditTests.swift",
+        "UITests/",
+        "Sources/Views/",
+        "Sources/Theme/",
+        "Tests/SnapshotTests.swift",
+        "Tests/__Snapshots__/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./build_run.sh"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T052.md",
+      "facets": {
+        "layer": "views",
+        "workType": "bugfix",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
+    },
+    {
+      "id": "T053",
+      "title": "Declare Accessibility Nutrition Labels in App Store Connect (needs-human)",
+      "status": "pending",
+      "dependsOn": [
+        "T050",
+        "T051",
+        "T052"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "accessibility",
+        "app-store",
+        "needs-human"
+      ],
+      "scope": [
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T053.md"
+    },
+    {
+      "id": "T054",
+      "title": "Extract the Clear-all/undo soft-delete state machine into ListLogic as a unit-tested ClearChoreography",
+      "status": "pending",
+      "dependsOn": [
+        "T038"
+      ],
+      "gate": null,
+      "tags": [
+        "services",
+        "refactor",
+        "clear-all"
+      ],
+      "scope": [
+        "Sources/Services/ListLogic.swift",
+        "Sources/Views/ShoppingListView.swift",
+        "Tests/ListLogicTests.swift",
+        "README.md",
+        "CLAUDE.md"
+      ],
+      "design": null,
+      "verify": [
+        "run-app"
+      ],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T054.md",
+      "facets": {
+        "layer": "services",
+        "workType": "refactor",
+        "risk": [
+          "touches-core"
+        ]
+      }
+    },
+    {
+      "id": "T055",
+      "title": "View-layer cleanups: drop AnyView from the quantity-editor plumbing, delete BasketBackground's dead GeometryReader, resolve Haptics.prepare()",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "views",
+        "cleanup"
+      ],
+      "scope": [
+        "Sources/Views/ItemRow.swift",
+        "Sources/Views/ToGetSection.swift",
+        "Sources/Views/GotItSection.swift",
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Theme/Theme.swift",
+        "Sources/Services/Haptics.swift",
+        "Tests/SnapshotTests.swift"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T055.md",
+      "facets": {
+        "layer": "views",
+        "workType": "refactor",
+        "risk": []
+      }
+    },
+    {
+      "id": "T056",
+      "title": "Idle the 60s list ticker while nothing needs it and give it timer tolerance",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "views",
+        "performance",
+        "energy"
+      ],
+      "scope": [
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Services/ListLogic.swift",
+        "Tests/ListLogicTests.swift",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T056.md",
+      "facets": {
+        "layer": "views",
+        "workType": "refactor",
+        "risk": []
+      }
+    },
+    {
+      "id": "T057",
+      "title": "Shared AppSchema + SwiftData container factory adopted at every container-creation site",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "refactor",
+        "swiftdata",
+        "persistence"
+      ],
+      "scope": [
+        "Sources/Support/",
+        "Sources/BasketApp.swift",
+        "Sources/Services/AddToBasketIntent.swift",
+        "Sources/Views/ShoppingListView.swift",
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T057.md",
+      "facets": {
+        "layer": "models",
+        "workType": "refactor",
+        "risk": [
+          "touches-schema"
+        ]
+      }
+    },
+    {
+      "id": "T058",
+      "title": "Anchor shipped schema as BasketSchemaV1 + migration plan, and recover (move-aside + recreate) instead of fatalError on container-open failure",
+      "status": "pending",
+      "dependsOn": [
+        "T057"
+      ],
+      "gate": null,
+      "tags": [
+        "feature",
+        "swiftdata",
+        "migration",
+        "resilience"
+      ],
+      "scope": [
+        "Sources/Support/",
+        "Sources/Models/",
+        "Sources/BasketApp.swift",
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T058.md",
+      "facets": {
+        "layer": "models",
+        "workType": "migration",
+        "risk": [
+          "touches-schema"
+        ]
+      }
+    },
+    {
+      "id": "T059",
+      "title": "Stop piping xcodebuild through tail in record_ui_test.sh and export_ui_screenshots.sh (orphan-process risk)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tooling",
+        "reliability"
+      ],
+      "scope": [
+        "tools/record_ui_test.sh",
+        "tools/export_ui_screenshots.sh"
+      ],
+      "design": null,
+      "verify": [
+        "bash -n tools/record_ui_test.sh",
+        "bash -n tools/export_ui_screenshots.sh",
+        "! grep -n '| tail' tools/record_ui_test.sh tools/export_ui_screenshots.sh",
+        "grep -q 'build/' tools/export_ui_screenshots.sh"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T059.md",
+      "facets": {
+        "layer": "build",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T060",
+      "title": "export_ui_screenshots.sh: failure-only export mode plus .ips crash triage via xcsym",
+      "status": "pending",
+      "dependsOn": [
+        "T059"
+      ],
+      "gate": null,
+      "tags": [
+        "tooling",
+        "testing",
+        "observability"
+      ],
+      "scope": [
+        "tools/export_ui_screenshots.sh",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "bash -n tools/export_ui_screenshots.sh",
+        "grep -q -- '--only-failures' tools/export_ui_screenshots.sh",
+        "grep -q 'xcsym' tools/export_ui_screenshots.sh",
+        "grep -q 'DiagnosticReports' tools/export_ui_screenshots.sh",
+        "grep -q -- '--failures-only' README.md"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T060.md",
+      "facets": {
+        "layer": "build",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T061",
+      "title": "build_run.sh: surface app console errors after launch via xclog",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tooling",
+        "observability"
+      ],
+      "scope": [
+        "build_run.sh",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "bash -n build_run.sh",
+        "grep -q 'xclog' build_run.sh",
+        "grep -q 'xclog' README.md"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T061.md",
+      "facets": {
+        "layer": "build",
+        "workType": "logging",
+        "risk": []
+      }
+    },
+    {
+      "id": "T062",
+      "title": "Visual-verify guidance: mention crash triage and console error checks (human edit, .harness/custom)",
+      "status": "pending",
+      "dependsOn": [
+        "T060",
+        "T061"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "harness",
+        "docs",
+        "needs-human"
+      ],
+      "scope": [
+        ".harness/custom/visual-verify-build.md",
+        ".harness/custom/visual-verify-audit.md"
+      ],
+      "design": null,
+      "verify": [
+        "grep -q 'failures-only' .harness/custom/visual-verify-build.md",
+        "grep -q 'console' .harness/custom/visual-verify-build.md"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T062.md"
+    },
+    {
+      "id": "T063",
+      "title": "One-time env install: AXe via brew + xcui doctor green",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": "needs-human",
+      "tags": [
+        "environment",
+        "tooling",
+        "xcui",
+        "needs-human"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T063.md"
+    },
+    {
+      "id": "T064",
+      "title": "VoiceOver focus-order regression check (tools/verify_voiceover_order.sh)",
+      "status": "pending",
+      "dependsOn": [
+        "T063"
+      ],
+      "gate": null,
+      "tags": [
+        "accessibility",
+        "tooling",
+        "xcui",
+        "voiceover"
+      ],
+      "scope": [
+        "tools/verify_voiceover_order.sh",
+        "tools/voiceover_expected.json",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "./tools/verify_voiceover_order.sh",
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T064.md",
+      "facets": {
+        "layer": "build",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T065",
+      "title": "Doc edit: xcui/AXe one-off verification path in visual-verify-{build,audit}.md",
+      "status": "pending",
+      "dependsOn": [
+        "T063"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "docs",
+        "harness",
+        "xcui",
+        "needs-human"
+      ],
+      "scope": [
+        ".harness/custom/visual-verify-build.md",
+        ".harness/custom/visual-verify-audit.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T065.md"
+    },
+    {
+      "id": "T066",
+      "title": "Doc edit: point visual-verify docs at the VoiceOver order check",
+      "status": "pending",
+      "dependsOn": [
+        "T064",
+        "T065"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "docs",
+        "harness",
+        "accessibility",
+        "needs-human"
+      ],
+      "scope": [
+        ".harness/custom/visual-verify-build.md",
+        ".harness/custom/visual-verify-audit.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T066.md"
+    },
+    {
+      "id": "T067",
+      "title": "Doc edit: element-not-found triage rule in audit guidance",
+      "status": "pending",
+      "dependsOn": [
+        "T066"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "docs",
+        "harness",
+        "audit",
+        "needs-human"
+      ],
+      "scope": [
+        ".harness/custom/audit-preamble.md",
+        ".harness/custom/visual-verify-audit.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T067.md"
     }
   ]
 }
