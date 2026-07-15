@@ -3,5 +3,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T032 - root cause was a harness test-missing gate regex bug (blind to UITests/), not builder capability; re-attempt tightens interaction-safety guidance and works around the gate bug with a companion Tests/ unit test",
     "at": "2026-07-13T22:58:39Z"
+  },
+  "T029": {
+    "failed": true,
+    "reason": "review-failed: superseded by T033 — scope widened to include BasketWidget/ (the widget extension's own target directory), which T029's scope omitted",
+    "at": "2026-07-15T10:02:41Z"
   }
 }
