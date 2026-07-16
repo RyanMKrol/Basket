@@ -992,7 +992,7 @@
     {
       "id": "T040",
       "title": "Fix ClearedCelebration dismiss: graceful fade-out, not a clip",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
