@@ -791,7 +791,7 @@
       "verify": [
         "grep -n 'SWIFT_VERSION: \"6.0\"' project.yml",
         "sh -c '! grep -rn \"nonisolated(unsafe)\" Sources/ || grep -rn -B3 \"nonisolated(unsafe)\" Sources/'",
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'",
         "swiftc -swift-version 6 Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift Sources/Services/Formatting.swift Sources/Services/Measure.swift Sources/Services/Seasonality.swift tools/main.swift -o /tmp/basket_check6 && /tmp/basket_check6"
       ],
       "expectsTest": false,
@@ -978,7 +978,7 @@
       "design": null,
       "verify": [
         "python3 -c \"import re; s=open('Sources/Services/Suggestions.swift').read(); assert 'static let combinedMax = 3' in s, 'combinedMax must be 3'\"",
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": true,
       "spec": ".harness/tasks/T039.md",
@@ -1005,7 +1005,7 @@
       ],
       "design": null,
       "verify": [
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": false,
       "spec": ".harness/tasks/T040.md",
@@ -1112,7 +1112,7 @@
       ],
       "design": "A lightweight TipStatus enum on TipJar (@MainActor @Observable), e.g. case idle, purchasing, pendingApproval, failed(message: String), thanked. The state transitions live in a small StoreKit-free method (e.g. func resolve(_ outcome: TipOutcome) taking an internal enum success/cancelled/pending/failure) so unit tests can drive every transition directly without calling product.purchase(). purchase() and the Transaction.updates listener become thin callers of that method. AboutView renders the status as one quiet single line under the tip buttons, in the soft pastel palette (Theme.onPaperSoft, small Theme.body size, like the existing 'Thanks for supporting Basket' line). The pendingApproval line must NOT look like an error: no red, no warning icon.",
       "verify": [
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": true,
       "spec": ".harness/tasks/T045.md",
@@ -1142,7 +1142,7 @@
       ],
       "design": null,
       "verify": [
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": true,
       "spec": ".harness/tasks/T046.md",
@@ -1206,7 +1206,7 @@
         "test ! -f Sources/Services/Emoji.swift && test ! -f Sources/Services/Measure.swift && test ! -f Sources/Models/Suggestion.swift",
         "swiftc BasketCore/Sources/BasketCore/*.swift tools/main.swift -o /tmp/basket_check && /tmp/basket_check",
         "swiftlint lint",
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": false,
       "spec": ".harness/tasks/T048.md",
@@ -1244,7 +1244,7 @@
         "swift test --package-path BasketCore",
         "test ! -f tools/main.swift",
         "! grep -rn 'tools/main.swift\\|basket_check' .github/workflows/ci.yml README.md CLAUDE.md",
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": true,
       "spec": ".harness/tasks/T049.md",
@@ -1273,7 +1273,7 @@
       ],
       "design": null,
       "verify": [
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'",
         "./build_run.sh"
       ],
       "expectsTest": false,
@@ -1304,7 +1304,7 @@
       ],
       "design": null,
       "verify": [
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'",
         "./build_run.sh"
       ],
       "expectsTest": true,
@@ -1341,7 +1341,7 @@
       ],
       "design": null,
       "verify": [
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'",
         "./build_run.sh"
       ],
       "expectsTest": true,
@@ -1687,7 +1687,7 @@
       "design": null,
       "verify": [
         "./tools/verify_voiceover_order.sh",
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'"
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
       ],
       "expectsTest": false,
       "spec": ".harness/tasks/T064.md",
@@ -1847,7 +1847,7 @@
       "verify": [
         "grep -n 'SWIFT_VERSION: \"6.0\"' project.yml",
         "sh -c '! grep -rn \"nonisolated(unsafe)\" Sources/ || grep -rn -B3 \"nonisolated(unsafe)\" Sources/'",
-        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'",
         "swiftc -swift-version 6 Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift Sources/Services/Formatting.swift Sources/Services/Measure.swift Sources/Services/Seasonality.swift tools/main.swift -o /tmp/basket_check6 && /tmp/basket_check6"
       ],
       "expectsTest": false,

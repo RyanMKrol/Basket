@@ -63,8 +63,11 @@ A change is done when, on the branch:
   launches the app on the simulator and saves a screenshot to `screenshots/`).
 - **Tests pass:**
   - XCTest + XCUITest on the simulator — one command runs both, since
-    `BasketUITests` is wired into the same scheme's test action:
-    `xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
+    `BasketUITests` is wired into the same scheme's test action. Target Basket's
+    **dedicated** simulator (`Basket-Claude`), never the shared `iPhone 17 Pro`, so
+    two harness loops on one Mac can't collide on the same booted device;
+    `tools/loop_sim.sh` ensures it exists first (see the note in `harness.env`):
+    `./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'`
   - Native logic harness (fast, no simulator) — compile the pure-logic `Sources`
     files together with `tools/main.swift` and run it (see `README.md` → Tests).
 - **Docs updated in the same commit:** keep `README.md` in step with behaviour.

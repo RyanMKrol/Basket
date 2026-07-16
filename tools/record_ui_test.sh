@@ -19,7 +19,8 @@
 # Usage: ./tools/record_ui_test.sh <test-identifier> [simulator-name] [output.mov]
 #   test-identifier   required, passed straight to -only-testing:, e.g.
 #                      BasketUITests/CheckOffFlowTests/testCheckingItemOffMovesToGotSection
-#   simulator-name     default "iPhone 17 Pro"
+#   simulator-name     default: Basket's dedicated device (Basket-Claude, ensured by
+#                      tools/loop_sim.sh) rather than the shared "iPhone 17 Pro"
 #   output.mov          default screenshots/ui-tests/recordings/<sanitized-test-id>.mov
 
 set -euo pipefail
@@ -28,7 +29,8 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_DIR"
 
 TEST_ID="${1:?usage: record_ui_test.sh <test-identifier> [simulator-name] [output.mov]}"
-SIM_NAME="${2:-iPhone 17 Pro}"
+"$PROJECT_DIR/tools/loop_sim.sh" >/dev/null   # ensure Basket's dedicated device exists
+SIM_NAME="${2:-Basket-Claude}"
 SAFE_NAME="$(echo "$TEST_ID" | tr '/:' '__')"
 OUT_PATH="${3:-$PROJECT_DIR/screenshots/ui-tests/recordings/$SAFE_NAME.mov}"
 
