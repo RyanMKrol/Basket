@@ -168,9 +168,10 @@ top:
 - `Tests/` — the XCTest suite, run on the simulator:
 
   ```sh
+  ./tools/loop_sim.sh >/dev/null   # ensure Basket's dedicated device exists
   xcodegen generate
   xcodebuild test -project Basket.xcodeproj -scheme Basket \
-    -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+    -destination 'platform=iOS Simulator,name=Basket-Claude'
   ```
 
   This same command also runs `UITests/` (below) — both are wired into the

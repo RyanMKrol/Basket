@@ -38,10 +38,14 @@ makes them hold:
   `accessibilityIdentifier` (never display copy), use `BasketUITestCase`'s bounded waits
   (`waitForLabel` / `waitForValue` / `waitForGone` / `waitForToGetCount`) — never assert live UI
   state directly — and attach step screenshots.
-- **Simulator:** the pinned local test destination is `iPhone 17 Pro`; the full-suite command is
-  `xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination
-  'platform=iOS Simulator,name=iPhone 17 Pro'`. The fast pure-logic check is the native harness
-  (compile `Sources` logic files + `tools/main.swift` — see README.md → Tests).
+- **Simulator:** the pinned local test destination is Basket's DEDICATED device `Basket-Claude`
+  (an iPhone 17 Pro that `tools/loop_sim.sh` ensures exists), NEVER the shared `iPhone 17 Pro` —
+  otherwise two harness loops on one Mac collide on the same booted device. The full-suite command is
+  `./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj
+  -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'`. Any new task that authors
+  a simulator-driving script must default it to `Basket-Claude` via `loop_sim.sh`, not the shared
+  device. The fast pure-logic check is the native harness (compile `Sources` logic files +
+  `tools/main.swift` — see README.md → Tests).
 - **Privacy manifest:** any task whose change starts using a required-reason API (`UserDefaults`,
   file timestamps, boot time, disk space, active keyboard) must add the matching entry to
   `Sources/PrivacyInfo.xcprivacy` in the same change — App Store Connect rejects binaries without it.
