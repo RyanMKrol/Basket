@@ -936,7 +936,7 @@
     {
       "id": "T038",
       "title": "Clear-all undo toast: halve duration + stop the Got-it section flickering back on expiry",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
