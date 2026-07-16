@@ -13,5 +13,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T068 — scope now includes tools/main.swift (the Swift 6 native-harness compile bar was out of scope)",
     "at": "2026-07-16T19:00:14Z"
+  },
+  "T035": {
+    "failed": true,
+    "reason": "review-failed: superseded by T069 — scope now includes the report file + .gitignore the spec required",
+    "at": "2026-07-16T19:00:15Z"
   }
 }
