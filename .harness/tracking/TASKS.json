@@ -1067,7 +1067,7 @@
     {
       "id": "T043",
       "title": "Headless CPU profiling script (xcprof) + committed perf baseline + documented compare workflow",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [],
       "gate": null,
       "tags": [
