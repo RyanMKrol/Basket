@@ -116,8 +116,18 @@ Requires Xcode's command-line tools and [XcodeGen](https://github.com/yonaskolb/
 
 ```sh
 ./build_run.sh                 # generate → build → install → launch → screenshot
-./build_run.sh "iPhone 17"     # target a different simulator
+./build_run.sh "iPhone 17"     # target a different simulator (name or UDID)
 ```
+
+With no argument, `build_run.sh` targets a **dedicated simulator** (default name
+`Basket-Claude`, an iPhone 17 Pro), resolved and created-if-missing by
+`tools/loop_sim.sh`. This keeps Basket off the shared `iPhone 17 Pro` device so a
+second harness loop for another project on the same Mac can't collide on it —
+without a dedicated device, both loops resolve the same booted `iPhone 17 Pro`,
+each re-installs and launches its own app onto it (the running app visibly
+flip-flops), and `xcodebuild test` intermittently fails to launch the xctrunner.
+The harness `LOCAL_DOD` (in `.harness/config/harness.env`) targets the same
+dedicated device by name. Set `BASKET_SIM_NAME` to use a different one.
 
 `build_run.sh` builds by `-target` with an explicit `SUPPORTED_PLATFORMS` because
 this machine's Xcode generates a scheme whose supported-platforms list is empty.

@@ -9,7 +9,10 @@
 #     We therefore build by `-target` with an explicit SUPPORTED_PLATFORMS + SYMROOT.
 #   * The installed simulator runtime is iOS 26.2; SDK is 26.5 — fine for the sim.
 #
-# Usage: ./build_run.sh [simulator-name]   (default: "iPhone 17 Pro")
+# Usage: ./build_run.sh [simulator-name-or-udid]
+#   Default (no arg): this project's DEDICATED simulator (tools/loop_sim.sh), so
+#   concurrent harness loops for other projects on the same Mac never fight over
+#   one shared "iPhone 17 Pro" device. Pass a name or UDID to override.
 
 set -euo pipefail
 
@@ -18,12 +21,14 @@ cd "$PROJECT_DIR"
 
 APP_NAME="Basket"
 BUNDLE_ID="com.ryankrol.basket"
-SIM_NAME="${1:-iPhone 17 Pro}"
+# No explicit arg → resolve (and create-if-missing) the project's dedicated device
+# via loop_sim.sh, which prints its UDID. An explicit name/UDID arg overrides.
+SIM_NAME="${1:-$("$PROJECT_DIR/tools/loop_sim.sh")}"
 # Resolve the argument to a concrete UDID. A device *name* can be ambiguous (the
 # same model exists per installed runtime), so prefer an already-booted match,
 # else the last (newest-runtime) available one. Pass a UDID to pin a specific
 # simulator (e.g. to avoid clashing with another agent on a shared machine) —
-# it's detected by shape and used as-is.
+# it's detected by shape and used as-is (the dedicated-device default already is one).
 # The `|| true` on each pipeline matters: under `set -euo pipefail`, a grep that
 # finds nothing returns non-zero and would otherwise abort the whole script
 # *silently* (before the first echo) whenever the named device isn't booted.
