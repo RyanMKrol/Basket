@@ -964,7 +964,7 @@
     {
       "id": "T039",
       "title": "Reduce live add-bar suggestion count cap from 4 to 3",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
