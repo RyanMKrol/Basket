@@ -1098,7 +1098,7 @@
     {
       "id": "T045",
       "title": "Tip jar: surface pending (Ask to Buy) and failed purchases as a quiet status line",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
