@@ -22,6 +22,9 @@ struct ShoppingListView: View {
     @State private var showingAbout = false
     /// True briefly while the "you got everything" celebration plays.
     @State private var celebrating = false
+    /// True while the celebration is animating itself back out — see
+    /// `dismissCelebration()`, the single path that ends the celebration.
+    @State private var celebrationDismissing = false
     /// "Clear all" soft-delete buffer: items are hidden immediately but only
     /// actually deleted once the undo toast expires, so an accidental tap is
     /// recoverable. Kept as IDs (not copies) so undo just un-hides the real
@@ -71,7 +74,11 @@ struct ShoppingListView: View {
             VStack(spacing: 0) {
                 header
 
-                if listIsEmpty {
+                // Defer the empty state while the celebration is up (and
+                // through its own dismiss animation) so the two never
+                // overlap, even if "Clear got items" empties the list mid-
+                // celebration — see dismissCelebration().
+                if listIsEmpty && !celebrating {
                     EmptyStateView()
                 } else {
                     ScrollView {
@@ -105,10 +112,10 @@ struct ShoppingListView: View {
                 }
             }
 
-            // Skip the celebration once the screen is fully empty — the empty
-            // state is the payoff then, and otherwise the two overlap centred.
-            if celebrating && !listIsEmpty {
-                ClearedCelebration(reduceMotion: reduceMotion)
+            // `celebrating` is the ONLY thing that mounts/unmounts this —
+            // see dismissCelebration() for the single path that ends it.
+            if celebrating {
+                ClearedCelebration(reduceMotion: reduceMotion, isDismissing: celebrationDismissing)
                     .transition(.opacity)
             }
         }
@@ -371,9 +378,31 @@ struct ShoppingListView: View {
         // observes it — see TestHooks.celebrationDuration.
         guard let duration = TestHooks.celebrationDuration else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            withAppAnimation(.easeIn(duration: 0.4)) { celebrating = false }
+            dismissCelebration()
         }
     }
+
+    /// The one path that ends the celebration: tell ClearedCelebration to
+    /// animate its own content back down in step with the outer fade, then
+    /// unmount the overlay once that exit animation has actually played out.
+    /// Both the timed auto-dismiss and an in-celebration "Clear got items"
+    /// tap route through here, so there's never a second, uncoordinated way
+    /// for the overlay to disappear (that compound-trigger yank was the bug).
+    private func dismissCelebration() {
+        guard celebrating, !celebrationDismissing else { return }
+        withAppAnimation(.easeOut(duration: celebrationExitDuration)) {
+            celebrationDismissing = true
+        }
+        let delay = TestHooks.disableAnimations ? 0.05 : celebrationExitDuration
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            celebrating = false
+            celebrationDismissing = false
+        }
+    }
+
+    /// Mirrors ClearedCelebration's own exit-animation duration so the
+    /// overlay unmounts right as its content finishes fading, not before.
+    private var celebrationExitDuration: TimeInterval { reduceMotion ? 0.3 : 0.4 }
 
     /// Clear the whole "Got it" section now (manual tidy-up). Items vanish
     /// from view immediately but the SwiftData delete is deferred until the
@@ -390,6 +419,11 @@ struct ShoppingListView: View {
             showClearToast = true
         }
         Haptics.soft()
+        // Emptying "Got it" mid-celebration used to yank the overlay out via
+        // the old `!listIsEmpty` visibility guard, independent of and out of
+        // step with the celebration's own dismiss. Route it through the same
+        // graceful dismiss instead.
+        if celebrating { dismissCelebration() }
 
         clearToken += 1
         let token = clearToken

@@ -5,6 +5,12 @@ import SwiftUI
 /// spark burst. Respects Reduce Motion (a calm fade instead of flying sparks).
 struct ClearedCelebration: View {
     var reduceMotion: Bool = false
+    /// Set true by the caller the moment it starts dismissing the
+    /// celebration (in step with its own outer fade), so the emoji and
+    /// label shrink and soften back down together with the background
+    /// instead of sitting pinned at full scale/opacity until the outer
+    /// container is yanked out of the view tree.
+    var isDismissing: Bool = false
 
     @State private var shown = false
 
@@ -31,6 +37,12 @@ struct ClearedCelebration: View {
             withAppAnimation(reduceMotion ? .easeIn(duration: 0.35)
                                           : .spring(response: 0.5, dampingFraction: 0.6)) {
                 shown = true
+            }
+        }
+        .onChange(of: isDismissing) { _, dismissing in
+            guard dismissing else { return }
+            withAppAnimation(.easeOut(duration: reduceMotion ? 0.3 : 0.4)) {
+                shown = false
             }
         }
         .allowsHitTesting(false)

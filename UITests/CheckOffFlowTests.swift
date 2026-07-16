@@ -61,6 +61,51 @@ final class CheckOffFlowTests: BasketUITestCase {
         attachScreenshot("02-celebration")
     }
 
+    /// The celebration's dismiss must fade its own content out gracefully,
+    /// synced with the outer container's fade, instead of the emoji/label
+    /// sitting pinned at full scale/opacity while only the background dims —
+    /// see T040 / ClearedCelebration.isDismissing.
+    ///
+    /// `TestHooks.celebrationDuration` is nil under UI testing (deliberately,
+    /// to avoid racing the overlay's transient auto-dismiss timer — see
+    /// `testClearingWholeListShowsCelebration`), so the only reachable way to
+    /// end a celebration under test is the same one a user has: tapping
+    /// "Clear all" in the Got it section while it's showing. That's also
+    /// exactly the previously-buggy compound-condition path (T040 spec item
+    /// 2), so this single recording covers both: the dismiss fades
+    /// gracefully, and it's driven by the one unified `dismissCelebration()`
+    /// path rather than an independent, uncoordinated yank.
+    ///
+    /// Runs with `realTiming` so the recorded frames show the real
+    /// production animation curves, not the sped-up test defaults. See
+    /// worklog/T040.md for the recorded video path and the frame-by-frame
+    /// trend observed.
+    func testCelebrationDismissFadesGracefullyOnClearGot() {
+        launchApp(realTiming: true)
+
+        for name in SharedFixtures.starterItems {
+            app.buttons[A11yID.ItemRow.check(name)].tap()
+        }
+
+        XCTAssertTrue(app.staticTexts["celebration.title"].waitForExistence(timeout: 5))
+        attachScreenshot("01-celebration-shown")
+
+        // Let the entrance spring + burst settle into a stable state before
+        // the dismiss so the recording's dismiss window is unambiguous.
+        Thread.sleep(forTimeInterval: 1.5)
+
+        XCTAssertTrue(app.buttons[A11yID.GotSection.clearAll].waitForExistence(timeout: 3))
+        app.buttons[A11yID.GotSection.clearAll].tap()
+        attachScreenshot("02-clear-tapped-mid-celebration")
+
+        // Give the exit animation (~0.4s) generous room to finish playing so
+        // the tail of the recording captures the fully-settled end state too.
+        Thread.sleep(forTimeInterval: 3.0)
+        attachScreenshot("03-after-dismiss")
+
+        XCTAssertFalse(app.staticTexts["celebration.title"].exists)
+    }
+
     /// "Clear all" empties the whole "Got it" section immediately, rather
     /// than waiting for its 1-hour TTL.
     func testClearAllEmptiesGotItSection() {
