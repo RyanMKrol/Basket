@@ -226,7 +226,7 @@ struct CheckCircle: View {
                 .scaleEffect(isChecked ? 1 : 0.1)
                 .opacity(isChecked ? 1 : 0)
 
-            Image(systemName: "checkmark")
+            Image(systemName: "arrow.up.left")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(.white)
                 .scaleEffect(isChecked ? 1 : 0.1)
