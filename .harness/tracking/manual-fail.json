@@ -18,5 +18,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T069 — scope now includes the report file + .gitignore the spec required",
     "at": "2026-07-16T19:00:15Z"
+  },
+  "T043": {
+    "failed": true,
+    "reason": "review-failed: superseded by T070 — dropped the out-of-scope .harness/ LIMITATIONS edit; task now stays within tools/ + README + .gitignore",
+    "at": "2026-07-16T19:00:17Z"
   }
 }
