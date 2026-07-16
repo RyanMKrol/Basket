@@ -407,7 +407,7 @@ struct ShoppingListView: View {
         for item in items where ids.contains(item.persistentModelID) {
             context.delete(item)
         }
-        pendingClearIDs.removeAll()
+        pendingClearIDs = pendingClearIDs.filter { id in items.contains { $0.persistentModelID == id } }
         withAppAnimation(.easeOut(duration: 0.3)) { showClearToast = false }
     }
 

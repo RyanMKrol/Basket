@@ -36,13 +36,13 @@ enum TestHooks {
     static var celebrationDuration: TimeInterval? { isUITesting ? nil : 1.6 }
 
     /// How long the "Cleared N items — Undo" toast stays up before the
-    /// buffered items are actually deleted. Production gives ~5s to react;
+    /// buffered items are actually deleted. Production gives ~2.5s to react;
     /// under UI testing it shrinks to 3s — short enough to keep the
     /// let-it-expire flow fast, but long enough to survive XCUITest's own
     /// accessibility-tree synchronization overhead (each `waitFor…`/tap can
     /// itself cost the better part of a second) before the undo-in-time flow
     /// gets to check for the button.
-    static var clearToastDuration: TimeInterval { disableAnimations ? 3.0 : 5.0 }
+    static var clearToastDuration: TimeInterval { disableAnimations ? 3.0 : 2.5 }
 
     /// The frozen wall-clock instant (ISO-8601, e.g. "2026-07-15T10:00:00Z")
     /// from the UITEST_FROZEN_DATE environment variable — so TTL cutoffs,

@@ -127,4 +127,31 @@ final class CheckOffFlowTests: BasketUITestCase {
         XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
         XCTAssertFalse(gotSectionHeader.exists)
     }
+
+    /// When the undo toast expires, the "Got it" section must not flicker
+    /// back into view, even briefly. This test runs with `realTiming` so it
+    /// exercises the real 2.5s toast duration and the actual SwiftData
+    /// deletion timing.
+    func testClearToastExpiryDoesNotFlickerGotSection() {
+        launchApp(realTiming: true)
+
+        app.buttons[A11yID.ItemRow.check("Milk")].tap()
+        XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
+        attachScreenshot("01-checked-item")
+
+        app.buttons[A11yID.GotSection.clearAll].tap()
+        let undo = app.buttons["clearToast.undo"]
+        XCTAssertTrue(undo.waitForExistence(timeout: 2))
+        attachScreenshot("02-toast-shown")
+
+        // Wait out the full ~2.5s toast duration without tapping Undo.
+        // The toast disappears and the item stays deleted.
+        waitForGone(undo, timeout: 4)
+        attachScreenshot("03-toast-expired-no-flicker")
+
+        // Confirm the item is gone and the Got it section header never
+        // reappeared during the expiry.
+        XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
+        XCTAssertFalse(gotSectionHeader.exists)
+    }
 }
