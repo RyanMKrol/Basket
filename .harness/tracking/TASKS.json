@@ -771,7 +771,7 @@
     {
       "id": "T044",
       "title": "Swift 6 strict-concurrency migration: fix unsafe statics, flip SWIFT_VERSION to 6.0",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [],
       "gate": null,
       "tags": [
@@ -864,7 +864,7 @@
     {
       "id": "T035",
       "title": "Audit SemanticEmoji anchor collisions across the corpus (condiment-cluster follow-up)",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [],
       "gate": null,
       "tags": [
@@ -1067,7 +1067,7 @@
     {
       "id": "T043",
       "title": "Headless CPU profiling script (xcprof) + committed perf baseline + documented compare workflow",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [],
       "gate": null,
       "tags": [
