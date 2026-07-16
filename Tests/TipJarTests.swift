@@ -55,4 +55,90 @@ final class TipJarTests: XCTestCase {
             XCTAssertFalse(badge.label.isEmpty)
         }
     }
+
+    // MARK: - State Machine Tests
+
+    func testInitialStatusIsIdle() async {
+        let jar = TipJar()
+        XCTAssertEqual(jar.status, .idle)
+    }
+
+    func testBeginTipSetsStatusToPurchasing() async {
+        let jar = TipJar()
+        jar.beginTip()
+        XCTAssertEqual(jar.status, .purchasing)
+    }
+
+    func testResolvePendingSetsPendingApproval() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.pending)
+        XCTAssertEqual(jar.status, .pendingApproval)
+    }
+
+    func testResolveFailureWithExactMessage() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.failure(message: "Couldn't reach the App Store. Please try again later."))
+
+        if case .failed(let message) = jar.status {
+            XCTAssertEqual(message, "Couldn't reach the App Store. Please try again later.")
+        } else {
+            XCTFail("Expected failed status")
+        }
+    }
+
+    func testResolveCancelledSetsIdle() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.cancelled)
+        XCTAssertEqual(jar.status, .idle)
+    }
+
+    func testResolveSuccessSetsThank() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.success)
+        XCTAssertEqual(jar.status, .thanked)
+        XCTAssertTrue(jar.hasTipped)
+    }
+
+    func testThankStateReverts() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.success)
+        XCTAssertEqual(jar.status, .thanked)
+
+        try? await Task.sleep(nanoseconds: 3_100_000_000)
+        XCTAssertEqual(jar.status, .idle)
+    }
+
+    func testFailedClearsOnNewTip() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.failure(message: "Couldn't reach the App Store. Please try again later."))
+        XCTAssertEqual(jar.status, .failed(message: "Couldn't reach the App Store. Please try again later."))
+
+        jar.beginTip()
+        XCTAssertEqual(jar.status, .purchasing)
+    }
+
+    func testTransactionUpdateFromPendingApprovalSetsThanked() async {
+        let jar = TipJar()
+        jar.beginTip()
+        jar.resolve(.pending)
+        XCTAssertEqual(jar.status, .pendingApproval)
+
+        jar.transactionUpdateArrived()
+        XCTAssertEqual(jar.status, .thanked)
+        XCTAssertTrue(jar.hasTipped)
+    }
+
+    func testTransactionUpdateNotFromPendingApprovalJustMarkedTipped() async {
+        let jar = TipJar()
+        // For this test, we just check that the transaction arrived handler marks the user as tipped
+        // even when not in pendingApproval state. Since status is private(set), we test via transactionUpdateArrived
+        jar.transactionUpdateArrived()
+        XCTAssertTrue(jar.hasTipped)
+    }
 }

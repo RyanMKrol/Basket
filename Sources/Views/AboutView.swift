@@ -81,14 +81,27 @@ struct AboutView: View {
                 }
             }
 
-            if tipJar.thanked {
+            switch tipJar.status {
+            case .thanked:
                 Text("Thank you! 💚")
                     .font(Theme.body(14, weight: .semibold))
                     .foregroundStyle(Theme.leaf)
-            } else if tipJar.hasTipped {
-                Text("Thanks for supporting Basket ♥")
-                    .font(Theme.body(12))
-                    .foregroundStyle(Theme.onPaperSoft.opacity(0.85))
+            case .pendingApproval:
+                Text("Tip pending approval")
+                    .font(Theme.body(12, weight: .regular))
+                    .foregroundStyle(Theme.onPaperSoft)
+                    .accessibilityIdentifier("about.tipStatus")
+            case .failed(let message):
+                Text(message)
+                    .font(Theme.body(12, weight: .regular))
+                    .foregroundStyle(Theme.onPaperSoft)
+                    .accessibilityIdentifier("about.tipStatus")
+            case .idle, .purchasing:
+                if tipJar.hasTipped {
+                    Text("Thanks for supporting Basket ♥")
+                        .font(Theme.body(12))
+                        .foregroundStyle(Theme.onPaperSoft.opacity(0.85))
+                }
             }
         }
     }
@@ -120,6 +133,6 @@ struct AboutView: View {
         .disabled(tipJar.purchasingID != nil)
         .opacity(tipJar.purchasingID != nil && !busy ? 0.5 : 1)
         .accessibilityLabel("\(badge.label) tip, \(product.displayPrice)\(busy ? ", purchasing" : "")")
-        .accessibilityHint("Leaves a tip — doesn't unlock anything")
+        .accessibilityHint("Leaves a tip. Doesn't unlock anything.")
     }
 }

@@ -23,12 +23,27 @@ final class TipJar {
 
     enum LoadState { case idle, loading, loaded, unavailable }
 
+    enum TipStatus: Equatable {
+        case idle
+        case purchasing
+        case pendingApproval
+        case failed(message: String)
+        case thanked
+    }
+
+    enum TipOutcome {
+        case success
+        case cancelled
+        case pending
+        case failure(message: String)
+    }
+
     private(set) var products: [Product] = []
     private(set) var state: LoadState = .idle
     /// The tip currently being purchased (drives the inline spinner).
     var purchasingID: Product.ID?
-    /// True briefly right after a successful tip (drives the "Thank you!" line).
-    var thanked = false
+    /// Status of the tip purchase flow.
+    private(set) var status: TipStatus = .idle
     /// Persisted: the user has tipped at least once.
     private(set) var hasTipped = UserDefaults.standard.bool(forKey: TipJar.tippedKey)
 
@@ -43,7 +58,7 @@ final class TipJar {
             for await update in Transaction.updates {
                 if case .verified(let txn) = update {
                     await txn.finish()
-                    self?.markTipped()
+                    self?.transactionUpdateArrived()
                 }
             }
         }
@@ -87,25 +102,58 @@ final class TipJar {
     func tip(_ product: Product) async {
         purchasingID = product.id
         defer { purchasingID = nil }
+        beginTip()
         do {
             switch try await product.purchase() {
             case .success(let verification):
                 if case .verified(let txn) = verification {
-                    await txn.finish()          // consumable → finish immediately
-                    markTipped()
-                    thanked = true
-                    Task { @MainActor [weak self] in   // momentary "Thank you!"
-                        try? await Task.sleep(nanoseconds: 3_000_000_000)
-                        self?.thanked = false
-                    }
+                    await txn.finish()
+                    resolve(.success)
                 }
-            case .userCancelled, .pending:
-                break
+            case .userCancelled:
+                resolve(.cancelled)
+            case .pending:
+                resolve(.pending)
             @unknown default:
                 break
             }
         } catch {
-            // A failed tip shouldn't shout at the user — quietly do nothing.
+            resolve(.failure(message: "Couldn't reach the App Store. Please try again later."))
+        }
+    }
+
+    func beginTip() {
+        status = .purchasing
+    }
+
+    func resolve(_ outcome: TipOutcome) {
+        switch outcome {
+        case .success:
+            markTipped()
+            status = .thanked
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                self?.status = .idle
+            }
+        case .cancelled:
+            status = .idle
+        case .pending:
+            status = .pendingApproval
+        case .failure(let message):
+            status = .failed(message: message)
+        }
+    }
+
+    func transactionUpdateArrived() {
+        if status == .pendingApproval {
+            markTipped()
+            status = .thanked
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                self?.status = .idle
+            }
+        } else {
+            markTipped()
         }
     }
 
