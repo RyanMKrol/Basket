@@ -46,6 +46,6 @@ final class UsualsFlowTests: BasketUITestCase {
         field.tap()
 
         // No suggestion chips of any kind should appear for a fresh install.
-        XCTAssertFalse(app.buttons[A11yID.AddBar.suggestion("Banana")].waitForExistence(timeout: 2))
+        assertStaysGone(app.buttons[A11yID.AddBar.suggestion("Banana")], for: 2)
     }
 }

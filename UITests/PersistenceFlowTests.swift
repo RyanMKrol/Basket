@@ -64,8 +64,8 @@ final class PersistenceFlowTests: BasketUITestCase {
 
         waitForToGetCount(3)
         waitForGone(gotSectionHeader, timeout: 5)
-        XCTAssertFalse(app.buttons[A11yID.ItemRow.row("Milk")].exists,
-                       "expired item should be deleted, not restored to the list")
+        assertStaysGone(app.buttons[A11yID.ItemRow.row("Milk")],
+                        "expired item should be deleted, not restored to the list")
         attachScreenshot("02-purged-at-1130")
     }
 }

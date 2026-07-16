@@ -35,7 +35,7 @@ final class RenameFlowTests: BasketUITestCase {
         attachScreenshot("03-renamed")
 
         // Name changed, old row gone.
-        XCTAssertFalse(app.buttons[A11yID.ItemRow.row("Milk")].exists)
+        assertStaysGone(app.buttons[A11yID.ItemRow.row("Milk")])
 
         // Quantity cleared: the row's label is bare "Bananas" (no ", 500 ml"
         // suffix), which the row only carries when a quantity is set.

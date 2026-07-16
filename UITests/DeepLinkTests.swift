@@ -64,7 +64,7 @@ final class DeepLinkTests: BasketUITestCase {
 
         // The keyboard dismiss button should not be visible since focus is not set.
         let dismissButton = app.buttons[A11yID.AddBar.dismissKeyboard]
-        XCTAssertFalse(dismissButton.exists)
+        assertStaysGone(dismissButton)
 
         attachScreenshot("01-normal-launch-not-focused")
     }

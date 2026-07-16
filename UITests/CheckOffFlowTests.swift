@@ -103,7 +103,7 @@ final class CheckOffFlowTests: BasketUITestCase {
         Thread.sleep(forTimeInterval: 3.0)
         attachScreenshot("03-after-dismiss")
 
-        XCTAssertFalse(app.staticTexts["celebration.title"].exists)
+        assertStaysGone(app.staticTexts["celebration.title"])
     }
 
     /// "Clear all" empties the whole "Got it" section immediately, rather
@@ -119,7 +119,7 @@ final class CheckOffFlowTests: BasketUITestCase {
         attachScreenshot("02-cleared")
 
         waitForGone(gotSectionHeader)
-        XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
+        assertStaysGone(app.buttons[A11yID.ItemRow.check("Milk")])
     }
 
     /// "Clear all" is instantly recoverable: tapping the undo toast's Undo
@@ -169,8 +169,8 @@ final class CheckOffFlowTests: BasketUITestCase {
         waitForGone(undo, timeout: 5)
         attachScreenshot("03-toast-expired")
 
-        XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
-        XCTAssertFalse(gotSectionHeader.exists)
+        assertStaysGone(app.buttons[A11yID.ItemRow.check("Milk")])
+        assertStaysGone(gotSectionHeader)
     }
 
     /// When the undo toast expires, the "Got it" section must not flicker
@@ -196,7 +196,7 @@ final class CheckOffFlowTests: BasketUITestCase {
 
         // Confirm the item is gone and the Got it section header never
         // reappeared during the expiry.
-        XCTAssertFalse(app.buttons[A11yID.ItemRow.check("Milk")].exists)
-        XCTAssertFalse(gotSectionHeader.exists)
+        assertStaysGone(app.buttons[A11yID.ItemRow.check("Milk")])
+        assertStaysGone(gotSectionHeader)
     }
 }

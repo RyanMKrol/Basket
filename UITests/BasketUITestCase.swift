@@ -46,7 +46,8 @@ class BasketUITestCase: XCTestCase {
     // XCUITest gives no guarantee that a tap's effects have rendered by the
     // next line, so a bare XCTAssert on live UI state is a race — it can fail
     // on a slow run, or falsely pass by reading a stale-but-expected value.
-    // Every assertion about UI state goes through one of these waits.
+    // Every assertion about UI state goes through one of these waits, including
+    // absence checks via assertStaysGone (never a bare XCTAssertFalse on .exists).
 
     /// Waits for `element.label` to equal `expected`; on timeout, fails
     /// showing the label it last saw.
@@ -108,6 +109,20 @@ class BasketUITestCase: XCTestCase {
         waitForLabel(app.staticTexts[A11yID.Header.count],
                      equals: A11yID.toGetCountText(count),
                      timeout: timeout, file: file, line: line)
+    }
+
+    /// Asserts the element stays absent for the whole settle window, failing
+    /// the moment it appears. The bounded-wait counterpart of waitForGone for
+    /// the "and it should NOT show up" case — a bare XCTAssertFalse(.exists)
+    /// only proves absence at one instant.
+    func assertStaysGone(_ element: XCUIElement, for window: TimeInterval = 1.5,
+                         _ message: String = "",
+                         file: StaticString = #filePath, line: UInt = #line) {
+        if waitUntilExists(element, true, timeout: window) {
+            let suffix = message.isEmpty ? "" : ": \(message)"
+            XCTFail("Element should not appear but did\(suffix)",
+                    file: file, line: line)
+        }
     }
 
     /// The "Got it" section header — its presence means at least one checked
