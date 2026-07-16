@@ -1018,7 +1018,7 @@
     {
       "id": "T041",
       "title": "assertStaysGone bounded stays-absent helper in BasketUITestCase + convert all XCTAssertFalse(.exists) sites",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
