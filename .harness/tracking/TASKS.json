@@ -911,7 +911,7 @@
     {
       "id": "T037",
       "title": "Got-it row: swap checkmark glyph for an up-arrow (undo affordance)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
