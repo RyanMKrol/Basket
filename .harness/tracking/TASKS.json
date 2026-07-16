@@ -1766,6 +1766,99 @@
       "verify": [],
       "expectsTest": false,
       "spec": ".harness/tasks/T067.md"
+    },
+    {
+      "id": "T068",
+      "title": "Add -semantic-report mode to audit_coverage.swift (scope-fixed re-attempt of T035)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "emoji",
+        "investigation"
+      ],
+      "scope": [
+        "tools/audit_coverage.swift",
+        "tools/semantic-anchor-report.txt",
+        ".gitignore"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T068.md",
+      "facets": {
+        "layer": "generators",
+        "workType": "bugfix",
+        "risk": []
+      }
+    },
+    {
+      "id": "T069",
+      "title": "Headless CPU profiling script (xcprof) + committed perf baseline + documented compare workflow",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tooling",
+        "performance",
+        "profiling",
+        "xcprof"
+      ],
+      "scope": [
+        "tools/",
+        "README.md",
+        ".gitignore"
+      ],
+      "design": null,
+      "verify": [
+        "bash -n tools/profile_app.sh",
+        "tools/profile_app.sh --help >/dev/null",
+        "jq -e . tools/perf-baseline/baseline.json >/dev/null"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T069.md",
+      "facets": {
+        "layer": "build",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T070",
+      "title": "Swift 6 strict-concurrency migration: fix unsafe statics, flip SWIFT_VERSION to 6.0",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "concurrency",
+        "swift6",
+        "build",
+        "migration"
+      ],
+      "scope": [
+        "project.yml",
+        "Sources/",
+        "Tests/",
+        "tools/main.swift",
+        ".github/workflows/ci.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "grep -n 'SWIFT_VERSION: \"6.0\"' project.yml",
+        "sh -c '! grep -rn \"nonisolated(unsafe)\" Sources/ || grep -rn -B3 \"nonisolated(unsafe)\" Sources/'",
+        "xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=iPhone 17 Pro'",
+        "swiftc -swift-version 6 Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift Sources/Services/Formatting.swift Sources/Services/Measure.swift Sources/Services/Seasonality.swift tools/main.swift -o /tmp/basket_check6 && /tmp/basket_check6"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T070.md",
+      "facets": {
+        "layer": "build",
+        "workType": "migration",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
     }
   ]
 }
