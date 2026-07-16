@@ -13,7 +13,7 @@ enum Suggestions {
     /// Only suggest things bought within this window (~1 month).
     static let memoryTTL: TimeInterval = 60 * 60 * 24 * 30
     /// Cap for the combined (history + dictionary) suggestion list.
-    static let combinedMax = 4
+    static let combinedMax = 3
 
     /// Typing suggestions from the user's personal history first (ranked by
     /// frequency + recency), then a built-in food dictionary for autocomplete.

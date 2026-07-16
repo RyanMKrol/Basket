@@ -159,6 +159,22 @@ final class SuggestionsTests: XCTestCase {
         XCTAssertEqual(ranked("thing", many).count, Suggestions.combinedMax)
     }
 
+    // The add-bar suggestion stack is capped at 3 rows (T039). Pins the concrete
+    // value so the symbolic caps tests above can't silently drift back to 4.
+    func testCombinedMaxIsThree() {
+        XCTAssertEqual(Suggestions.combinedMax, 3)
+    }
+
+    func testCombinedShowsAtMostThreeRows() {
+        let many = (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }
+        XCTAssertEqual(ranked("thing", many).count, 3)
+    }
+
+    func testUsualsShowsAtMostThreeRows() {
+        let many = (0..<10).map { cand("Thing\($0)", times: 1, daysAgo: 1) }
+        XCTAssertEqual(Suggestions.usuals(history: many, onList: [], now: now).count, 3)
+    }
+
     private let dict = ["Tomatoes", "Tomato Soup", "Tomato Ketchup", "Milk", "Bananas"]
 
     func testCombinedAutocompletesFromDictionary() {
