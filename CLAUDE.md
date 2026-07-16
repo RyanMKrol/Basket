@@ -74,14 +74,12 @@ Both test commands above also run in CI (`.github/workflows/ci.yml`) on
 **every branch push** — pre-merge signal for your worktree branch, post-merge
 backstop on `main` (there's no PR review step; see the golden rule above). On
 failure CI uploads the `.xcresult` (failure screenshots + audit logs) as an
-artifact, and a scheduled nightly `flake-hunt` job reruns every test up to 5
-times to surface only-fails-sometimes tests. The push-triggered job retries a
-failed test once (`-retry-tests-on-failure -test-iterations 2`) — a test only
-fails the gate if it fails both attempts. This deliberately tolerates the UI
-suite's known timing flakes, because the autonomous build loop gates merges on
-this run unattended, so a single flake would otherwise cost a whole build
-iteration. It's a best-practice safety net, not something Apple requires for
-App Store submission.
+artifact. The push-triggered job retries a failed test once
+(`-retry-tests-on-failure -test-iterations 2`) — a test only fails the gate if
+it fails both attempts. This deliberately tolerates the UI suite's known timing
+flakes, because the autonomous build loop gates merges on this run unattended,
+so a single flake would otherwise cost a whole build iteration. It's a
+best-practice safety net, not something Apple requires for App Store submission.
 
 ## Project map
 

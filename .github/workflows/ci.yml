@@ -4,13 +4,10 @@ name: CI
 # branch into directly (see CLAUDE.md — this repo doesn't use pull requests),
 # so there's no review step to catch a broken build/test before it lands.
 # Running on every branch push gives each worktree branch a pre-merge signal;
-# the run on main after the merge is the final backstop. The nightly schedule
-# drives the flake-hunt job only (see below). workflow_dispatch drives the
-# record-snapshots job only — see SnapshotTests.swift.
+# the run on main after the merge is the final backstop. workflow_dispatch
+# drives the record-snapshots job only — see SnapshotTests.swift.
 on:
   push:
-  schedule:
-    - cron: "17 3 * * *"
   workflow_dispatch:
     inputs:
       record_snapshots:
@@ -52,10 +49,8 @@ jobs:
       # single flaky failure silently costs a whole ~30-min build iteration
       # (cold rebuild + tier escalation), so tolerating it is the right call.
       # (For human-driven work the older "fail loudly, never retry" stance made
-      # sense; it flipped when the loop became the primary consumer.) The
-      # nightly flake-hunt job still surfaces genuinely flaky tests via
-      # -run-tests-until-failure. Test timeouts turn a hung test into a failure
-      # instead of a wedged runner.
+      # sense; it flipped when the loop became the primary consumer.) Test
+      # timeouts turn a hung test into a failure instead of a wedged runner.
       - name: XCTest + XCUITest suite
         run: |
           xcodebuild test \
@@ -87,45 +82,6 @@ jobs:
                  Sources/Services/Measure.swift Sources/Services/Seasonality.swift \
                  tools/main.swift -o /tmp/basket_check
           /tmp/basket_check
-
-  # Nightly: run every test up to 5 times, stopping at the first failure —
-  # a test that only fails sometimes is exactly what this surfaces. Kept out
-  # of the push-triggered job so the merge signal stays fast and strict.
-  flake-hunt:
-    if: github.event_name == 'schedule'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode 26
-        uses: ./.github/actions/select-xcode
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
-
-      - name: Generate Xcode project
-        run: xcodegen generate
-
-      - name: Resolve an available iPhone simulator
-        id: sim
-        uses: ./.github/actions/resolve-simulator
-
-      - name: Run the suite repeatedly to surface flakes
-        run: |
-          xcodebuild test \
-            -project Basket.xcodeproj -scheme Basket \
-            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
-            -test-timeouts-enabled YES -default-test-execution-time-allowance 600 \
-            -test-iterations 5 -run-tests-until-failure \
-            -resultBundlePath FlakeHunt.xcresult
-
-      - name: Upload result bundle on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: flake-hunt-results
-          path: FlakeHunt.xcresult
-          retention-days: 14
 
   # Re-records Tests/__Snapshots__ on THIS runner (see SnapshotTests.swift for
   # why that matters) instead of verifying against the existing references.

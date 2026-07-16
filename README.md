@@ -315,10 +315,9 @@ top:
 harness) on **every branch push** — pre-merge signal for worktree branches,
 post-merge backstop on `main`. On failure it uploads the `.xcresult` bundle
 (which contains the failure screenshots and audit logs) as a workflow
-artifact. The merge-gating job never retries: a flaky test should fail
-loudly. Instead, a scheduled nightly `flake-hunt` job runs every test up to
-5 times (`-test-iterations 5 -run-tests-until-failure`) to surface the
-only-fails-sometimes kind before it wastes anyone's day.
+artifact. The push-triggered job retries a failed test once
+(`-retry-tests-on-failure -test-iterations 2`) — a test only fails the gate if
+it fails both attempts.
 
 ### Releasing to TestFlight
 
