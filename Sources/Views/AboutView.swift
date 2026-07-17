@@ -8,6 +8,8 @@ import StoreKit
 /// theme picker. Basket is free; tipping is entirely optional and unlocks nothing.
 struct AboutView: View {
     @Environment(TipJar.self) private var tipJar
+    @ScaledMetric(relativeTo: .largeTitle) private var basketEmojiSize: CGFloat = 60
+    @ScaledMetric(relativeTo: .title2) private var badgeEmojiSize: CGFloat = 24
 
     private var version: String {
         let info = Bundle.main.infoDictionary
@@ -22,7 +24,7 @@ struct AboutView: View {
 
             VStack(spacing: 14) {
                 Text("🧺")
-                    .font(.system(size: 60))
+                    .font(.system(size: basketEmojiSize))
                     .padding(.top, 10)
                     .accessibilityHidden(true)
 
@@ -36,6 +38,12 @@ struct AboutView: View {
                     .font(Theme.body(15))
                     .foregroundStyle(Theme.onPaperSoft)
                     .multilineTextAlignment(.center)
+                    // The sheet's fixed `.medium`/`.large` detents leave this
+                    // squeezed between the title and the tip section — capped
+                    // rather than left to truncate at the top of the Dynamic
+                    // Type range. See README.md's Dynamic Type note.
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                    .accessibilityIdentifier("about.subtitle")
 
                 tipSection
                     .padding(.top, 6)
@@ -62,6 +70,8 @@ struct AboutView: View {
             Text("Enjoying Basket? Leave a tip ☕")
                 .font(Theme.body(14, weight: .medium))
                 .foregroundStyle(Theme.onPaperSoft)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+                .accessibilityIdentifier("about.tipPrompt")
 
             switch tipJar.state {
             case .idle, .loading:
@@ -113,12 +123,20 @@ struct AboutView: View {
             Task { await tipJar.tip(product) }
         } label: {
             VStack(spacing: 3) {
-                Text(badge.emoji).font(.system(size: 24))
+                Text(badge.emoji).font(.system(size: badgeEmojiSize)).accessibilityHidden(true)
                 Text(badge.label).font(Theme.body(13, weight: .semibold))
+                    .accessibilityIdentifier("about.tipLabel")
                 Text(product.displayPrice).font(Theme.body(11)).opacity(0.9)
+                    .accessibilityIdentifier("about.tipPrice")
             }
             .foregroundStyle(.white)
-            .frame(width: 82, height: 86)
+            .frame(width: 82)
+            .frame(minHeight: 86)
+            // The label + price would otherwise outgrow this compact badge's
+            // fixed width and spill past its rounded background at the very
+            // top of the Dynamic Type range — capped rather than left to
+            // overflow. See README.md's Dynamic Type note.
+            .dynamicTypeSize(...DynamicTypeSize.accessibility2)
             .background(Theme.leaf, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay {
                 if busy {

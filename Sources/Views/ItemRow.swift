@@ -45,6 +45,11 @@ struct ItemRow: View {
                     // rest of the row (spacer + quantity chip) keeps opening
                     // the quantity editor, untouched.
                     Text(emoji)
+                        // Not routed through @ScaledMetric: this glyph sits
+                        // in a fixed 34x34 box, so scaling the font would
+                        // overflow the box rather than the row growing to
+                        // fit it. Never flagged by the Dynamic Type audit
+                        // (it's a decorative pictograph, not readable text).
                         .font(.system(size: 24))
                         .frame(width: 34, height: 34)
                         // Queryable (not just visual) so a rename's emoji

@@ -104,6 +104,8 @@ struct QuantityEditor: View {
                 .font(Theme.body(16, weight: .semibold))
                 .foregroundStyle(Theme.ink)
                 .monospacedDigit()
+                .fixedSize(horizontal: false, vertical: true)
+                .dynamicTypeSize(...DynamicTypeSize.accessibility2)
                 // minHeight brings the tappable area up to Apple's 44pt
                 // minimum (flagged by performAccessibilityAudit's hit-region
                 // check) without changing the text's own visual size.

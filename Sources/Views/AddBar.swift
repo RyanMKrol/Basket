@@ -12,6 +12,7 @@ struct AddBar: View {
     /// Focus is owned by the parent so it can drop the keyboard when another
     /// surface (e.g. the quantity editor) takes over.
     var focused: FocusState<Bool>.Binding
+    @ScaledMetric(relativeTo: .body) private var suggestionEmojiSize: CGFloat = 20
 
     var body: some View {
         VStack(spacing: 8) {
@@ -24,7 +25,7 @@ struct AddBar: View {
                             focused.wrappedValue = true   // keep the keyboard up for rapid adding
                         } label: {
                             HStack(spacing: 12) {
-                                Text(s.emoji).font(.system(size: 20))
+                                Text(s.emoji).font(.system(size: suggestionEmojiSize))
                                 Text(s.name)
                                     .font(Theme.body(17, weight: .medium))
                                     .foregroundStyle(Theme.ink)

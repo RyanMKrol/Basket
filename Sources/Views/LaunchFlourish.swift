@@ -21,6 +21,7 @@ struct LaunchFlourish: View {
     var onFinished: () -> Void
 
     @State private var appear = false
+    @ScaledMetric(relativeTo: .largeTitle) private var basketEmojiSize: CGFloat = 88
 
     var body: some View {
         ZStack {
@@ -33,7 +34,7 @@ struct LaunchFlourish: View {
                                      count: 12, radius: 96)
                     }
                     Text("🧺")
-                        .font(.system(size: 88))
+                        .font(.system(size: basketEmojiSize))
                         .scaleEffect(appear ? 1 : 0.5)
                         .opacity(appear ? 1 : 0)
                 }

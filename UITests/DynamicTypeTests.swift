@@ -25,4 +25,37 @@ final class DynamicTypeTests: BasketUITestCase {
         XCTAssertGreaterThan(scaledHeight, defaultHeight,
                               "Item name label should render taller under an accessibility content size, since Theme fonts now scale via relativeTo:")
     }
+
+    /// Visual evidence for T052: at the largest supported accessibility
+    /// content size, the main list, quantity editor, empty state, and about
+    /// sheet all still render their key elements — no crash, no vanished
+    /// content — even though EmptyStateView's title and the quantity value
+    /// are internally capped at `.accessibility2` (see their doc comments).
+    func testLargestAccessibilitySizeScreensRenderWithoutBreaking() {
+        app.launchArguments = ["-uiTesting", "-uiTestingDisableAnimations",
+                                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchEnvironment["UITEST_FROZEN_DATE"] = Self.frozenDate
+        app.launchEnvironment["TZ"] = "Europe/London"
+        app.launch()
+
+        XCTAssertTrue(app.buttons[A11yID.ItemRow.row("Milk")].waitForExistence(timeout: 5))
+        attachScreenshot("01-main-list-accessibilityXXXL")
+
+        app.buttons[A11yID.ItemRow.row("Milk")].tap()
+        XCTAssertTrue(app.buttons[A11yID.QuantityEditor.value].waitForExistence(timeout: 3))
+        attachScreenshot("02-quantity-editor-accessibilityXXXL")
+
+        app.terminate()
+        app.launchArguments = ["-uiTesting", "-uiTestingEmpty", "-uiTestingDisableAnimations",
+                                "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launchEnvironment["UITEST_FROZEN_DATE"] = Self.frozenDate
+        app.launchEnvironment["TZ"] = "Europe/London"
+        app.launch()
+        XCTAssertTrue(app.staticTexts["emptyState.subtitle"].waitForExistence(timeout: 5))
+        attachScreenshot("03-empty-state-accessibilityXXXL")
+
+        app.buttons[A11yID.Header.aboutButton].tap()
+        XCTAssertTrue(app.staticTexts["about.title"].waitForExistence(timeout: 3))
+        attachScreenshot("04-about-sheet-accessibilityXXXL")
+    }
 }

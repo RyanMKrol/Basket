@@ -4,15 +4,13 @@ import XCTest
 /// over the app's main screens, catching hit-region/label/trait regressions
 /// automatically instead of relying only on manual VoiceOver passes.
 ///
-/// Two audit categories are excluded wholesale, and one specific issue is
-/// suppressed — each documented below, not silently dropped. `.hitRegion`,
-/// `.elementDetection` (bar the one exception), `.sufficientElementDescription`,
-/// and `.trait` all stay enabled and must pass cleanly.
+/// One audit category is excluded wholesale, and a small number of specific
+/// issues are suppressed — each documented below, not silently dropped.
+/// `.hitRegion`, `.elementDetection` (bar one exception), `.dynamicType` (bar
+/// two capped elements), `.sufficientElementDescription`, and `.trait` all
+/// stay enabled and must pass cleanly.
 final class AccessibilityAuditTests: BasketUITestCase {
     /// `.all` minus:
-    /// - `.dynamicType`: the pixel-art theme's `VT323`/`Silkscreen` fonts are
-    ///   fixed-size by design (a deliberate retro-pixel aesthetic), so they
-    ///   don't participate in Dynamic Type scaling. A design choice, not a bug.
     /// - `.textClipped`: flagged almost every single-line item name, colour
     ///   emoji glyph, and secondary label in the app as "clipped", including
     ///   ones confirmed rendering in full in this suite's own screenshots
@@ -29,7 +27,7 @@ final class AccessibilityAuditTests: BasketUITestCase {
     ///   pending an explicit call from the app's owner, rather than papering
     ///   over it with a long, copy-coupled per-element allowlist.
     private var auditTypes: XCUIAccessibilityAuditType {
-        XCUIAccessibilityAuditType.all.subtracting([.dynamicType, .textClipped, .contrast])
+        XCUIAccessibilityAuditType.all.subtracting([.textClipped, .contrast])
     }
 
     func testMainListPassesAccessibilityAudit() throws {
@@ -72,6 +70,19 @@ final class AccessibilityAuditTests: BasketUITestCase {
         try app.performAccessibilityAudit(for: auditTypes, handleIssue)
     }
 
+    /// Elements whose layout genuinely can't grow past `.accessibility2`
+    /// without overflowing a fixed-size row or badge — capped via
+    /// `.dynamicTypeSize` at the view itself (see EmptyStateView,
+    /// QuantityEditor, AboutView's tip badge), a deliberate, documented
+    /// trade-off per README.md's Dynamic Type note. This audit's
+    /// `.dynamicType` check evaluates against the OS's full range regardless
+    /// of that cap, so it still reports these by identifier — suppressed
+    /// narrowly here rather than excluding the whole category.
+    private static let cappedDynamicTypeIdentifiers: Set<String> = [
+        "emptyState.title", A11yID.QuantityEditor.value,
+        "about.subtitle", "about.tipPrompt", "about.tipLabel", "about.tipPrice"
+    ]
+
     /// Returning `true` marks an issue as handled (suppressed); `false` lets
     /// it fail the test. Every issue is printed either way, so a failure's
     /// log always shows the full list, not just the first one XCTest reports.
@@ -85,6 +96,12 @@ final class AccessibilityAuditTests: BasketUITestCase {
         // any future .elementDetection finding that *does* name an element
         // still fails the test as it should.
         if issue.auditType == .elementDetection && issue.element == nil {
+            return true
+        }
+
+        if issue.auditType == .dynamicType,
+           let id = issue.element?.identifier,
+           Self.cappedDynamicTypeIdentifiers.contains(id) {
             return true
         }
 

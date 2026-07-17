@@ -13,6 +13,7 @@ struct ClearedCelebration: View {
     var isDismissing: Bool = false
 
     @State private var shown = false
+    @ScaledMetric(relativeTo: .largeTitle) private var celebrationEmojiSize: CGFloat = 66
 
     var body: some View {
         VStack(spacing: 12) {
@@ -22,7 +23,7 @@ struct ClearedCelebration: View {
                                  count: 16, radius: 130)
                 }
                 Text("🎉")
-                    .font(.system(size: 66))
+                    .font(.system(size: celebrationEmojiSize))
                     .scaleEffect(shown ? 1 : 0.4)
                     .opacity(shown ? 1 : 0)
                     .accessibilityHidden(true)

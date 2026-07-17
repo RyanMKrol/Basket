@@ -17,6 +17,17 @@ and `.monospaced` font kinds (no active theme uses them) still build a plain
 `.system(size:weight:design:)` and do not yet participate in Dynamic Type —
 revisit if a non-custom theme is ever added.
 
+**Dynamic Type note:** a handful of spots genuinely can't grow past
+`.accessibility2` without their fixed-size row/badge overflowing — each is
+capped there explicitly via `.dynamicTypeSize(...DynamicTypeSize.accessibility2)`
+rather than left to clip or overlap: `EmptyStateView`'s rotating title (long
+lines in a fixed-width screen), `QuantityEditor`'s value display (a
+stepper/value/clear-button row with no more room to give), and `AboutView`'s
+tip badges, subtitle, and tip prompt (a compact fixed-size card and a sheet
+whose `.medium`/`.large` detents leave little vertical room). Everything else
+scales the full Dynamic Type range uncapped. See the row of test evidence in
+`DynamicTypeTests.testLargestAccessibilitySizeScreensRenderWithoutBreaking`.
+
 ## Features
 
 - **Quick add** — always-visible bottom bar with a green **＋** add button; as you
@@ -320,17 +331,20 @@ top:
     `performAccessibilityAudit()` over the main list, quantity editor, empty
     state, and About sheet — catching hit-region/label/trait regressions
     automatically.
-    `.contrast`, `.textClipped`, and `.dynamicType` are excluded (with
-    reasons documented inline: the soft/pastel palette and colour emoji
-    don't fit those heuristics, and although the pixel fonts now scale with
-    Dynamic Type via `relativeTo:`, layout fallout across the views hasn't
-    been audited yet, so `.dynamicType` stays excluded until a follow-up
-    unit re-enables it), not silently ignored.
+    `.contrast` and `.textClipped` are excluded wholesale (with reasons
+    documented inline: the soft/pastel palette and colour emoji don't fit
+    those heuristics). `.dynamicType` stays enabled — see the Dynamic Type
+    note below for the small, identifier-scoped set of capped elements it
+    still narrowly suppresses (documented inline, not silently ignored).
   - `DynamicTypeTests.swift` proves the Dynamic Type scaling end to end:
     launches the app once at the default content size and once at
     `UICTContentSizeCategoryAccessibilityM`, then asserts the "Milk" row's
     name label (`A11yID.ItemRow.nameLabel`) renders strictly taller under the
-    larger category.
+    larger category. `testLargestAccessibilitySizeScreensRenderWithoutBreaking`
+    launches at the largest possible category
+    (`UICTContentSizeCategoryAccessibilityXXXL`) and screenshots the main
+    list, quantity editor, empty state, and About sheet, as visual evidence
+    that nothing overlaps or clips.
   - `TapPrecisionTests.swift` stress-tests the app's smallest controls (the
     +/- stepper buttons, unit pills, the check circle) with taps offset from
     dead-center at a fixed, seeded jitter — standing in for a real finger's
