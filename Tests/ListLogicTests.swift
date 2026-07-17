@@ -85,4 +85,68 @@ final class ListLogicTests: XCTestCase {
         _ = choreo.finishBurst(1)
         XCTAssertTrue(choreo.beginCheck(1), "committed item can be checked again")
     }
+
+    // MARK: - ClearChoreography
+
+    func testExpireAfterUndoIsNoOp() {
+        var choreo = ClearChoreography<Int>()
+        let begun = choreo.beginClear([1, 2])
+        XCTAssertNotNil(begun)
+        let oldToken = begun!.token
+
+        XCTAssertTrue(choreo.undo())
+        XCTAssertNil(choreo.expire(token: oldToken), "undo must invalidate the pending expiry")
+        XCTAssertFalse(choreo.isHidden(1))
+        XCTAssertFalse(choreo.isHidden(2))
+    }
+
+    func testDoubleClearSupersedesPendingExpiry() {
+        var choreo = ClearChoreography<Int>()
+        let first = choreo.beginClear([1, 2])!
+        let second = choreo.beginClear([3])!
+
+        XCTAssertNil(choreo.expire(token: first.token), "batch 1's token is stale once batch 2 begins")
+        XCTAssertEqual(choreo.expire(token: second.token), [1, 2, 3],
+                       "current token returns the FULL buffer, since batch 1 was never deleted")
+    }
+
+    func testUndoAfterExpiryIsNoOp() {
+        var choreo = ClearChoreography<Int>()
+        let begun = choreo.beginClear([1, 2])!
+
+        let toDelete = choreo.expire(token: begun.token)
+        XCTAssertEqual(toDelete, [1, 2])
+        // "Deleted" — narrow to what's still present (none of them).
+        choreo.narrow { _ in false }
+
+        XCTAssertFalse(choreo.undo(), "buffer is already empty after narrowing away the deleted ids")
+        XCTAssertFalse(choreo.isHidden(1))
+        XCTAssertFalse(choreo.isHidden(2))
+    }
+
+    func testStaleTokenNeverReturnsIDsToDelete() {
+        var choreo = ClearChoreography<Int>()
+        let begun = choreo.beginClear([1])!
+        _ = choreo.beginClear([2]) // bumps the token again
+
+        XCTAssertNil(choreo.expire(token: begun.token - 1), "never-issued token")
+        XCTAssertNil(choreo.expire(token: begun.token), "superseded token")
+    }
+
+    func testNarrowPreservesNoFlickerSemantics() {
+        var choreo = ClearChoreography<Int>()
+        let begun = choreo.beginClear([1, 2])!
+
+        let toDelete = choreo.expire(token: begun.token)
+        XCTAssertEqual(toDelete, [1, 2])
+        // Still hidden until narrow runs — the frame where the query hasn't
+        // refreshed yet must not flicker the deleted rows back into view.
+        XCTAssertTrue(choreo.isHidden(1))
+        XCTAssertTrue(choreo.isHidden(2))
+
+        // 1 deleted (no longer present), 2 still present (predicate accepts it).
+        choreo.narrow { $0 != 1 }
+        XCTAssertFalse(choreo.isHidden(1), "narrow drops ids the predicate rejects")
+        XCTAssertTrue(choreo.isHidden(2), "narrow keeps ids the predicate still accepts")
+    }
 }

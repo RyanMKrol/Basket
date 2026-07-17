@@ -77,3 +77,64 @@ struct CheckOffChoreography<ID: Hashable> {
         return batch
     }
 }
+
+/// The "Clear all" soft-delete/undo choreography: tapped items hide
+/// immediately but the actual delete is deferred until an undo toast expires,
+/// so a mis-tap is recoverable. Pure state machine — the view supplies the
+/// timer and the actual model deletes.
+///
+/// A monotonic token invalidates any in-flight expiry that a newer "Clear
+/// all" or an undo has superseded, so a stale timer can never delete the
+/// wrong batch. `expire(token:)` deliberately does NOT empty the buffer
+/// itself — the caller narrows it (via `narrow(stillPresent:)`) to ids still
+/// present after the deletes, so items stay hidden through the one frame
+/// where the underlying query hasn't refreshed yet (no delete→reappear
+/// flicker).
+struct ClearChoreography<ID: Hashable> {
+    private(set) var hidden: Set<ID> = []
+    private(set) var token: Int = 0
+
+    /// The item is buffered for deletion: its row should stay hidden even
+    /// though the model hasn't actually deleted it yet.
+    func isHidden(_ id: ID) -> Bool {
+        hidden.contains(id)
+    }
+
+    /// Buffer `ids` for deletion and bump the token, superseding any pending
+    /// expiry. Returns the new token and the buffer's total size, or nil if
+    /// every id was already buffered (nothing new to clear).
+    mutating func beginClear(_ ids: some Collection<ID>) -> (token: Int, count: Int)? {
+        let newIDs = Set(ids).subtracting(hidden)
+        guard !newIDs.isEmpty else { return nil }
+        hidden.formUnion(newIDs)
+        token += 1
+        return (token, hidden.count)
+    }
+
+    /// Drop the whole buffer and bump the token, invalidating any in-flight
+    /// expiry. Returns false — changing nothing — if the buffer was already
+    /// empty.
+    mutating func undo() -> Bool {
+        guard !hidden.isEmpty else { return false }
+        hidden.removeAll()
+        token += 1
+        return true
+    }
+
+    /// The undo toast expired. Returns the ids to actually delete only when
+    /// `expiredToken` is still current and the buffer is non-empty — a stale
+    /// token (superseded by a later clear or an undo) or an already-emptied
+    /// buffer is a no-op. Does not itself empty the buffer; see
+    /// `narrow(stillPresent:)`.
+    func expire(token expiredToken: Int) -> Set<ID>? {
+        guard expiredToken == token, !hidden.isEmpty else { return nil }
+        return hidden
+    }
+
+    /// Drop buffered ids the predicate rejects — called with "ids still
+    /// present" right after the caller issues the deletes, so items stay
+    /// hidden until the underlying query actually catches up.
+    mutating func narrow(stillPresent: (ID) -> Bool) {
+        hidden = hidden.filter(stillPresent)
+    }
+}

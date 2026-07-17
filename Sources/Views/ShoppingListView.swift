@@ -25,16 +25,13 @@ struct ShoppingListView: View {
     /// True while the celebration is animating itself back out — see
     /// `dismissCelebration()`, the single path that ends the celebration.
     @State private var celebrationDismissing = false
-    /// "Clear all" soft-delete buffer: items are hidden immediately but only
-    /// actually deleted once the undo toast expires, so an accidental tap is
-    /// recoverable. Kept as IDs (not copies) so undo just un-hides the real
-    /// SwiftData objects — `persistentModelID` stays intact.
-    @State private var pendingClearIDs: Set<PersistentIdentifier> = []
+    /// The "Clear all" soft-delete/undo state machine (hide-then-defer-delete,
+    /// with a token that invalidates a superseded expiry — see
+    /// `ClearChoreography`). Kept as IDs (not copies) so undo just un-hides
+    /// the real SwiftData objects — `persistentModelID` stays intact.
+    @State private var clearChoreo = ClearChoreography<PersistentIdentifier>()
     @State private var showClearToast = false
     @State private var clearedToastCount = 0
-    /// Invalidates an in-flight expiry timer when a newer "Clear all" or an
-    /// undo supersedes it, so a stale timer can't delete the wrong batch.
-    @State private var clearToken = 0
     /// Cold-start launch flourish — fires once per process, not on resume.
     /// Skipped under UI testing so tests don't have to wait out a splash that
     /// isn't part of the flow being verified.
@@ -61,7 +58,7 @@ struct ShoppingListView: View {
     /// delete is deferred until the undo toast expires.
     private var recentlyGot: [GroceryItem] {
         ListLogic.recentlyGot(items, now: now, ttl: gotTTL)
-            .filter { !pendingClearIDs.contains($0.persistentModelID) }
+            .filter { !clearChoreo.isHidden($0.persistentModelID) }
     }
 
     /// Nothing to get and nothing recently got — the empty state is showing.
@@ -406,16 +403,15 @@ struct ShoppingListView: View {
 
     /// Clear the whole "Got it" section now (manual tidy-up). Items vanish
     /// from view immediately but the SwiftData delete is deferred until the
-    /// undo toast expires (see `pendingClearIDs`), so a mis-tap is
+    /// undo toast expires (see `ClearChoreography`), so a mis-tap is
     /// recoverable without re-inserting copies (which would break
     /// `persistentModelID`-based state like `expandedID`/`flashID`).
     private func clearGot() {
-        let toClear = items.filter { $0.isChecked && !pendingClearIDs.contains($0.persistentModelID) }
-        guard !toClear.isEmpty else { return }
+        let toClear = items.filter { $0.isChecked }.map(\.persistentModelID)
+        guard let (token, count) = clearChoreo.beginClear(toClear) else { return }
         withAppAnimation(reduceMotion ? .easeInOut(duration: 0.25)
                                        : .spring(response: 0.4, dampingFraction: 0.85)) {
-            pendingClearIDs.formUnion(toClear.map(\.persistentModelID))
-            clearedToastCount = pendingClearIDs.count
+            clearedToastCount = count
             showClearToast = true
         }
         Haptics.soft()
@@ -425,34 +421,28 @@ struct ShoppingListView: View {
         // graceful dismiss instead.
         if celebrating { dismissCelebration() }
 
-        clearToken += 1
-        let token = clearToken
         DispatchQueue.main.asyncAfter(deadline: .now() + TestHooks.clearToastDuration) {
-            guard clearToken == token else { return }
-            commitClear()
+            commitClear(token: token)
         }
     }
 
     /// The undo toast expired without being tapped: actually delete the
     /// buffered items now.
-    private func commitClear() {
-        let ids = pendingClearIDs
-        guard !ids.isEmpty else { return }
+    private func commitClear(token: Int) {
+        guard let ids = clearChoreo.expire(token: token) else { return }
         for item in items where ids.contains(item.persistentModelID) {
             context.delete(item)
         }
-        pendingClearIDs = pendingClearIDs.filter { id in items.contains { $0.persistentModelID == id } }
+        clearChoreo.narrow { id in items.contains { $0.persistentModelID == id } }
         withAppAnimation(.easeOut(duration: 0.3)) { showClearToast = false }
     }
 
     /// Undo tapped: drop the buffer so the items reappear with their prior
     /// state intact, and invalidate the pending expiry timer.
     private func undoClear() {
-        guard !pendingClearIDs.isEmpty else { return }
-        clearToken += 1
+        guard clearChoreo.undo() else { return }
         withAppAnimation(reduceMotion ? .easeInOut(duration: 0.25)
                                        : .spring(response: 0.4, dampingFraction: 0.82)) {
-            pendingClearIDs.removeAll()
             showClearToast = false
         }
         Haptics.soft()

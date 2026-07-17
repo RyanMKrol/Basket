@@ -218,8 +218,9 @@ top:
   they already depend on to keep working.
 
   - `ListLogicTests.swift` — the section partitioning (to-get / recently-got
-    / TTL-expired) and the check-off spark→commit state machine
-    (`CheckOffChoreography`), extracted from `ShoppingListView` into
+    / TTL-expired), the check-off spark→commit state machine
+    (`CheckOffChoreography`), and the "Clear all" soft-delete/undo state
+    machine (`ClearChoreography`), extracted from `ShoppingListView` into
     `Services/ListLogic.swift` precisely so they're testable without a
     simulator.
   - `ModelTests.swift` — SwiftData semantics against an in-memory

@@ -99,6 +99,7 @@ best-practice safety net, not something Apple requires for App Store submission.
     item's measure type by its emoji glyph), `Seasonality` (time-of-day / holiday
     flourishes), `TipJar` (StoreKit 2 consumable tip jar), `ListLogic`
     (section partitioning + `CheckOffChoreography`, the check-off state
+    machine, + `ClearChoreography`, the "Clear all" soft-delete/undo state
     machine — pure and unit-tested), `KnownItems` (suggestion-memory upsert),
     `TestHooks` + `AppClock` (the UI tests' determinism switchboard: launch
     args/env for animations-off, frozen clock, temp store — **route any new
