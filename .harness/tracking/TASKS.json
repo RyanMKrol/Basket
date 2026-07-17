@@ -807,7 +807,7 @@
     {
       "id": "T033",
       "title": "View-only Home Screen widget (small + medium)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T057",
         "T058"
