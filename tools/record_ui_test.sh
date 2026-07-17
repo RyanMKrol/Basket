@@ -69,11 +69,18 @@ trap cleanup EXIT
 sleep 1   # let recordVideo actually start capturing before the test launches
 
 echo "▸ Running $TEST_ID on '$SIM_NAME'…"
-xcodebuild test \
-  -project Basket.xcodeproj -scheme Basket \
-  -destination "platform=iOS Simulator,id=$SIM" \
-  -only-testing:"$TEST_ID" \
-  | tail -20
+LOG="$PROJECT_DIR/build/record_ui_test.log"
+mkdir -p "$PROJECT_DIR/build"
+if ! xcodebuild test \
+     -project Basket.xcodeproj -scheme Basket \
+     -destination "platform=iOS Simulator,id=$SIM" \
+     -only-testing:"$TEST_ID" \
+     >"$LOG" 2>&1; then
+  echo "xcodebuild test failed. Last 40 lines of $LOG:" >&2
+  tail -40 "$LOG" >&2
+  exit 1
+fi
+tail -20 "$LOG"
 
 echo "▸ Recording saved → $OUT_PATH"
 echo "▸ Pull frames with: swift tools/extract_video_frame.swift \"$OUT_PATH\" <seconds> <out.png>"

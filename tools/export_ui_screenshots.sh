@@ -27,12 +27,19 @@ echo "▸ Generating Xcode project…"
 xcodegen generate >/dev/null
 
 echo "▸ Running BasketUITests on '$SIM_NAME'…"
-xcodebuild test \
-  -project Basket.xcodeproj -scheme Basket \
-  -destination "platform=iOS Simulator,name=$SIM_NAME" \
-  -only-testing:BasketUITests \
-  -resultBundlePath "$RESULT_BUNDLE" \
-  | tail -20
+LOG="$PROJECT_DIR/build/export_ui_screenshots.log"
+mkdir -p "$PROJECT_DIR/build"
+if ! xcodebuild test \
+     -project Basket.xcodeproj -scheme Basket \
+     -destination "platform=iOS Simulator,name=$SIM_NAME" \
+     -only-testing:BasketUITests \
+     -resultBundlePath "$RESULT_BUNDLE" \
+     >"$LOG" 2>&1; then
+  echo "xcodebuild test failed. Last 40 lines of $LOG:" >&2
+  tail -40 "$LOG" >&2
+  exit 1
+fi
+tail -20 "$LOG"
 
 echo "▸ Exporting screenshots…"
 EXPORT_DIR="$(mktemp -d)"
