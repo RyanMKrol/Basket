@@ -294,19 +294,17 @@ struct ShoppingListView: View {
     }
 
     /// The inline editor for a row, supplied only while it's expanded.
-    private func editor(for item: GroceryItem) -> AnyView? {
+    private func editor(for item: GroceryItem) -> QuantityEditor? {
         guard expandedID == item.persistentModelID,
               let u = item.unit, let q = item.quantity else { return nil }
-        return AnyView(
-            QuantityEditor(
-                value: q,
-                unit: u,
-                units: Measure.units(for: Measure.typeForName(item.name)),
-                onStep: { up in quantity.step(item, up: up) },
-                onPickUnit: { newUnit in quantity.pickUnit(item, newUnit) },
-                onSetValue: { value in quantity.setValue(item, value) },
-                onClear: { quantity.clear(item) }
-            )
+        return QuantityEditor(
+            value: q,
+            unit: u,
+            units: Measure.units(for: Measure.typeForName(item.name)),
+            onStep: { up in quantity.step(item, up: up) },
+            onPickUnit: { newUnit in quantity.pickUnit(item, newUnit) },
+            onSetValue: { value in quantity.setValue(item, value) },
+            onClear: { quantity.clear(item) }
         )
     }
 

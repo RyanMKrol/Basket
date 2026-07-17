@@ -8,7 +8,7 @@ import SwiftUI
 /// the row** (or the "+ Qty" chip) opens an inline quantity editor that slides
 /// down inside the card. In the faded "Got it" section there's no quantity
 /// affordance, so tapping anywhere (including the name) restores the item.
-struct ItemRow: View {
+struct ItemRow<Editor: View>: View {
     let name: String
     let emoji: String
     let isChecked: Bool
@@ -28,7 +28,7 @@ struct ItemRow: View {
     /// re-derivation and quantity reset are the caller's job).
     var onRename: (String) -> Void = { _ in }
     /// The quantity editor, supplied by the parent when this row is expanded.
-    var quantityEditor: AnyView? = nil
+    var quantityEditor: Editor? = nil
 
     @State private var isRenaming = false
     @State private var renameDraft: String = ""
@@ -212,6 +212,27 @@ struct ItemRow: View {
                 .background(Theme.inkSoft.opacity(0.08), in: Capsule())
             }
         }
+    }
+}
+
+extension ItemRow where Editor == EmptyView {
+    init(name: String, emoji: String, isChecked: Bool,
+         isChecking: Bool = false, isFlashing: Bool = false,
+         quantityText: String? = nil, showsQuantity: Bool = false,
+         isExpanded: Bool = false, onToggle: @escaping () -> Void,
+         onTapQuantity: @escaping () -> Void = {}, onRename: @escaping (String) -> Void = { _ in }) {
+        self.name = name
+        self.emoji = emoji
+        self.isChecked = isChecked
+        self.isChecking = isChecking
+        self.isFlashing = isFlashing
+        self.quantityText = quantityText
+        self.showsQuantity = showsQuantity
+        self.isExpanded = isExpanded
+        self.onToggle = onToggle
+        self.onTapQuantity = onTapQuantity
+        self.onRename = onRename
+        self.quantityEditor = nil
     }
 }
 

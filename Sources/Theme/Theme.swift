@@ -102,11 +102,8 @@ struct BasketBackground: View {
     var body: some View {
         ZStack {
             Theme.paper
-            GeometryReader { geo in
-                let w = geo.size.width, h = geo.size.height
-                switch Theme.current.background {
-                case .dotted(let c): dots(c, w, h)
-                }
+            switch Theme.current.background {
+            case .dotted(let c): dots(c)
             }
             // A whisper of time-of-day colour over the light backdrop — cool in
             // the morning, golden in the evening. Kept very faint so it never
@@ -125,7 +122,7 @@ struct BasketBackground: View {
         }
     }
 
-    private func dots(_ color: Color, _ w: CGFloat, _ h: CGFloat) -> some View {
+    private func dots(_ color: Color) -> some View {
         Canvas { ctx, size in
             let step: CGFloat = 26, r: CGFloat = 2.4
             var y: CGFloat = step / 2

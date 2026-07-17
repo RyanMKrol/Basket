@@ -10,7 +10,7 @@ struct ToGetSection: View {
     let flashID: PersistentIdentifier?
     let expandedID: PersistentIdentifier?
     let quantityText: (GroceryItem) -> String?
-    let editor: (GroceryItem) -> AnyView?
+    let editor: (GroceryItem) -> QuantityEditor?
     let onToggle: (GroceryItem) -> Void
     let onTapQuantity: (GroceryItem) -> Void
     var onRename: (GroceryItem, String) -> Void = { _, _ in }
