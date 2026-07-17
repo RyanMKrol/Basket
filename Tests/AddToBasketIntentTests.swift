@@ -14,7 +14,24 @@ final class AddToBasketIntentTests: XCTestCase {
 
     override func tearDown() {
         AddToBasketIntent.containerOverride = nil
+        WidgetReload.reloadTimelines = WidgetReload.defaultReloadTimelines
         super.tearDown()
+    }
+
+    /// The headline staleness case this seam exists for: a Siri add while
+    /// the widget is on screen and the app never launches. Only
+    /// `WidgetReload`'s indirection makes this assertable without touching
+    /// real WidgetKit.
+    func testPerformNudgesWidgetReloadAfterSave() async throws {
+        let container = try makeContainer()
+        AddToBasketIntent.containerOverride = container
+        var reloadCount = 0
+        WidgetReload.reloadTimelines = { reloadCount += 1 }
+
+        let intent = AddToBasketIntent(item: BasketItemEntity(name: "milk"))
+        _ = try await intent.perform()
+
+        XCTAssertEqual(reloadCount, 1)
     }
 
     func testPerformInsertsNewItemWithDerivedEmoji() async throws {

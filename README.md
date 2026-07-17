@@ -94,6 +94,32 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   shares one model list and container factory,
   `Sources/Support/AppSchema.swift`, so the processes that open the same
   App Group store file can't disagree on its schema.
+- **Home Screen widget** — a view-only WidgetKit extension (`BasketWidget/`,
+  target `BasketWidgetExtension`) reads the same shared App Group store.
+  Small shows the "N to get" count plus the first couple of items (emoji +
+  name); medium shows the count plus a longer list, in the same Pastel Dots
+  colours and row style as the in-app list. Nothing to get shows "All done"
+  🧺. The widget only ever reads: `BasketWidgetProvider`'s `TimelineProvider`
+  builds its container exclusively through the shared `AppSchema` factory
+  (never `ModelContainer(for:)` directly) and never inserts/saves. A widget
+  process never sees the app process's SwiftData writes on its own, so the
+  app nudges `WidgetCenter.shared.reloadTimelines(ofKind:)` (via the
+  `WidgetReload` seam, `Sources/Services/WidgetReload.swift`) at both write
+  choke points — `BasketApp`'s scenePhase `.background` flush, and
+  `AddToBasketIntent.perform()` (the "Siri add while the widget is on
+  screen and the app never launches" case) — with a 4-hour fallback
+  timeline policy so the widget self-heals if a nudge is ever missed. The
+  widget's own kind identifier (`BasketWidgetIdentifiers.kind`,
+  `Sources/Support/BasketWidgetKind.swift`) is a single shared constant so
+  the extension's `StaticConfiguration(kind:)` and the app's reload calls
+  can't drift apart. Since an app-extension target can't link the app's own
+  binary, the widget target recompiles the read-only slice of `Sources/` it
+  needs (models, `ListLogic`, `Emoji`, `AppSchema`, `Theme`) directly from
+  `project.yml`'s `BasketWidgetExtension` source list rather than depending
+  on target `Basket` — the pure entry-computation logic
+  (`Sources/Services/BasketWidgetSnapshot.swift`) is shared the same way, so
+  it's unit-testable from `BasketTests` (which links target `Basket`
+  normally) without any rendering.
 - **Schema anchoring + crash-proof store recovery** — Basket shipped to the
   App Store before any `VersionedSchema` existed, so `BasketSchemaV1`
   (`Sources/Support/AppSchema.swift`) anchors that released shape:
@@ -262,6 +288,24 @@ top:
     like the released app, reopens intact through the factory) and the
     move-aside-and-recreate recovery (a store that fails to open still comes
     back as a working container, with a `.broken-` sibling left behind).
+  - `BasketWidgetSnapshotBuilderTests.swift` — hermetic coverage of
+    `BasketWidgetSnapshotBuilder.entry(from:date:)`, the widget's timeline
+    entry computation: given items fetched from a scratch in-memory
+    container, asserts the count, top-N items with derived emoji, and the
+    empty state — pure logic, no rendering. `AddToBasketIntentTests.swift`
+    also covers the freshness-nudge seam: `WidgetReload.reloadTimelines` is
+    swapped for a counting closure and asserted to fire once after
+    `AddToBasketIntent.perform()`'s save (the "Siri add while the widget is
+    on screen" case); tests restore it via `WidgetReload.defaultReloadTimelines`
+    in `tearDown`, never a hand-written closure, so the guard that makes the
+    default inert under a unit-test host can't go stale. That guard exists
+    because a unit-test host launches the real `BasketApp` (including its
+    scenePhase `.background` flush), and calling the real
+    `WidgetCenter.shared.reloadTimelines` from that context — before a
+    freshly (re)built simulator has finished registering the widget kind —
+    reliably traps; `WidgetReload.defaultReloadTimelines` no-ops under
+    `TestHooks.isHostedByXCTest`, mirroring `BasketApp.init`'s bypass of the
+    real App Group store.
   - `TipJarTests.swift` — the tip jar's product loading through a local
     `SKTestSession` (StoreKitTest) on `StoreKit/Basket.storekit`. Purchases
     themselves can't run in a plain unit-test host (no UI anchor for the

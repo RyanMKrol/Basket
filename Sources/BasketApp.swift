@@ -76,6 +76,10 @@ struct BasketApp: App {
                     if phase == .background {
                         do {
                             try container.mainContext.save()
+                            // The widget process never sees this write on its
+                            // own — nudge WidgetKit so it picks it up (see
+                            // WidgetReload).
+                            WidgetReload.reloadTimelines()
                         } catch {
                             Self.logger.error("Failed to save context on background: \(error)")
                         }
