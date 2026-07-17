@@ -65,17 +65,19 @@ enum Theme {
     static var cardShadow: Color { current.cardShadow }
     static var shadowRadius: CGFloat { current.shadowRadius }
 
-    static func body(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
-        font(current.bodyFont, size: size, weight: weight)
+    static func body(_ size: CGFloat, weight: Font.Weight = .regular, relativeTo textStyle: Font.TextStyle = .body) -> Font {
+        font(current.bodyFont, size: size, weight: weight, relativeTo: textStyle)
     }
-    static func title(_ size: CGFloat, weight: Font.Weight = .bold) -> Font {
-        font(current.titleFont, size: size, weight: weight)
+    static func title(_ size: CGFloat, weight: Font.Weight = .bold, relativeTo textStyle: Font.TextStyle = .title) -> Font {
+        font(current.titleFont, size: size, weight: weight, relativeTo: textStyle)
     }
-    private static func font(_ kind: FontKind, size: CGFloat, weight: Font.Weight) -> Font {
+    private static func font(_ kind: FontKind, size: CGFloat, weight: Font.Weight, relativeTo textStyle: Font.TextStyle) -> Font {
         switch kind {
+        // `.rounded`/`.monospaced` aren't used by pastelDots (both fonts are `.custom`); they
+        // don't yet participate in Dynamic Type. Revisit if a non-custom theme is ever added.
         case .rounded: return .system(size: size, weight: weight, design: .rounded)
         case .monospaced: return .system(size: size, weight: weight, design: .monospaced)
-        case .custom(let name, let scale): return .custom(name, size: size * scale)
+        case .custom(let name, let scale): return .custom(name, size: size * scale, relativeTo: textStyle)
         }
     }
 }

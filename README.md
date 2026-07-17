@@ -8,7 +8,14 @@ section that clears itself after an hour.
 Built with **SwiftUI + SwiftData**, on-device only (no account, no backend).
 
 The look is **Pastel Dots** — creamy cards on a soft green pixel-dot backdrop,
-with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
+with pixel fonts (VT323 + Silkscreen) and fresh fruity accents. The pixel fonts
+scale with the user's Dynamic Type setting: `Theme.body`/`Theme.title`
+(`Sources/Theme/Theme.swift`) build every custom font via
+`Font.custom(_:size:relativeTo:)`, so Larger Text keeps the retro typeface
+while still growing with the chosen text style. `Theme`'s unused `.rounded`
+and `.monospaced` font kinds (no active theme uses them) still build a plain
+`.system(size:weight:design:)` and do not yet participate in Dynamic Type —
+revisit if a non-custom theme is ever added.
 
 ## Features
 
@@ -315,8 +322,15 @@ top:
     automatically.
     `.contrast`, `.textClipped`, and `.dynamicType` are excluded (with
     reasons documented inline: the soft/pastel palette and colour emoji
-    don't fit those heuristics, and the pixel fonts are deliberately
-    fixed-size), not silently ignored.
+    don't fit those heuristics, and although the pixel fonts now scale with
+    Dynamic Type via `relativeTo:`, layout fallout across the views hasn't
+    been audited yet, so `.dynamicType` stays excluded until a follow-up
+    unit re-enables it), not silently ignored.
+  - `DynamicTypeTests.swift` proves the Dynamic Type scaling end to end:
+    launches the app once at the default content size and once at
+    `UICTContentSizeCategoryAccessibilityM`, then asserts the "Milk" row's
+    name label (`A11yID.ItemRow.nameLabel`) renders strictly taller under the
+    larger category.
   - `TapPrecisionTests.swift` stress-tests the app's smallest controls (the
     +/- stepper buttons, unit pills, the check circle) with taps offset from
     dead-center at a fixed, seeded jitter — standing in for a real finger's
