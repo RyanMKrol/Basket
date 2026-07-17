@@ -94,6 +94,25 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   shares one model list and container factory,
   `Sources/Support/AppSchema.swift`, so the processes that open the same
   App Group store file can't disagree on its schema.
+- **Schema anchoring + crash-proof store recovery** — Basket shipped to the
+  App Store before any `VersionedSchema` existed, so `BasketSchemaV1`
+  (`Sources/Support/AppSchema.swift`) anchors that released shape:
+  `versionIdentifier = 1.0.0`, `models` pointing straight at the live
+  `GroceryItem`/`KnownItem` classes (they ARE the released schema — V1 is an
+  anchor for future migrations, not a frozen copy). `BasketMigrationPlan`
+  currently has zero stages; a real model change starts at V2 — snapshot the
+  current shape into a new `BasketSchemaV2`, evolve the live classes, and add
+  a stage from V1 to V2 to the plan. Every container flavor (in-memory,
+  explicit URL, the shared App Group store) builds `Schema(versionedSchema:
+  BasketSchemaV1.self)` and passes `BasketMigrationPlan` to `ModelContainer`,
+  so the app, the Siri intent, tests, and a future widget all migrate
+  together. If a store still fails to open (corruption, a migration that
+  can't complete), the persistent-URL factory paths move the store file and
+  its `-wal`/`-shm` sidecars aside to `<name>.broken-<timestamp>` and retry
+  once against a fresh, empty store at the original URL — only a second
+  failure still reaches `BasketApp`'s `fatalError`. This is a deliberate
+  trade-off: losing a grocery list is recoverable (re-add a few items);
+  a permanent crash loop on every launch is not.
 - **Deep-link quick-add** — the `basket://add` URL scheme opens the app with
   the add bar focused and the keyboard up, ready to type. Works whether the app
   is already running or launching cold. This is the target for the Home Screen
@@ -238,7 +257,11 @@ top:
   - `AppSchemaTests.swift` — asserts `Sources/Support/AppSchema.swift`'s
     container factory keeps every flavor (in-memory, explicit file URL)
     agreeing on the same entity-name set derived from `AppSchema.models`, so
-    a model added to one flavor but not another fails here.
+    a model added to one flavor but not another fails here. Also covers the
+    `BasketSchemaV1` anchor (a store written with no migration plan attached,
+    like the released app, reopens intact through the factory) and the
+    move-aside-and-recreate recovery (a store that fails to open still comes
+    back as a working container, with a `.broken-` sibling left behind).
   - `TipJarTests.swift` — the tip jar's product loading through a local
     `SKTestSession` (StoreKitTest) on `StoreKit/Basket.storekit`. Purchases
     themselves can't run in a plain unit-test host (no UI anchor for the

@@ -43,6 +43,14 @@ struct BasketApp: App {
                 container = try AppSchema.makeSharedContainer()
             }
         } catch {
+            // The persistent flavors above (`makeContainer(url:)` /
+            // `makeSharedContainer()`) already retry once internally,
+            // moving an unopenable store aside and recreating a fresh one
+            // (see AppSchema) — losing a grocery list beats a bricked app
+            // stuck crash-looping on its own data. This only fires if that
+            // retry ALSO failed, or an in-memory container (which has
+            // nothing to recover) failed to construct — genuinely
+            // unrecoverable, so there's nothing left to do but stop.
             fatalError("Failed to create SwiftData container: \(error)")
         }
         // `-uiTestingEmpty` opts a test out of the starter items, for flows that
