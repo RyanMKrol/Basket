@@ -1501,7 +1501,7 @@
     {
       "id": "T058",
       "title": "Anchor shipped schema as BasketSchemaV1 + migration plan, and recover (move-aside + recreate) instead of fatalError on container-open failure",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T057"
       ],
