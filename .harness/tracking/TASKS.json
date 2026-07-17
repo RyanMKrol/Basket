@@ -1534,7 +1534,7 @@
     {
       "id": "T059",
       "title": "Stop piping xcodebuild through tail in record_ui_test.sh and export_ui_screenshots.sh (orphan-process risk)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
