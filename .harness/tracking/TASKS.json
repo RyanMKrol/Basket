@@ -685,7 +685,7 @@
     {
       "id": "T030",
       "title": "Interactive widget: tap an item to check it off",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [
         "T033"
       ],
