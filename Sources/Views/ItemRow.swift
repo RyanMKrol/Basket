@@ -33,6 +33,7 @@ struct ItemRow: View {
     @State private var isRenaming = false
     @State private var renameDraft: String = ""
     @FocusState private var renameFieldFocused: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var showChecked: Bool { isChecked || isChecking }
 
@@ -98,8 +99,8 @@ struct ItemRow: View {
                     .accessibilityIdentifier(A11yID.ItemRow.row(name))
                 }
 
-                CheckCircle(isChecked: showChecked)
-                    .overlay { if isChecking { SparkleBurst() } }
+                CheckCircle(isChecked: showChecked, reduceMotion: reduceMotion)
+                    .overlay { if isChecking && !reduceMotion { SparkleBurst() } }
                     .frame(width: 40, height: 40)   // comfortable tap target around the 26pt ring
                     .contentShape(Rectangle())
                     .onTapGesture(perform: onToggle)
@@ -212,6 +213,7 @@ struct ItemRow: View {
 /// The check control: an empty soft ring that fills with green + a checkmark.
 struct CheckCircle: View {
     let isChecked: Bool
+    var reduceMotion: Bool = false
 
     var body: some View {
         ZStack {
@@ -232,7 +234,11 @@ struct CheckCircle: View {
                 .scaleEffect(isChecked ? 1 : 0.1)
                 .opacity(isChecked ? 1 : 0)
         }
-        .animation(.spring(response: 0.42, dampingFraction: 0.6).unlessUITesting, value: isChecked)
+        .animation(
+            reduceMotion ? .easeInOut(duration: 0.25).unlessUITesting
+                        : .spring(response: 0.42, dampingFraction: 0.6).unlessUITesting,
+            value: isChecked
+        )
         .contentShape(Rectangle())
     }
 }

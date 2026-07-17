@@ -25,8 +25,9 @@ with pixel fonts (VT323 + Silkscreen) and fresh fruity accents.
   chip UI. Nothing shows for a fresh install with no history.
 - **Tap the check circle** to check an item off — the check pops with a burst of
   gold sparks while a strikethrough draws left-to-right, then the row glides into
-  a dimmed **"Got it"** section (tap it to restore it). Check several off at once
-  and they hold their place until the last spark finishes, then glide down
+  a dimmed **"Got it"** section (tap it to restore it). The spark burst respects
+  Reduce Motion (a calm check-circle animation takes its place). Check several off
+  at once and they hold their place until the last spark finishes, then glide down
   together — so the list never shuffles under your taps.
 - **Tap the row** (or its faint **"+ Qty"** chip) to set a quantity. An inline
   stepper slides down with a **smart default unit** guessed from the item — pour-y
