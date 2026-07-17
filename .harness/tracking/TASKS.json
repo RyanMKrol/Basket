@@ -1259,7 +1259,7 @@
     {
       "id": "T050",
       "title": "Gate the per-item SparkleBurst behind Reduce Motion in ItemRow",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
