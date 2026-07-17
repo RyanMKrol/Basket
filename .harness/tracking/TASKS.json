@@ -1443,7 +1443,7 @@
     {
       "id": "T056",
       "title": "Idle the 60s list ticker while nothing needs it and give it timer tolerance",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
