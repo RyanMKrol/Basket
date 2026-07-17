@@ -1470,7 +1470,7 @@
     {
       "id": "T057",
       "title": "Shared AppSchema + SwiftData container factory adopted at every container-creation site",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [

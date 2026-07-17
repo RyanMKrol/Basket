@@ -40,3 +40,4 @@
 {"id":"T045","ts":"2026-07-16T20:14:08Z","kind":"audit-fail","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"services","workType":"feature","risk":[]},"detail":""}
 {"id":"T052","ts":"2026-07-17T06:37:57Z","kind":"audit-fail","rung":0,"attempt":0,"model":"claude-sonnet-5","effort":"medium","facets":{"layer":"views","workType":"bugfix","risk":["cross-cutting"]},"detail":""}
 {"id":"T056","ts":"2026-07-17T11:29:42Z","kind":"audit-fail","rung":0,"attempt":0,"model":"claude-haiku-4-5","effort":"","facets":{"layer":"views","workType":"refactor","risk":[]},"detail":""}
+{"id":"T057","ts":"2026-07-17T13:00:52Z","kind":"ci-red","rung":0,"attempt":0,"model":"claude-sonnet-5","effort":"medium","facets":{"layer":"models","workType":"refactor","risk":["touches-schema"]},"detail":"CI checks failed on the branch"}
