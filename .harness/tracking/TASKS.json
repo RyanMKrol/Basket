@@ -1563,7 +1563,7 @@
     {
       "id": "T060",
       "title": "export_ui_screenshots.sh: failure-only export mode plus .ips crash triage via xcsym",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T059"
       ],
