@@ -713,7 +713,7 @@
     {
       "id": "T031",
       "title": "Quick-add '+' widget button + add/combined widget variants",
-      "status": "pending",
+      "status": "blocked",
       "dependsOn": [
         "T028",
         "T033"
