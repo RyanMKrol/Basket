@@ -1380,7 +1380,7 @@
     {
       "id": "T054",
       "title": "Extract the Clear-all/undo soft-delete state machine into ListLogic as a unit-tested ClearChoreography",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T038"
       ],
