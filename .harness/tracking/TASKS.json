@@ -1770,7 +1770,7 @@
     {
       "id": "T068",
       "title": "Add -semantic-report mode to audit_coverage.swift (scope-fixed re-attempt of T035)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
