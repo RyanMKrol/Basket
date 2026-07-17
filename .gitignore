@@ -13,6 +13,9 @@ DerivedData/
 # Screenshots scratch
 screenshots/
 
+# Generated diagnostic artifacts (audit_coverage.swift)
+tools/semantic-anchor-report.txt
+
 # macOS
 .DS_Store
 
