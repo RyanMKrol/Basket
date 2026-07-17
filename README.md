@@ -180,6 +180,24 @@ top:
   `xcrun xccov`). Beyond the pure-logic tests in `BasketTests.swift`, this
   target holds the middle layer:
 
+  When `Tests/` (BasketTests) hosts the app, `TestHooks.isHostedByXCTest`
+  fires (`NSClassFromString("XCTestCase") != nil` — XCTest is only ever
+  loaded in-process when the app is acting as a unit-test host) and
+  `BasketApp.init` swaps in an inert in-memory store with no starter-item
+  seeding, instead of opening and seeding the real on-device App Group
+  store. `UITests/` (XCUITest) still launches the app as a separate process
+  that never links XCTest, so this hook stays false there and every
+  `-uiTesting` / `UITEST_STORE_URL` behaviour is unaffected. See
+  `Tests/TestHostTests.swift` for the pinning assertion.
+
+  This bypass is deliberately **partial**: only the store and starter-item
+  seeding are made inert under a unit-test host. `registerFonts()` and the
+  `TipJar` `@State` property still run their production paths unconditionally
+  — `SnapshotTests.swift`'s reference images were recorded with the bundled
+  pixel fonts registered by `BasketApp.init`, and `TipJarTests.swift`
+  constructs its own `TipJar` instances, so both need the init side effects
+  they already depend on to keep working.
+
   - `ListLogicTests.swift` — the section partitioning (to-get / recently-got
     / TTL-expired) and the check-off spark→commit state machine
     (`CheckOffChoreography`), extracted from `ShoppingListView` into

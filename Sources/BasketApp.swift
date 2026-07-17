@@ -35,6 +35,18 @@ struct BasketApp: App {
                     for: GroceryItem.self, KnownItem.self,
                     configurations: config
                 )
+            } else if TestHooks.isHostedByXCTest {
+                // A unit-test host (BasketTests) links XCTest into this same
+                // process, so it hits this branch before the real store below
+                // — an inert in-memory container, never the on-disk App Group
+                // store. The unit tests build their own containers where they
+                // need one (see ModelTests.makeContainer), so this container
+                // is never touched; it exists purely so init() can finish.
+                let config = ModelConfiguration(isStoredInMemoryOnly: true)
+                container = try ModelContainer(
+                    for: GroceryItem.self, KnownItem.self,
+                    configurations: config
+                )
             } else {
                 // Real store lives in the App Group container so the Siri intent
                 // and widget can read the same list (see AppGroup). The test
@@ -50,8 +62,9 @@ struct BasketApp: App {
             fatalError("Failed to create SwiftData container: \(error)")
         }
         // `-uiTestingEmpty` opts a test out of the starter items, for flows that
-        // need to start from the empty state.
-        if !TestHooks.startEmpty {
+        // need to start from the empty state; a unit-test host never seeds at
+        // all, since it never touches its (inert) container.
+        if !TestHooks.startEmpty && !TestHooks.isHostedByXCTest {
             Self.seedIfEmpty(container.mainContext)
         }
     }

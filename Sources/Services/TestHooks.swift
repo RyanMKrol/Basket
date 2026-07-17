@@ -58,6 +58,19 @@ enum TestHooks {
     static let storeURL: URL? = ProcessInfo.processInfo
         .environment["UITEST_STORE_URL"]
         .map { URL(fileURLWithPath: $0) }
+
+    /// True only when the app is running as a unit-test HOST: `XCTest` is
+    /// loaded in-process because BasketTests is linked into the Basket
+    /// target and run in the same process (see project.yml's `dependencies:
+    /// [target: Basket]` on the BasketTests target). Under XCUITest the app
+    /// is launched as a *separate* process that never links XCTest, so
+    /// `NSClassFromString("XCTestCase")` is nil there and this hook stays
+    /// false — UI-test behaviour must keep going exclusively through the
+    /// `-uiTesting` / `UITEST_STORE_URL` hooks above, never through this one.
+    /// `BasketApp.init` uses this to skip the real App Group store and
+    /// starter-item seeding when a unit test host launches the app, so every
+    /// `xcodebuild test` run stops mutating production-shaped on-disk state.
+    static let isHostedByXCTest = NSClassFromString("XCTestCase") != nil
 }
 
 /// The app's single source of "what time is it" — `Date.now` in production,
