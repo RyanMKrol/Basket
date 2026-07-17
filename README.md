@@ -89,7 +89,11 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   writes through the same shared App Group SwiftData store the app reads
   (`AppGroup`), derives the emoji and dedupe/bump behaviour exactly like
   typing it into the add bar (`AddItem.perform`, shared with
-  `ShoppingListView`), and records the item in the suggestion memory.
+  `ShoppingListView`), and records the item in the suggestion memory. Every
+  container-creation site (the app, this intent, and later a widget)
+  shares one model list and container factory,
+  `Sources/Support/AppSchema.swift`, so the processes that open the same
+  App Group store file can't disagree on its schema.
 - **Deep-link quick-add** — the `basket://add` URL scheme opens the app with
   the add bar focused and the keyboard up, ready to type. Works whether the app
   is already running or launching cold. This is the target for the Home Screen
@@ -231,6 +235,10 @@ top:
     `ModelContainer`: the first-launch seed (`BasketApp.seedIfEmpty`), the
     `KnownItems.rememberAdd` suggestion-memory upsert, and the
     `GroceryItem.unit` raw-string round-trip.
+  - `AppSchemaTests.swift` — asserts `Sources/Support/AppSchema.swift`'s
+    container factory keeps every flavor (in-memory, explicit file URL)
+    agreeing on the same entity-name set derived from `AppSchema.models`, so
+    a model added to one flavor but not another fails here.
   - `TipJarTests.swift` — the tip jar's product loading through a local
     `SKTestSession` (StoreKitTest) on `StoreKit/Basket.storekit`. Purchases
     themselves can't run in a plain unit-test host (no UI anchor for the

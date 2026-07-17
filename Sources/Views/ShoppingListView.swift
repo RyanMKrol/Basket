@@ -519,5 +519,5 @@ struct ShoppingListView: View {
 
 #Preview {
     ShoppingListView()
-        .modelContainer(for: [GroceryItem.self, KnownItem.self], inMemory: true)
+        .modelContainer(for: AppSchema.models, inMemory: true)
 }

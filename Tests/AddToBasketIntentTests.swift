@@ -9,8 +9,7 @@ import SwiftData
 @MainActor
 final class AddToBasketIntentTests: XCTestCase {
     private func makeContainer() throws -> ModelContainer {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+        try AppSchema.makeInMemoryContainer()
     }
 
     override func tearDown() {

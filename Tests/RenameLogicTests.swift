@@ -21,8 +21,7 @@ final class RenameLogicTests: XCTestCase {
 
     @MainActor
     private func makeContainer() throws -> ModelContainer {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+        try AppSchema.makeInMemoryContainer()
     }
 
     /// Mirrors `ShoppingListView.rename(_:to:)`: only applied once

@@ -24,17 +24,9 @@ struct BasketApp: App {
         // data; the persistence tests instead point at their own temp file.
         do {
             if let url = TestHooks.storeURL {
-                let config = ModelConfiguration(url: url)
-                container = try ModelContainer(
-                    for: GroceryItem.self, KnownItem.self,
-                    configurations: config
-                )
+                container = try AppSchema.makeContainer(url: url)
             } else if TestHooks.isUITesting {
-                let config = ModelConfiguration(isStoredInMemoryOnly: true)
-                container = try ModelContainer(
-                    for: GroceryItem.self, KnownItem.self,
-                    configurations: config
-                )
+                container = try AppSchema.makeInMemoryContainer()
             } else if TestHooks.isHostedByXCTest {
                 // A unit-test host (BasketTests) links XCTest into this same
                 // process, so it hits this branch before the real store below
@@ -42,21 +34,13 @@ struct BasketApp: App {
                 // store. The unit tests build their own containers where they
                 // need one (see ModelTests.makeContainer), so this container
                 // is never touched; it exists purely so init() can finish.
-                let config = ModelConfiguration(isStoredInMemoryOnly: true)
-                container = try ModelContainer(
-                    for: GroceryItem.self, KnownItem.self,
-                    configurations: config
-                )
+                container = try AppSchema.makeInMemoryContainer()
             } else {
                 // Real store lives in the App Group container so the Siri intent
                 // and widget can read the same list (see AppGroup). The test
                 // paths above are untouched — they keep their in-memory / temp
                 // stores.
-                let config = ModelConfiguration(url: AppGroup.storeURL)
-                container = try ModelContainer(
-                    for: GroceryItem.self, KnownItem.self,
-                    configurations: config
-                )
+                container = try AppSchema.makeSharedContainer()
             }
         } catch {
             fatalError("Failed to create SwiftData container: \(error)")

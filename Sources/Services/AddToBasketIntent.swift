@@ -77,8 +77,7 @@ struct AddToBasketIntent: AppIntent {
         if let containerOverride {
             return containerOverride
         }
-        let config = ModelConfiguration(url: AppGroup.storeURL)
-        return try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+        return try AppSchema.makeSharedContainer()
     }
 }
 

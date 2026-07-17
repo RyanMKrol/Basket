@@ -10,8 +10,7 @@ final class ModelTests: XCTestCase {
     private let now = Date(timeIntervalSince1970: 1_800_000_000)
 
     private func makeContainer() throws -> ModelContainer {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        return try ModelContainer(for: GroceryItem.self, KnownItem.self, configurations: config)
+        try AppSchema.makeInMemoryContainer()
     }
 
     func testSeedIfEmptySeedsStartersNewestFirstAndOnlyOnce() throws {
