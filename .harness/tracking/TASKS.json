@@ -1126,7 +1126,7 @@
     {
       "id": "T046",
       "title": "Inert app startup when hosted by unit tests: in-memory store, no seeding",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
