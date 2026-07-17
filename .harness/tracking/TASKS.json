@@ -1320,7 +1320,7 @@
     {
       "id": "T052",
       "title": "Re-enable the .dynamicType accessibility audit and fix the layout fallout (cap at accessibility2 authorized)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T051"
       ],
