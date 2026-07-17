@@ -73,3 +73,19 @@ mkdir -p "$SHOT_DIR"
 sleep 3
 xcrun simctl io "$SIM" screenshot "$SHOT_PATH" >/dev/null
 echo "▸ Screenshot → $SHOT_PATH"
+
+# Check console for errors using xclog if available
+XCLOG="${XCLOG:-$(ls -d "$HOME"/.claude/plugins/cache/axiom-marketplace/axiom/*/bin/xclog 2>/dev/null | sort -V | tail -1)}"
+if [ -z "$XCLOG" ] || [ ! -x "$XCLOG" ]; then
+  echo "xclog not found, skipping console error check"
+else
+  CONSOLE_LOG="$SHOT_DIR/console-errors.log"
+  "$XCLOG" show "$APP_NAME" --device "$SIM" --last 2m --filter '(?i)error|fault' > "$CONSOLE_LOG" 2>/dev/null || true
+  if [ -s "$CONSOLE_LOG" ]; then
+    echo "▸ Console errors detected during launch:"
+    cat "$CONSOLE_LOG"
+  else
+    rm -f "$CONSOLE_LOG"
+    echo "▸ No console errors during launch"
+  fi
+fi

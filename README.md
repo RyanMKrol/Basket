@@ -201,6 +201,10 @@ flip-flops), and `xcodebuild test` intermittently fails to launch the xctrunner.
 The harness `LOCAL_DOD` (in `.harness/config/harness.env`) targets the same
 dedicated device by name. Set `BASKET_SIM_NAME` to use a different one.
 
+After launch, the script checks the app's console for error or fault log lines via
+the Axiom plugin's xclog when installed, writing any findings to
+`screenshots/console-errors.log`, and skips the check quietly when xclog is absent.
+
 `build_run.sh` builds by `-target` with an explicit `SUPPORTED_PLATFORMS` because
 this machine's Xcode generates a scheme whose supported-platforms list is empty.
 
