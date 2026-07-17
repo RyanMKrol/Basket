@@ -1287,7 +1287,7 @@
     {
       "id": "T051",
       "title": "Dynamic Type: thread relativeTo through Theme's font builders + a scaling UI test",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
