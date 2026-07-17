@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Combine
 
 /// Main screen: title, the to-get list, a faded "Got it" section for recently
 /// checked items, and the pinned bottom add bar. Backed by SwiftData.
@@ -46,7 +47,8 @@ struct ShoppingListView: View {
     /// How long a checked-off item lingers in the faded section before it clears.
     private let gotTTL: TimeInterval = 60 * 60   // 1 hour
 
-    private let ticker = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
+    private let ticker = Timer.publish(every: 60, tolerance: 6, on: .main, in: .common)
+    @State private var tickerSubscription: Cancellable?
 
     private var toGet: [GroceryItem] {
         ListLogic.toGet(items)
@@ -132,11 +134,18 @@ struct ShoppingListView: View {
                 )
             }
         }
-        .onAppear { now = AppClock.now; purgeExpired() }
+        .onAppear {
+            now = AppClock.now
+            purgeExpired()
+            updateTickerConnection()
+        }
         .onChange(of: shouldFocusAddBar) { _, newValue in
             if newValue {
                 addBarFocused = true
             }
+        }
+        .onChange(of: recentlyGot.count) { _, _ in
+            updateTickerConnection()
         }
         .onReceive(ticker) { _ in now = AppClock.now; purgeExpired() }
         .sheet(isPresented: $showingAbout) { AboutView() }
@@ -309,6 +318,19 @@ struct ShoppingListView: View {
     }
 
     // MARK: - Actions
+
+    /// Connect or disconnect the ticker based on whether recentlyGot has items.
+    /// When connecting, refresh `now` immediately so the list doesn't render
+    /// against a stale clock.
+    private func updateTickerConnection() {
+        let needsTicker = ListLogic.tickerNeeded(recentlyGot.count)
+        if needsTicker && tickerSubscription == nil {
+            now = AppClock.now
+            tickerSubscription = ticker.connect()
+        } else if !needsTicker {
+            tickerSubscription = nil
+        }
+    }
 
     /// Toggle an item between the to-get list and the faded "Got it" section.
     private func toggle(_ item: GroceryItem) {

@@ -76,7 +76,11 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   toast expire to commit the clear. Under the hood the items are only *hidden*
   until the toast expires, not deleted, so undo restores the real rows instead of
   re-inserting copies. The toast respects Reduce Motion and announces itself to
-  VoiceOver.
+  VoiceOver. **Trade-off:** while the "Got it" section is empty, the internal
+  timer that ages items and refreshes time-of-day flourishes is idle; they only
+  update on interaction or re-render rather than every 60 seconds. The tint drifts
+  over hours, not minutes — acceptable, and worth the energy savings; revisit if a
+  visible seasonality flourish ever needs minute-level refresh on an idle list.
 - **Duplicate-aware** — re-adding something already listed bumps + flashes the
   existing row instead of creating a copy.
 - **"Hey Siri, add milk to my Basket"** — an `AddToBasketIntent` App Intent,

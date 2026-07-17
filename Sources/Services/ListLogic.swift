@@ -12,6 +12,13 @@ protocol ListEntry {
 }
 
 enum ListLogic {
+    /// Decide whether the 60-second ticker should be connected: only when
+    /// there are items in the "Got it" section to age toward their TTL.
+    /// Returns true iff recentlyGot is non-empty.
+    static func tickerNeeded(_ recentlyGotCount: Int) -> Bool {
+        recentlyGotCount > 0
+    }
+
     /// Items still to get, in the caller's order (the view queries
     /// newest-first).
     static func toGet<T: ListEntry>(_ items: [T]) -> [T] {

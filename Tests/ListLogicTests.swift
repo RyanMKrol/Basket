@@ -42,6 +42,12 @@ final class ListLogicTests: XCTestCase {
         XCTAssertEqual(ListLogic.expired(items, now: now, ttl: ttl).map(\.name), ["cutoff"])
     }
 
+    func testTickerNeededIffRecentlyGotIsNonEmpty() {
+        XCTAssertFalse(ListLogic.tickerNeeded(0), "ticker not needed when recentlyGot is empty")
+        XCTAssertTrue(ListLogic.tickerNeeded(1), "ticker needed when recentlyGot has items")
+        XCTAssertTrue(ListLogic.tickerNeeded(42), "ticker needed regardless of how many items")
+    }
+
     func testCheckedWithoutTimestampCountsAsExpired() {
         // Defensive: a checked item with no checkedAt should never linger.
         let items = [Entry(name: "stray", isChecked: true, checkedAt: nil)]
