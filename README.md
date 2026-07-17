@@ -374,12 +374,17 @@ top:
   line — a bare assert can fail on a slow run or falsely pass on a stale
   read. Every step attaches a screenshot to the test report
   (`XCTAttachment`, `.lifetime = .keepAlways`), viewable in Xcode's Report
-  Navigator — or export them as plain PNGs:
+  Navigator or export them as plain PNGs:
 
   ```sh
-  ./tools/export_ui_screenshots.sh                 # → screenshots/ui-tests/
-  ./tools/export_ui_screenshots.sh "iPhone 17"     # target a different simulator
+  ./tools/export_ui_screenshots.sh                     # → screenshots/ui-tests/
+  ./tools/export_ui_screenshots.sh "iPhone 17"         # target a different simulator
+  ./tools/export_ui_screenshots.sh --failures-only     # export only failure-associated attachments
   ```
+
+  When a test run fails, the script automatically sweeps for app crash reports (.ips files)
+  and triages them using the Axiom plugin's xcsym binary if available. Without xcsym, it
+  lists the unsymbolicated .ips file paths so they can be examined manually.
 
   Interactive elements carry stable `.accessibilityIdentifier`s (`addBar.*`,
   `itemRow.*`, `quantityEditor.*`, `header.*`) so tests query by identifier
