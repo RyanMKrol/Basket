@@ -1596,7 +1596,7 @@
     {
       "id": "T061",
       "title": "build_run.sh: surface app console errors after launch via xclog",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
