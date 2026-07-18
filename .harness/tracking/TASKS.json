@@ -2074,6 +2074,57 @@
       "verify": [],
       "expectsTest": false,
       "spec": ".harness/tasks/T078.md"
+    },
+    {
+      "id": "T079",
+      "title": "Remove the Home Screen widget feature (extension target, widget-only code, tests, docs)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "removal",
+        "widget",
+        "cleanup"
+      ],
+      "scope": [
+        "BasketWidget/",
+        "Sources/Services/WidgetReload.swift",
+        "Sources/Services/BasketWidgetSnapshot.swift",
+        "Sources/Services/CheckOffItemIntent.swift",
+        "Sources/Support/BasketWidgetKind.swift",
+        "Sources/Services/AddToBasketIntent.swift",
+        "Sources/BasketApp.swift",
+        "Sources/Support/DeepLinkEnvironment.swift",
+        "Sources/Views/ShoppingListView.swift",
+        "Sources/Info.plist",
+        "project.yml",
+        "Tests/CheckOffItemIntentTests.swift",
+        "Tests/BasketWidgetSnapshotBuilderTests.swift",
+        "Tests/BasketWidgetURLTests.swift",
+        "Tests/AddToBasketIntentTests.swift",
+        "UITests/DeepLinkTests.swift",
+        "README.md",
+        "CLAUDE.md"
+      ],
+      "design": null,
+      "verify": [
+        "grep -rn 'Widget' Sources/ BasketWidget/ Tests/ UITests/ (no widget-feature references remain; BasketWidget/ is gone)",
+        "grep -rniE 'basket://|DeepLink|shouldFocusAddBar|CFBundleURLSchemes' Sources/ Tests/ UITests/ project.yml (no deep-link references remain)",
+        "grep -n 'BasketWidgetExtension' project.yml (no matches)",
+        "xcodegen generate (regenerates cleanly with no widget target and no basket URL scheme)",
+        "./build_run.sh (** BUILD SUCCEEDED **)",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude' (full XCTest+XCUITest suite green)",
+        "native logic harness compiles + runs green (tools/main.swift)"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T079.md",
+      "facets": {
+        "layer": "build",
+        "workType": "refactor",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
     }
   ]
 }
