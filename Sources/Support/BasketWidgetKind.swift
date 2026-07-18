@@ -7,4 +7,6 @@ import Foundation
 /// rename in one place can't silently desync from the other.
 enum BasketWidgetIdentifiers {
     static let kind = "BasketWidget"
+    static let addKind = "BasketAddWidget"
+    static let combinedKind = "BasketCombinedWidget"
 }
