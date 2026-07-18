@@ -1859,6 +1859,152 @@
           "cross-cutting"
         ]
       }
+    },
+    {
+      "id": "T071",
+      "title": "Interactive widget: tap an item to check it off",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature",
+        "widget"
+      ],
+      "scope": [
+        "Sources/",
+        "BasketWidget/",
+        "project.yml",
+        "Tests/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T071.md",
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T072",
+      "title": "Quick-add '+' widget button + add/combined widget variants",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "feature",
+        "widget"
+      ],
+      "scope": [
+        "Sources/",
+        "BasketWidget/",
+        "Tests/",
+        "project.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": true,
+      "spec": ".harness/tasks/T072.md",
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T073",
+      "title": "Headless CPU-profiling script (xcprof) + documented compare workflow — no live baseline capture",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "tooling",
+        "performance",
+        "profiling",
+        "xcprof"
+      ],
+      "scope": [
+        "tools/profile_app.sh",
+        "README.md",
+        ".gitignore"
+      ],
+      "design": null,
+      "verify": [
+        "bash -n tools/profile_app.sh",
+        "tools/profile_app.sh --help >/dev/null"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T073.md",
+      "facets": {
+        "layer": "build",
+        "workType": "feature",
+        "risk": []
+      }
+    },
+    {
+      "id": "T074",
+      "title": "Record and commit a real CPU perf baseline on hardware that can attach (human step)",
+      "status": "pending",
+      "dependsOn": [
+        "T073"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "performance",
+        "profiling",
+        "xcprof",
+        "needs-human"
+      ],
+      "scope": [
+        "tools/perf-baseline/",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "jq -e . tools/perf-baseline/baseline.json >/dev/null"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T074.md"
+    },
+    {
+      "id": "T075",
+      "title": "Swift 6 strict-concurrency migration: fix unsafe statics, make native harness main-actor-safe, flip SWIFT_VERSION to 6.0",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "concurrency",
+        "swift6",
+        "build",
+        "migration"
+      ],
+      "scope": [
+        "project.yml",
+        "Sources/",
+        "Tests/",
+        "tools/main.swift",
+        ".github/workflows/ci.yml",
+        "README.md"
+      ],
+      "design": null,
+      "verify": [
+        "grep -n 'SWIFT_VERSION: \"6.0\"' project.yml",
+        "sh -c '! grep -rn \"nonisolated(unsafe)\" Sources/ || grep -rn -B3 \"nonisolated(unsafe)\" Sources/'",
+        "swiftc -swift-version 6 -parse-as-library Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift Sources/Services/Formatting.swift Sources/Services/Measure.swift Sources/Services/Seasonality.swift tools/main.swift -o /tmp/basket_check6 && /tmp/basket_check6",
+        "./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'"
+      ],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T075.md",
+      "facets": {
+        "layer": "build",
+        "workType": "migration",
+        "risk": [
+          "cross-cutting"
+        ]
+      }
     }
   ]
 }
