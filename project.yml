@@ -111,6 +111,8 @@ targets:
       - path: Sources/Services/Seasonality.swift
       - path: Sources/Services/TestHooks.swift
       - path: Sources/Services/BasketWidgetSnapshot.swift
+      - path: Sources/Services/CheckOffItemIntent.swift
+      - path: Sources/Services/WidgetReload.swift
       - path: Sources/Support/AppGroup.swift
       - path: Sources/Support/AppSchema.swift
       - path: Sources/Support/BasketWidgetKind.swift

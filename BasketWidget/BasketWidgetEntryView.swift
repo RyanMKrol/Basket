@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftUI
 import WidgetKit
 
@@ -40,6 +41,18 @@ struct BasketWidgetEntryView: View {
     }
 
     private func row(_ item: BasketWidgetItem) -> some View {
+        Group {
+            if #available(iOS 17, *) {
+                Button(intent: CheckOffItemIntent(itemName: item.name)) {
+                    rowContent(item)
+                }
+            } else {
+                rowContent(item)
+            }
+        }
+    }
+
+    private func rowContent(_ item: BasketWidgetItem) -> some View {
         HStack(spacing: 8) {
             Text(item.emoji)
                 .font(.system(size: 16))

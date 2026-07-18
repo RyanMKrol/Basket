@@ -94,32 +94,32 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   shares one model list and container factory,
   `Sources/Support/AppSchema.swift`, so the processes that open the same
   App Group store file can't disagree on its schema.
-- **Home Screen widget** — a view-only WidgetKit extension (`BasketWidget/`,
+- **Home Screen widget** — a WidgetKit extension (`BasketWidget/`,
   target `BasketWidgetExtension`) reads the same shared App Group store.
   Small shows the "N to get" count plus the first couple of items (emoji +
   name); medium shows the count plus a longer list, in the same Pastel Dots
   colours and row style as the in-app list. Nothing to get shows "All done"
-  🧺. The widget only ever reads: `BasketWidgetProvider`'s `TimelineProvider`
-  builds its container exclusively through the shared `AppSchema` factory
-  (never `ModelContainer(for:)` directly) and never inserts/saves. A widget
-  process never sees the app process's SwiftData writes on its own, so the
-  app nudges `WidgetCenter.shared.reloadTimelines(ofKind:)` (via the
-  `WidgetReload` seam, `Sources/Services/WidgetReload.swift`) at both write
-  choke points — `BasketApp`'s scenePhase `.background` flush, and
-  `AddToBasketIntent.perform()` (the "Siri add while the widget is on
-  screen and the app never launches" case) — with a 4-hour fallback
-  timeline policy so the widget self-heals if a nudge is ever missed. The
-  widget's own kind identifier (`BasketWidgetIdentifiers.kind`,
+  🧺. On iOS 17+, each item row is tappable via a `CheckOffItemIntent`
+  (`Sources/Services/CheckOffItemIntent.swift`) bound to each row — tap an
+  item on the widget to check it off directly without opening the app,
+  moving it to the "Got it" section (older iOS versions fall back to static,
+  non-interactive rows). The widget's writes (and the app's) nudge
+  `WidgetCenter.shared.reloadTimelines(ofKind:)` (via the `WidgetReload`
+  seam) at both write choke points — `BasketApp`'s scenePhase `.background`
+  flush, `CheckOffItemIntent.perform()`, and `AddToBasketIntent.perform()`
+  (the "Siri add while the widget is on screen" case) — with a 4-hour
+  fallback timeline policy so the widget self-heals if a nudge is ever
+  missed. The widget's own kind identifier (`BasketWidgetIdentifiers.kind`,
   `Sources/Support/BasketWidgetKind.swift`) is a single shared constant so
   the extension's `StaticConfiguration(kind:)` and the app's reload calls
   can't drift apart. Since an app-extension target can't link the app's own
   binary, the widget target recompiles the read-only slice of `Sources/` it
-  needs (models, `ListLogic`, `Emoji`, `AppSchema`, `Theme`) directly from
-  `project.yml`'s `BasketWidgetExtension` source list rather than depending
-  on target `Basket` — the pure entry-computation logic
-  (`Sources/Services/BasketWidgetSnapshot.swift`) is shared the same way, so
-  it's unit-testable from `BasketTests` (which links target `Basket`
-  normally) without any rendering.
+  needs (models, `ListLogic`, `Emoji`, `AppSchema`, `Theme`, and the intents
+  that touch the store) directly from `project.yml`'s `BasketWidgetExtension`
+  source list rather than depending on target `Basket` — the pure
+  entry-computation logic (`Sources/Services/BasketWidgetSnapshot.swift`) is
+  shared the same way, so it's unit-testable from `BasketTests` (which links
+  target `Basket` normally) without any rendering.
 - **Schema anchoring + crash-proof store recovery** — Basket shipped to the
   App Store before any `VersionedSchema` existed, so `BasketSchemaV1`
   (`Sources/Support/AppSchema.swift`) anchors that released shape:
