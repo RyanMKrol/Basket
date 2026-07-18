@@ -6,6 +6,10 @@ import SwiftData
 /// (the expanded-row id, and the add bar's draft/focus so opening an editor
 /// can drop them) so the row handlers stay small, testable free functions
 /// instead of methods scattered across the root view.
+/// `@MainActor`: it holds SwiftUI `@Binding`/`FocusState` bindings, mutates SwiftData
+/// model objects, and calls the main-actor `Haptics` — every method is invoked from the
+/// main-actor view layer (`ShoppingListView`).
+@MainActor
 struct QuantityController {
     @Binding var expandedID: PersistentIdentifier?
     @Binding var draft: String

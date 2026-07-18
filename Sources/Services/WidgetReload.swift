@@ -15,10 +15,16 @@ enum WidgetReload {
     /// `TestHooks.isHostedByXCTest` bypass for the real App Group store.
     /// Tests that override `reloadTimelines` restore it via this constant
     /// (not a hand-written closure) so the guard can't be reintroduced stale.
-    static let defaultReloadTimelines: () -> Void = {
+    /// `nonisolated(unsafe)`: a non-`Sendable` closure constant, only ever invoked from
+    /// already-`@MainActor` write choke points (see the type doc). Immutable after init.
+    nonisolated(unsafe) static let defaultReloadTimelines: () -> Void = {
         guard !TestHooks.isHostedByXCTest else { return }
         WidgetCenter.shared.reloadTimelines(ofKind: BasketWidgetIdentifiers.kind)
     }
 
-    static var reloadTimelines: () -> Void = defaultReloadTimelines
+    /// `nonisolated(unsafe)`: a mutable static holding a non-`Sendable` closure. It is
+    /// reassigned only by unit tests (on the test's main thread) and invoked only from
+    /// already-`@MainActor` write choke points, so access is effectively serialised.
+    /// Revisit if a background writer ever needs to nudge the widget.
+    nonisolated(unsafe) static var reloadTimelines: () -> Void = defaultReloadTimelines
 }

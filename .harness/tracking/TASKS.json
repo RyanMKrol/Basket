@@ -1972,7 +1972,7 @@
     {
       "id": "T075",
       "title": "Swift 6 strict-concurrency migration: fix unsafe statics, make native harness main-actor-safe, flip SWIFT_VERSION to 6.0",
-      "status": "blocked",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [

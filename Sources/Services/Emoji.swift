@@ -14,7 +14,10 @@ enum Emoji {
     /// every visible row on every redraw (and again via `Measure`), and the
     /// 60s ticker forces those redraws, so the same names recur constantly.
     /// `NSCache` memoises by name (thread-safe, self-evicting under pressure).
-    private static let cache = NSCache<NSString, NSString>()
+    /// `nonisolated(unsafe)`: `NSCache` is documented thread-safe, so the only thing
+    /// the compiler can't see is its `Sendable` conformance; the annotation asserts
+    /// that external synchronisation. Revisit if `Emoji` ever gains isolated state.
+    nonisolated(unsafe) private static let cache = NSCache<NSString, NSString>()
 
     static func forName(_ name: String) -> String {
         let key = name as NSString

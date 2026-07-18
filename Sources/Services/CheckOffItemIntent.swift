@@ -6,8 +6,8 @@ import SwiftData
 /// strategy) and handles the idempotent case gracefully: if the item is already
 /// checked or missing, no-op without crashing.
 struct CheckOffItemIntent: AppIntent {
-    static var title: LocalizedStringResource = "Check Off Item"
-    static var description = IntentDescription("Marks an item as gotten on your Basket shopping list.")
+    static let title: LocalizedStringResource = "Check Off Item"
+    static let description = IntentDescription("Marks an item as gotten on your Basket shopping list.")
 
     @Parameter(title: "Item Name")
     var itemName: String
@@ -28,7 +28,9 @@ struct CheckOffItemIntent: AppIntent {
     /// instead of the real App Group store, so `perform()` stays testable
     /// without touching real on-device data. `nil` (the default) means "use
     /// the real shared store" — inert in production.
-    static var containerOverride: ModelContainer?
+    /// `nonisolated(unsafe)`: a mutable static of non-`Sendable` `ModelContainer`, set only
+    /// by unit tests (on the test main thread) and read only inside `@MainActor resolveContainer()`.
+    nonisolated(unsafe) static var containerOverride: ModelContainer?
 
     @MainActor
     func perform() async throws -> some IntentResult {

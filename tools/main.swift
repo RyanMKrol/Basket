@@ -19,7 +19,12 @@
 //
 import Foundation
 
+// Under Swift 6, top-level *variables* (`failures`, `utc`) are implicitly `@MainActor`
+// while top-level *functions* are nonisolated — so the helpers that touch them are
+// marked `@MainActor` to match. The whole script runs as main-actor top-level code, so
+// this needs no `@main` entry point (which would collide with the top-level statements).
 var failures = 0
+@MainActor
 func check(_ cond: Bool, _ msg: String) {
     if cond { print("  ✓ \(msg)") } else { print("  ✗ FAIL: \(msg)"); failures += 1 }
 }
@@ -227,6 +232,7 @@ check(Measure.parse("999999", unit: .gram) == 100_000, "parse caps runaway input
 
 print("Seasonality:")
 var utc = Calendar(identifier: .gregorian); utc.timeZone = TimeZone(identifier: "UTC")!
+@MainActor
 func seasonDate(_ y: Int, _ m: Int, _ day: Int, _ h: Int = 12) -> Date {
     utc.date(from: DateComponents(year: y, month: m, day: day, hour: h))!
 }

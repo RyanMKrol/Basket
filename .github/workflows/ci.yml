@@ -75,7 +75,8 @@ jobs:
       # fast, no simulator. See README.md → Tests.
       - name: Native logic harness
         run: |
-          swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
+          swiftc -swift-version 6 \
+                 Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
                  Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
                  Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
                  Sources/Services/Formatting.swift \

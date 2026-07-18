@@ -245,6 +245,27 @@ Generated files (`Sources/Services/EmojiTable.swift`,
 `Tests/__Snapshots__/` are excluded. Errors fail the build (CI runs `swiftlint lint`
 before the build/test steps); warnings are advisory.
 
+## Concurrency (Swift 6)
+
+The app builds in **Swift 6 language mode** (`SWIFT_VERSION: "6.0"` in `project.yml`),
+so strict data-race checking is on. UI-facing code is main-actor by default (`Haptics`,
+`QuantityController`, views, the intents' `perform()`). The pure-logic services in the
+native-harness set (`Emoji`, `SemanticEmoji`, `Suggestions`, `Measure`, `Seasonality`,
+…) are deliberately **not** `@MainActor` — that keeps `tools/main.swift` a plain
+top-level script (no `@main`, no `-parse-as-library`).
+
+A handful of globals use `nonisolated(unsafe)` — a migration escape hatch that asserts
+external synchronisation the compiler can't see. Each carries an adjacent justification
+comment; revisit if a concurrent caller is ever introduced:
+
+| Global | Why it's safe |
+|---|---|
+| `Emoji.cache` (`NSCache`) | `NSCache` is documented thread-safe; only its `Sendable` conformance is invisible to the compiler. |
+| `SemanticEmoji.embedding` (`NLEmbedding`) | Loaded once, thereafter read-only, touched serially (main-thread view + single-threaded harness). |
+| `WidgetReload.reloadTimelines` / `defaultReloadTimelines` (closures) | Reassigned only by unit tests; invoked only from already-main-actor write choke points. |
+| `AddToBasketIntent` / `CheckOffItemIntent` `containerOverride` (`ModelContainer?`) | Test-only seam, set on the test main thread, read inside `@MainActor resolveContainer()`. |
+| `LaunchOnce.fired` (`Bool`) | Read/written only from the main-actor root view's `consume()`. |
+
 ## Tests
 
 Coverage is layered like a pyramid — pure logic at the bottom (fast, no
@@ -341,13 +362,21 @@ top:
   simulator needed):
 
   ```sh
-  swiftc Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
+  swiftc -swift-version 6 \
+         Sources/Services/Emoji.swift Sources/Services/EmojiTable.swift \
          Sources/Services/SemanticEmoji.swift Sources/Services/Suggestions.swift \
          Sources/Services/SuggestionDictionary.swift Sources/Models/Suggestion.swift \
          Sources/Services/Formatting.swift \
          Sources/Services/Measure.swift Sources/Services/Seasonality.swift \
          tools/main.swift -o /tmp/basket_check && /tmp/basket_check
   ```
+
+  The `-swift-version 6` flag keeps the pure-logic files honest under strict
+  concurrency (it matches the app's `SWIFT_VERSION: "6.0"`). The harness stays a
+  plain top-level script — no `@main` entry point is needed, so no
+  `-parse-as-library`; the two helpers that touch top-level mutable state
+  (`check`, `seasonDate`) are marked `@MainActor` to match the implicitly
+  main-actor top-level context.
 
 - `tools/audit_coverage.swift` — two modes for emoji emoji mapping quality:
   - **Coverage audit** (default): counts how many of the ~3900-item corpus resolve

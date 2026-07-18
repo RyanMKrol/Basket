@@ -2,6 +2,9 @@ import UIKit
 
 /// Haptic feedback via pre-allocated generators to avoid per-call allocation.
 /// No-ops harmlessly on the simulator. Suppressed under UI testing.
+/// `@MainActor` because `UIFeedbackGenerator` is main-actor-isolated UIKit; every
+/// call site (`soft()`/`success()`/`restore()`) already runs on the main thread.
+@MainActor
 enum Haptics {
     private static let softGen = UIImpactFeedbackGenerator(style: .soft)
     private static let impactGen = UIImpactFeedbackGenerator(style: .light)
