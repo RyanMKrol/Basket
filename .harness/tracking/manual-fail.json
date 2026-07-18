@@ -38,5 +38,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T073 (script+docs) + T074 (needs-human baseline) — the environmental attach wall means a real baseline can't be captured unattended; split the automatable part out",
     "at": "2026-07-18T09:18:24Z"
+  },
+  "T070": {
+    "failed": true,
+    "reason": "review-failed: superseded by T075 — adds the missing @main/-parse-as-library native-harness entry point so the Swift 6 migration's @MainActor isolation compiles",
+    "at": "2026-07-18T09:18:26Z"
   }
 }
