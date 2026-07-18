@@ -33,5 +33,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T072 — scope widened to include BasketWidget/ where the widget-variant files live",
     "at": "2026-07-18T09:18:23Z"
+  },
+  "T069": {
+    "failed": true,
+    "reason": "review-failed: superseded by T073 (script+docs) + T074 (needs-human baseline) — the environmental attach wall means a real baseline can't be captured unattended; split the automatable part out",
+    "at": "2026-07-18T09:18:24Z"
   }
 }
