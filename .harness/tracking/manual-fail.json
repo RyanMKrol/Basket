@@ -43,5 +43,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T075 — adds the missing @main/-parse-as-library native-harness entry point so the Swift 6 migration's @MainActor isolation compiles",
     "at": "2026-07-18T09:18:26Z"
+  },
+  "T028": {
+    "failed": true,
+    "reason": "When you click the widget, the keyboard does not open automatically, which is a failure of what I asked for.",
+    "at": "2026-07-18T19:46:20Z"
   }
 }
