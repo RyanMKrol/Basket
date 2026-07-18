@@ -2005,6 +2005,75 @@
           "cross-cutting"
         ]
       }
+    },
+    {
+      "id": "T076",
+      "title": "Background blur behind add-bar + suggestions when focused (3 intensities behind a switch)",
+      "status": "pending",
+      "dependsOn": [],
+      "gate": null,
+      "tags": [
+        "ui",
+        "add-bar",
+        "blur"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "feature",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T076.md"
+    },
+    {
+      "id": "T077",
+      "title": "Pick the winning background-blur intensity (human review)",
+      "status": "pending",
+      "dependsOn": [
+        "T076"
+      ],
+      "gate": "needs-human",
+      "tags": [
+        "ui",
+        "review"
+      ],
+      "scope": [],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T077.md"
+    },
+    {
+      "id": "T078",
+      "title": "Hardcode the chosen blur intensity + remove the comparison switch",
+      "status": "pending",
+      "dependsOn": [
+        "T077"
+      ],
+      "gate": null,
+      "tags": [
+        "ui",
+        "add-bar",
+        "blur",
+        "cleanup"
+      ],
+      "facets": {
+        "layer": "views",
+        "workType": "refactor",
+        "risk": []
+      },
+      "scope": [
+        "Sources/Views/"
+      ],
+      "design": null,
+      "verify": [],
+      "expectsTest": false,
+      "spec": ".harness/tasks/T078.md"
     }
   ]
 }
