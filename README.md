@@ -456,6 +456,79 @@ top:
 > installed iOS **simulator runtime matching the SDK**. If you hit "No simulator
 > runtime version … available", run `xcodebuild -downloadPlatform iOS`.
 
+### Performance profiling (CPU)
+
+`tools/profile_app.sh` records CPU profiles of Basket running a UI test workload, using xcprof
+(from the Axiom plugin) to attach xctrace to the running process. The result is a trace bundle
+and a JSON analysis suitable for performance regression detection via `xcprof compare`.
+
+**What it does:** the script runs a specified UI test while capturing CPU time spent in each
+function, then analyzes the trace to JSON. Traces are stored under `build/perf-traces/` (ignored
+by .gitignore) and are never committed.
+
+**Usage:**
+```sh
+./tools/profile_app.sh                                           # default workload, timestamp label
+./tools/profile_app.sh MyTest.xctest/MyTests/testName            # custom test
+./tools/profile_app.sh MyTest.xctest/MyTests/testName iPhone17 my-label  # custom sim + label
+./tools/profile_app.sh MyTest.xctest/MyTests/testName --refresh-baseline  # update baseline
+```
+
+**Arguments:**
+- `test-identifier` (optional) — XCUITest path to drive during profiling. Default:
+  `BasketUITests/SuggestionsFlowTests/testTappingSuggestionChipAddsItem`. **This must stay fixed** —
+  a stable, representative workload ensures that traces across machines and time are
+  comparable.
+- `simulator-name` (optional) — target device. Default: `Basket-Claude` (the dedicated device).
+- `output-label` (optional) — basename for artifacts under `build/perf-traces/`. Default: ISO 8601
+  timestamp.
+- `--refresh-baseline` — after a successful trace capture, copy the JSON analysis to
+  `tools/perf-baseline/baseline.json` (pretty-printed via `jq`). Only succeeds when a
+  non-empty, Basket-attributed trace is captured.
+
+**A/B performance testing:** baseline and current traces are compared on the same machine:
+```sh
+# 1. On main (or a stable baseline commit), record the reference:
+./tools/profile_app.sh --refresh-baseline
+
+# 2. Switch to your branch and record the current state:
+./tools/profile_app.sh your-label
+
+# 3. Compare (exit 3 signals a regression):
+xcprof compare tools/perf-baseline/baseline.json build/perf-traces/your-label.trace --fail-on-regression
+```
+
+**Important caveats:**
+
+- **CPU-only profiling.** Memory and Leaks instruments are not exportable headlessly, so this
+  is NOT a memory leak detector. Use Xcode's Instruments app (Leaks tool) for heap analysis.
+- **Baseline is local.** `xcprof compare` requires both traces to come from the SAME machine.
+  Cross-machine baselines are unreliable because CPU profiles are highly sensitive to hardware,
+  clock speed, and OS scheduling.
+- **CI gating is deferred.** GitHub runners lack the Axiom plugin, and even if they had it, a
+  GitHub runner's CPU characteristics don't match any developer machine. Automated regression
+  gates belong on local machines or a stable, dedicated CI harness, never cross-machine.
+
+#### Why attach may see nothing on this machine
+
+On this build machine, `xctrace --attach` does not observe the Simulator-hosted Basket process
+while it is alive. The trace is captured but remains empty of function samples, resulting in an
+empty JSON analysis. This is an environmental limitation, not a tool bug:
+
+- `--attach` works by injecting a probe into a running process on the same machine. The
+  Simulator process is virtual and not always visible to host-level instrumentation.
+- `--device` (the alternative for attaching to a running process) misroutes the CPU Profiler tap
+  setup to a paired physical iPhone via CoreDeviceService and hangs indefinitely.
+
+**Consequence:** recording a real, non-empty baseline is a **human step**, performed on a machine
+where `xctrace --attach` successfully observes the app (typically a developer's Xcode IDE machine).
+Once a baseline is in place, this script can still record and analyze comparison traces for
+regression detection, even on this machine with the attach limitation — the analysis may be empty,
+but the script detects this and exits non-zero, failing the comparison gracefully.
+
+For pairing guidance and baseline recording on suitable hardware, see the paired needs-human task
+in the backlog.
+
 ### CI
 
 `.github/workflows/ci.yml` runs the full suite (simulator tests + native
