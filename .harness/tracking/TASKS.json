@@ -1863,7 +1863,7 @@
     {
       "id": "T071",
       "title": "Interactive widget: tap an item to check it off",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
