@@ -1890,7 +1890,7 @@
     {
       "id": "T072",
       "title": "Quick-add '+' widget button + add/combined widget variants",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
