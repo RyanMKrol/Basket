@@ -6,6 +6,9 @@ import SwiftUI
 /// resume. The static is the belt-and-suspenders: even if the root view is
 /// re-initialised, it won't fire twice.
 enum LaunchOnce {
+    /// `nonisolated(unsafe)`: a plain `Bool` flag, only ever read/written from the
+    /// SwiftUI root view's `consume()` on the main actor. Revisit if a non-main caller
+    /// ever needs it.
     nonisolated(unsafe) static var fired = false
     static func consume() -> Bool {
         if fired { return false }

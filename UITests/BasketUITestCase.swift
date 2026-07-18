@@ -4,6 +4,9 @@ import XCTest
 /// Every test launches its own fresh process against an in-memory SwiftData
 /// store (see `-uiTesting` in `BasketApp.init`), so tests never touch real
 /// on-device data and don't interfere with each other.
+/// `@MainActor`: XCUITest UI automation (`XCUIApplication`, element queries/taps)
+/// is main-actor-isolated under Swift 6; subclasses inherit the isolation.
+@MainActor
 class BasketUITestCase: XCTestCase {
     let app = XCUIApplication()
 

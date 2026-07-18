@@ -19,7 +19,13 @@ enum SemanticEmoji {
         "the", "and", "with", "of", "in", "for",
     ]
 
-    private static let embedding = NLEmbedding.wordEmbedding(for: .english)
+    /// `nonisolated(unsafe)`: `NLEmbedding` is a class and not `Sendable`. It is loaded
+    /// once and thereafter only read (`contains`, `distance(between:and:)`) against an
+    /// immutable model, and every caller (the main-thread list view and the single-threaded
+    /// native harness) touches it serially. Keeping it non-isolated is deliberate — marking
+    /// `SemanticEmoji` `@MainActor` would cascade through `Emoji`/`Measure` and force the
+    /// native harness into a `@main` entry point. Revisit if it ever gains concurrent readers.
+    nonisolated(unsafe) private static let embedding = NLEmbedding.wordEmbedding(for: .english)
 
     /// Anchor words → emoji. Filtered at load to those actually in the
     /// embedding's vocabulary (some, e.g. brand-y or compound words, are not).
