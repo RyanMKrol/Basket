@@ -685,7 +685,7 @@
     {
       "id": "T030",
       "title": "Interactive widget: tap an item to check it off",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [
         "T033"
       ],
@@ -713,7 +713,7 @@
     {
       "id": "T031",
       "title": "Quick-add '+' widget button + add/combined widget variants",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [
         "T028",
         "T033"
@@ -1795,7 +1795,7 @@
     {
       "id": "T069",
       "title": "Headless CPU profiling script (xcprof) + committed perf baseline + documented compare workflow",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [],
       "gate": null,
       "tags": [
@@ -1826,7 +1826,7 @@
     {
       "id": "T070",
       "title": "Swift 6 strict-concurrency migration: fix unsafe statics, flip SWIFT_VERSION to 6.0",
-      "status": "blocked",
+      "status": "failed",
       "dependsOn": [],
       "gate": null,
       "tags": [
