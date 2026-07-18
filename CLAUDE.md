@@ -84,6 +84,32 @@ flakes, because the autonomous build loop gates merges on this run unattended,
 so a single flake would otherwise cost a whole build iteration. It's a
 best-practice safety net, not something Apple requires for App Store submission.
 
+## Versioning & TestFlight releases
+
+Two version numbers live in `project.yml` (`targets.Basket.info.properties`, and
+the widget's — **they must match**). They are **generated into `Info.plist` by
+`xcodegen generate`**, so `project.yml` is the source of truth; never hand-edit
+the plists.
+
+- **`CFBundleVersion` (build number) — leave it alone.** `release.yml` overrides
+  it with the CI run number on every TestFlight upload, so it's always unique
+  per build. It does **not** need a manual bump, ever.
+- **`CFBundleShortVersionString` (marketing version, e.g. `1.0.2`) — bump ONLY at
+  a real release boundary, never per commit.** TestFlight accepts *many* builds
+  under one marketing version (told apart by the build number), so day-to-day
+  commits and re-test uploads keep the same marketing version. **You must bump it
+  (patch, e.g. `1.0.2` → `1.0.3`) once the current version has been submitted /
+  approved to the App Store** — Apple closes an approved version's pre-release
+  train, and the next upload then fails with `error 90186` ("train … is closed")
+  / `90062` ("must contain a higher version"). Bumping *per change* is wrong: it
+  would churn the version pointlessly and stop the number mapping to real releases.
+
+**To bump** (a normal worktree task): raise `CFBundleShortVersionString` in **both**
+places in `project.yml`, run `xcodegen generate`, and commit `project.yml` +
+both regenerated `Info.plist` files. Then re-run the Release workflow. Full
+release mechanics (secrets, signing, the manual `workflow_dispatch` trigger) are
+in `README.md` → "Releasing to TestFlight".
+
 ## Project map
 
 - `project.yml` — XcodeGen spec; the `.xcodeproj` is **generated** (run
