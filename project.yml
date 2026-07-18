@@ -55,7 +55,7 @@ targets:
         # version's pre-release train once it's approved, so bump this to open
         # a new one before any further TestFlight/App Store upload, even
         # mid-cycle.
-        CFBundleShortVersionString: "1.0.1"
+        CFBundleShortVersionString: "1.0.2"
         # Build number — must be unique per upload for a given marketing
         # version. release.yml overrides this with the CI run number for every
         # TestFlight upload, so this literal only matters for local/Xcode builds.
@@ -130,7 +130,7 @@ targets:
         CFBundleDisplayName: Basket
         # Must match the containing app's CFBundleShortVersionString /
         # CFBundleVersion (Sources/Info.plist above) — Xcode warns otherwise.
-        CFBundleShortVersionString: "1.0.1"
+        CFBundleShortVersionString: "1.0.2"
         CFBundleVersion: "2"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
