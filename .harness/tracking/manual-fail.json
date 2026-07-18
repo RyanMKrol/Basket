@@ -28,5 +28,10 @@
     "failed": true,
     "reason": "review-failed: superseded by T071 — scope widened to include BasketWidget/ + project.yml (the interactive rows and intent registration the Done-when required)",
     "at": "2026-07-18T09:18:21Z"
+  },
+  "T031": {
+    "failed": true,
+    "reason": "review-failed: superseded by T072 — scope widened to include BasketWidget/ where the widget-variant files live",
+    "at": "2026-07-18T09:18:23Z"
   }
 }
