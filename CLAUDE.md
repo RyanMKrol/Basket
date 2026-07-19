@@ -70,8 +70,11 @@ A change is done when, on the branch:
     `./tools/loop_sim.sh >/dev/null && xcodegen generate && xcodebuild test -project Basket.xcodeproj -scheme Basket -destination 'platform=iOS Simulator,name=Basket-Claude'`
   - Native logic harness (fast, no simulator) — compile the pure-logic `Sources`
     files together with `tools/main.swift` and run it (see `README.md` → Tests).
-- **Docs updated in the same commit:** keep `README.md` in step with behaviour.
 - **Generated files regenerated, not hand-edited** (see below).
+
+The repo-root `README.md` is maintainer-owned product documentation — the loop
+does not edit it (it hard-fails any task that tries), and keeping project docs
+current is the owner's job, not the harness's.
 
 Both test commands above also run in CI (`.github/workflows/ci.yml`) on
 **every branch push** — pre-merge signal for your worktree branch, post-merge
@@ -259,12 +262,13 @@ partial work; build only from the task's `spec` (`## Do` / `## Done when`),
 `scope`, and `verify`. A task that can't be done in one cold pass is mis-sized
 and should be split, not resumed.
 
-### Record trade-offs & limitations
+### Record trade-offs & limitations (optional)
 
-When a change introduces or reveals a design trade-off or known limitation, add
-a row to `.harness/custom/docs/LIMITATIONS.md` **in the same commit** — what it
-is, why, the impact, and when to revisit. (Use the `custom/` overlay, never the
-plugin-owned `.harness/docs/LIMITATIONS.md`, which is refreshed on upgrade.)
+`.harness/custom/docs/LIMITATIONS.md` exists if you want to note a design
+trade-off or known limitation — what it is, why, the impact, and when to
+revisit. It's **optional**; no task is required to update it. (Use the `custom/`
+overlay, never the plugin-owned `.harness/docs/LIMITATIONS.md`, which is
+refreshed on upgrade.)
 
 ### Respect the needs-human gate
 

@@ -2103,7 +2103,6 @@
         "Tests/BasketWidgetURLTests.swift",
         "Tests/AddToBasketIntentTests.swift",
         "UITests/DeepLinkTests.swift",
-        "README.md",
         "CLAUDE.md"
       ],
       "design": null,

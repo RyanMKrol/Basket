@@ -605,43 +605,10 @@ Once uploaded, the build appears under App Store Connect → TestFlight after
 Apple finishes processing (~10-30 min) and is immediately installable by
 internal testers.
 
-## Autonomous backlog (implementation harness)
+## Building this project
 
-The repo carries an autonomous build harness in [`.harness/`](./.harness/README.md):
-a sequential loop that builds `.harness/tracking/TASKS.json` one fully-verified
-task at a time, gated on the same CI suite above. Current backlog status:
-
-| Task | Title | Status |
-|------|-------|--------|
-| T001 | Fix tautological Seasonality assertion in the native harness | pending |
-| T002 | UI-test launch arguments accumulate across relaunches | pending |
-| T003 | flash() reads a possibly-deleted SwiftData model after 0.9s | pending |
-| T004 | Log silent try? failures in persistence paths | pending |
-| T005 | Model initializer defaults bypass AppClock | pending |
-| T006 | Remove non-default themes; hardcode the Pastel Dots look | pending |
-| T007 | Stable tie-break in emoji keyword sort (generator) | pending |
-| T008 | Fix ~20 semantically wrong emoji mappings + generator duplicate warning | pending |
-| T009 | Exact-word matching for short emoji keywords (kills pap/paper class) | pending |
-| T010 | Head-noun preference in compound emoji matching | pending |
-| T011 | Household/toiletries/pharmacy/baby/pet/brands vocabulary + corpus files | pending |
-| T012 | Golden-subset correctness mode for the emoji coverage audit | pending |
-| T013 | Port Measure/Seasonality/Formatting checks into XCTest | pending |
-| T014 | Measure.parse rejects negative and malformed input | pending |
-| T015 | SwiftLint config + CI lint step | pending |
-| T016 | Delete superseded icon/art generator tools (~1,900 lines) | pending |
-| T017 | Shared A11yID constants between app and UI tests | pending |
-| T019 | Rename an item by tapping its name | pending |
-| T020 | Undo toast for Clear all | pending |
-| T021 | 'Usuals' suggestion chips on empty add-bar focus | pending |
-| T023 | Success haptic on the All done! celebration + restore haptic | pending |
-| T024 | Formatting cleanup: wrap over-long lines + consistent MARK usage | pending |
-| T025 | Refactor ShoppingListView (extract sections + quantity handlers) | pending |
-| T026 | App Group + shared SwiftData container (foundation for Siri/widgets) 🔒 | pending |
-| T027 | 'Add to Basket' App Intent + App Shortcut (Siri add) | pending |
-| T028 | Quick-add deep link (basket://add focuses the add bar + keyboard) | pending |
-| T029 | View-only Home Screen widget (small + medium) | pending |
-| T030 | Interactive widget: tap an item to check it off | pending |
-| T031 | Quick-add '+' widget button + add/combined widget variants | pending |
-
-Preview with `DRY_RUN=1 .harness/scripts/loop.sh`; run with
-`.harness/scripts/supervise.sh` (from a real terminal).
+This repo carries an autonomous build harness in
+[`.harness/`](./.harness/README.md): a sequential loop that builds a task backlog
+one fully-verified task at a time, gated on the CI suite above. The live backlog
+and its status live in `.harness/tracking/TASKS.json` and the harness dashboard —
+see [`.harness/README.md`](./.harness/README.md) for how to run it.
