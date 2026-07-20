@@ -17,6 +17,13 @@ final class UsualsFlowTests: BasketUITestCase {
         field.typeText("\n")
         XCTAssertTrue(app.buttons[A11yID.ItemRow.row("Banana")].waitForExistence(timeout: 5))
 
+        // Adding keeps the add bar focused (rapid-add), which blurs + scrims the
+        // list — dismiss the keyboard before interacting with a row, or the tap
+        // just lands on the dismiss scrim.
+        let dismiss = app.buttons[A11yID.AddBar.dismissKeyboard]
+        dismiss.tap()
+        waitForGone(dismiss)
+
         app.buttons[A11yID.ItemRow.check("Banana")].tap()
         XCTAssertTrue(gotSectionHeader.waitForExistence(timeout: 3))
         app.buttons[A11yID.GotSection.clearAll].tap()
