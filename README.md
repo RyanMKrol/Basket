@@ -90,46 +90,10 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   (`AppGroup`), derives the emoji and dedupe/bump behaviour exactly like
   typing it into the add bar (`AddItem.perform`, shared with
   `ShoppingListView`), and records the item in the suggestion memory. Every
-  container-creation site (the app, this intent, and later a widget)
+  container-creation site (the app and this intent)
   shares one model list and container factory,
   `Sources/Support/AppSchema.swift`, so the processes that open the same
   App Group store file can't disagree on its schema.
-- **Home Screen widget** — a WidgetKit extension (`BasketWidget/`,
-  target `BasketWidgetExtension`) reads the same shared App Group store.
-  Three variants are available in the widget gallery, all in the Pastel Dots
-  look:
-  1. **List widget** (small + medium) — small shows the "N to get" count plus
-     the first couple of items (emoji + name); medium shows the count plus a
-     longer list, in the same colours and row style as the in-app list. Nothing
-     to get shows "All done" 🧺. On iOS 17+, each item row is tappable via a
-     `CheckOffItemIntent` (`Sources/Services/CheckOffItemIntent.swift`) bound
-     to each row — tap an item to check it off directly without opening the app,
-     moving it to the "Got it" section (older iOS versions fall back to static,
-     non-interactive rows).
-  2. **Add widget** (small only) — a single '+' quick-add button that opens the
-     app via the basket://add deep link, ready to type (you cannot type into a
-     widget itself — this is the intended 'take me into the app to add'
-     behaviour).
-  3. **Add + List widget** (medium only) — combines both: an add button at the
-     top, followed by the item list below, so you can both add and view in one
-     widget.
-  
-  The widget's writes (and the app's) nudge `WidgetCenter.shared.reloadTimelines(ofKind:)`
-  (via the `WidgetReload` seam) at both write choke points — `BasketApp`'s
-  scenePhase `.background` flush, `CheckOffItemIntent.perform()`, and
-  `AddToBasketIntent.perform()` (the "Siri add while the widget is on screen"
-  case) — with a 4-hour fallback timeline policy so the widget self-heals if a
-  nudge is ever missed. Widget kind identifiers (`BasketWidgetIdentifiers`,
-  `Sources/Support/BasketWidgetKind.swift`) are shared constants so the
-  extension's `StaticConfiguration(kind:)` and the app's reload calls can't
-  drift apart. Since an app-extension target can't link the app's own binary,
-  the widget target recompiles the read-only slice of `Sources/` it needs
-  (models, `ListLogic`, `Emoji`, `AppSchema`, `Theme`, and the intents that
-  touch the store) directly from `project.yml`'s `BasketWidgetExtension` source
-  list rather than depending on target `Basket` — the pure entry-computation
-  logic (`Sources/Services/BasketWidgetSnapshot.swift`) is shared the same way,
-  so it's unit-testable from `BasketTests` (which links target `Basket`
-  normally) without any rendering.
 - **Schema anchoring + crash-proof store recovery** — Basket shipped to the
   App Store before any `VersionedSchema` existed, so `BasketSchemaV1`
   (`Sources/Support/AppSchema.swift`) anchors that released shape:
@@ -141,7 +105,7 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   a stage from V1 to V2 to the plan. Every container flavor (in-memory,
   explicit URL, the shared App Group store) builds `Schema(versionedSchema:
   BasketSchemaV1.self)` and passes `BasketMigrationPlan` to `ModelContainer`,
-  so the app, the Siri intent, tests, and a future widget all migrate
+  so the app, the Siri intent, and tests all migrate
   together. If a store still fails to open (corruption, a migration that
   can't complete), the persistent-URL factory paths move the store file and
   its `-wal`/`-shm` sidecars aside to `<name>.broken-<timestamp>` and retry
@@ -149,11 +113,6 @@ scales the full Dynamic Type range uncapped. See the row of test evidence in
   failure still reaches `BasketApp`'s `fatalError`. This is a deliberate
   trade-off: losing a grocery list is recoverable (re-add a few items);
   a permanent crash loop on every launch is not.
-- **Deep-link quick-add** — the `basket://add` URL scheme opens the app with
-  the add bar focused and the keyboard up, ready to type. Works whether the app
-  is already running or launching cold. This is the target for the Home Screen
-  widget's quick-add button, letting you add an item with one tap and one swipe,
-  no app icons needed.
 - **About sheet** — the ⓘ in the header opens a small sheet with the app version
   and an optional **tip jar** (☕ / 🥪 / 🎁, in-app purchases via StoreKit). Basket
   is free; tipping unlocks nothing — but once you've tipped, the **Basket** title
@@ -262,8 +221,7 @@ comment; revisit if a concurrent caller is ever introduced:
 |---|---|
 | `Emoji.cache` (`NSCache`) | `NSCache` is documented thread-safe; only its `Sendable` conformance is invisible to the compiler. |
 | `SemanticEmoji.embedding` (`NLEmbedding`) | Loaded once, thereafter read-only, touched serially (main-thread view + single-threaded harness). |
-| `WidgetReload.reloadTimelines` / `defaultReloadTimelines` (closures) | Reassigned only by unit tests; invoked only from already-main-actor write choke points. |
-| `AddToBasketIntent` / `CheckOffItemIntent` `containerOverride` (`ModelContainer?`) | Test-only seam, set on the test main thread, read inside `@MainActor resolveContainer()`. |
+| `AddToBasketIntent` `containerOverride` (`ModelContainer?`) | Test-only seam, set on the test main thread, read inside `@MainActor resolveContainer()`. |
 | `LaunchOnce.fired` (`Bool`) | Read/written only from the main-actor root view's `consume()`. |
 
 ## Tests
@@ -323,24 +281,11 @@ top:
     like the released app, reopens intact through the factory) and the
     move-aside-and-recreate recovery (a store that fails to open still comes
     back as a working container, with a `.broken-` sibling left behind).
-  - `BasketWidgetSnapshotBuilderTests.swift` — hermetic coverage of
-    `BasketWidgetSnapshotBuilder.entry(from:date:)`, the widget's timeline
-    entry computation: given items fetched from a scratch in-memory
-    container, asserts the count, top-N items with derived emoji, and the
-    empty state — pure logic, no rendering. `AddToBasketIntentTests.swift`
-    also covers the freshness-nudge seam: `WidgetReload.reloadTimelines` is
-    swapped for a counting closure and asserted to fire once after
-    `AddToBasketIntent.perform()`'s save (the "Siri add while the widget is
-    on screen" case); tests restore it via `WidgetReload.defaultReloadTimelines`
-    in `tearDown`, never a hand-written closure, so the guard that makes the
-    default inert under a unit-test host can't go stale. That guard exists
-    because a unit-test host launches the real `BasketApp` (including its
-    scenePhase `.background` flush), and calling the real
-    `WidgetCenter.shared.reloadTimelines` from that context — before a
-    freshly (re)built simulator has finished registering the widget kind —
-    reliably traps; `WidgetReload.defaultReloadTimelines` no-ops under
-    `TestHooks.isHostedByXCTest`, mirroring `BasketApp.init`'s bypass of the
-    real App Group store.
+  - `AddToBasketIntentTests.swift` — covers the "Hey Siri, add milk"
+    App Intent (`AddToBasketIntent.perform()`): against a scratch in-memory
+    container it asserts the item is written to the shared store with its
+    derived emoji and that the dedupe/bump behaviour matches typing into the
+    add bar, so Siri and the Shortcuts app add exactly like the in-app path.
   - `TipJarTests.swift` — the tip jar's product loading through a local
     `SKTestSession` (StoreKitTest) on `StoreKit/Basket.storekit`. Purchases
     themselves can't run in a plain unit-test host (no UI anchor for the
