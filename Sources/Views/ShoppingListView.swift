@@ -37,6 +37,8 @@ struct ShoppingListView: View {
     /// Skipped under UI testing so tests don't have to wait out a splash that
     /// isn't part of the flow being verified.
     @State private var showFlourish = TestHooks.isUITesting ? false : LaunchOnce.consume()
+    /// Temporary debug state for selecting blur intensity when add bar is focused.
+    @State private var selectedBlurStyle: BlurStyle = .medium
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.shouldFocusAddBar) private var shouldFocusAddBar
     @Environment(TipJar.self) private var tipJar
@@ -110,6 +112,8 @@ struct ShoppingListView: View {
                     }
                 }
             }
+            .blur(radius: addBarFocused ? selectedBlurStyle.blurRadius : 0)
+            .animation(.easeInOut(duration: 0.2).unlessUITesting, value: addBarFocused)
 
             // `celebrating` is the ONLY thing that mounts/unmounts this —
             // see dismissCelebration() for the single path that ends it.
@@ -125,6 +129,19 @@ struct ShoppingListView: View {
                         .transition(reduceMotion ? .opacity
                                                   : .move(edge: .bottom).combined(with: .opacity))
                 }
+
+                // Temporary debug control: show blur intensity selector when add bar is focused
+                if addBarFocused {
+                    Picker("Blur", selection: $selectedBlurStyle) {
+                        ForEach(BlurStyle.allCases, id: \.self) { style in
+                            Text(style.label).tag(style)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 16)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+
                 AddBar(
                     text: $draft,
                     suggestions: liveSuggestions,
