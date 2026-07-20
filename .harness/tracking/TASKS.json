@@ -2078,7 +2078,7 @@
     {
       "id": "T079",
       "title": "Remove the Home Screen widget feature (extension target, widget-only code, tests, docs)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
