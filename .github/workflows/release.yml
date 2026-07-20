@@ -28,12 +28,18 @@ jobs:
         id: sim
         uses: ./.github/actions/resolve-simulator
 
+      # Mirror ci.yml's flake tolerance: one retry per test (-test-iterations 2),
+      # so a test only fails the release gate if it fails BOTH attempts. Without
+      # this, a single known UI timing flake (e.g. the auto-expiring "Cleared —
+      # Undo" toast) blocks a release even though the change is sound and ci.yml
+      # went green on the same commit. Keep this in lockstep with ci.yml.
       - name: XCTest + XCUITest suite
         run: |
           xcodebuild test \
             -project Basket.xcodeproj -scheme Basket \
             -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -test-timeouts-enabled YES -default-test-execution-time-allowance 600 \
+            -retry-tests-on-failure -test-iterations 2 \
             -resultBundlePath TestResults.xcresult
 
       - name: Upload result bundle on failure
