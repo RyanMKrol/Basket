@@ -37,8 +37,10 @@ struct ShoppingListView: View {
     /// Skipped under UI testing so tests don't have to wait out a splash that
     /// isn't part of the flow being verified.
     @State private var showFlourish = TestHooks.isUITesting ? false : LaunchOnce.consume()
-    /// Temporary debug state for selecting blur intensity when add bar is focused.
-    @State private var selectedBlurStyle: BlurStyle = .medium
+    /// Radius of the background blur applied behind the add bar + suggestions
+    /// while the add bar is focused, so they read clearly against the list.
+    /// Light (3 pt), chosen from the three intensities compared in T077.
+    private let focusedBlurRadius: CGFloat = 3
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(TipJar.self) private var tipJar
     /// Supporters tap the title to toggle the rainbow look. Defaults on after a
@@ -111,7 +113,7 @@ struct ShoppingListView: View {
                     }
                 }
             }
-            .blur(radius: addBarFocused ? selectedBlurStyle.blurRadius : 0)
+            .blur(radius: addBarFocused ? focusedBlurRadius : 0)
             .animation(.easeInOut(duration: 0.2).unlessUITesting, value: addBarFocused)
 
             // `celebrating` is the ONLY thing that mounts/unmounts this —
@@ -127,18 +129,6 @@ struct ShoppingListView: View {
                     ClearToast(count: clearedToastCount, onUndo: undoClear)
                         .transition(reduceMotion ? .opacity
                                                   : .move(edge: .bottom).combined(with: .opacity))
-                }
-
-                // Temporary debug control: show blur intensity selector when add bar is focused
-                if addBarFocused {
-                    Picker("Blur", selection: $selectedBlurStyle) {
-                        ForEach(BlurStyle.allCases, id: \.self) { style in
-                            Text(style.label).tag(style)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 16)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
                 AddBar(

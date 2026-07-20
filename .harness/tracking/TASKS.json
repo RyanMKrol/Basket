@@ -2033,7 +2033,7 @@
     {
       "id": "T077",
       "title": "Pick the winning background-blur intensity (human review)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T076"
       ],
@@ -2051,7 +2051,7 @@
     {
       "id": "T078",
       "title": "Hardcode the chosen blur intensity + remove the comparison switch",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [
         "T077"
       ],
