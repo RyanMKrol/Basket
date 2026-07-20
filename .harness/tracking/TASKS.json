@@ -629,7 +629,7 @@
     {
       "id": "T028",
       "title": "Quick-add deep link (basket://add focuses the add bar + keyboard)",
-      "status": "done",
+      "status": "failed",
       "dependsOn": [],
       "gate": null,
       "tags": [
