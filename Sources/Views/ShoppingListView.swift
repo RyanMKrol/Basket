@@ -116,6 +116,19 @@ struct ShoppingListView: View {
             .blur(radius: addBarFocused ? focusedBlurRadius : 0)
             .animation(.easeInOut(duration: 0.2).unlessUITesting, value: addBarFocused)
 
+            // While the add bar is focused the list behind is blurred, and it
+            // shouldn't stay interactive: a tap on the blurred backdrop should
+            // only dismiss the keyboard, not fall through to a row underneath.
+            // This transparent scrim sits above the blurred content and catches
+            // those taps. Hidden from VoiceOver (it's a touch-only affordance;
+            // VoiceOver users dismiss via the add bar's own keyboard-down button).
+            if addBarFocused {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { addBarFocused = false }
+                    .accessibilityHidden(true)
+            }
+
             // `celebrating` is the ONLY thing that mounts/unmounts this —
             // see dismissCelebration() for the single path that ends it.
             if celebrating {
