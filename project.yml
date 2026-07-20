@@ -27,13 +27,8 @@ targets:
     platform: iOS
     sources:
       - Sources
-    # Embeds the widget extension into the app bundle so it ships and shows
-    # up on the Home Screen widget gallery.
-    dependencies:
-      - target: BasketWidgetExtension
-        embed: true
     # App Group: the SwiftData store lives in this shared container so the
-    # Siri App Intent and widget extension read the same list. On the
+    # Siri App Intent reads the same list. On the
     # simulator the entitlement alone is enough; a real-device/TestFlight build
     # also needs the App Groups capability enabled for this App ID (Automatic
     # signing registers it on the first device build). XcodeGen generates the
@@ -72,9 +67,6 @@ targets:
         # the app out of that multitasking mode instead, which is what Apple's
         # own App Store Connect validation expects for a portrait-only app.
         UIRequiresFullScreen: true
-        CFBundleURLTypes:
-          - CFBundleURLSchemes:
-              - basket
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.basket
@@ -89,55 +81,6 @@ targets:
         # override the shipped binary was universal despite being meant as
         # iPhone-only, and App Store Connect required iPad screenshots for
         # an app never designed or tested on iPad.
-        TARGETED_DEVICE_FAMILY: "1"
-  BasketWidgetExtension:
-    type: app-extension
-    platform: iOS
-    sources:
-      - BasketWidget
-      # Read-only reuse of the app's models + pure logic so the widget shows
-      # the exact same data shape and emoji as the app (see project.yml
-      # comment on the Basket target's App Group entitlement, and
-      # Sources/Support/AppSchema.swift). Recompiled directly into this
-      # extension target rather than depending on target Basket, since an
-      # app-extension target can't embed another app's product.
-      - path: Sources/Models/GroceryItem.swift
-      - path: Sources/Models/KnownItem.swift
-      - path: Sources/Services/ListLogic.swift
-      - path: Sources/Services/Emoji.swift
-      - path: Sources/Services/EmojiTable.swift
-      - path: Sources/Services/SemanticEmoji.swift
-      - path: Sources/Services/Measure.swift
-      - path: Sources/Services/Seasonality.swift
-      - path: Sources/Services/TestHooks.swift
-      - path: Sources/Services/BasketWidgetSnapshot.swift
-      - path: Sources/Services/CheckOffItemIntent.swift
-      - path: Sources/Services/WidgetReload.swift
-      - path: Sources/Support/AppGroup.swift
-      - path: Sources/Support/AppSchema.swift
-      - path: Sources/Support/BasketWidgetKind.swift
-      - path: Sources/Support/A11yIDs.swift
-      - path: Sources/Theme/Theme.swift
-      - path: Sources/Theme/ThemePresets.swift
-    entitlements:
-      path: BasketWidget/BasketWidget.entitlements
-      properties:
-        com.apple.security.application-groups:
-          - group.com.ryankrol.basket
-    info:
-      path: BasketWidget/Info.plist
-      properties:
-        CFBundleDisplayName: Basket
-        # Must match the containing app's CFBundleShortVersionString /
-        # CFBundleVersion (Sources/Info.plist above) — Xcode warns otherwise.
-        CFBundleShortVersionString: "1.0.2"
-        CFBundleVersion: "2"
-        NSExtension:
-          NSExtensionPointIdentifier: com.apple.widgetkit-extension
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.ryankrol.basket.widget
-        GENERATE_INFOPLIST_FILE: NO
         TARGETED_DEVICE_FAMILY: "1"
   BasketTests:
     type: bundle.unit-test
@@ -178,7 +121,6 @@ schemes:
     build:
       targets:
         Basket: all
-        BasketWidgetExtension: all
         BasketTests: [test]
         BasketUITests: [test]
     run:

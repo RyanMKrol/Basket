@@ -89,10 +89,9 @@ best-practice safety net, not something Apple requires for App Store submission.
 
 ## Versioning & TestFlight releases
 
-Two version numbers live in `project.yml` (`targets.Basket.info.properties`, and
-the widget's — **they must match**). They are **generated into `Info.plist` by
-`xcodegen generate`**, so `project.yml` is the source of truth; never hand-edit
-the plists.
+The version number lives in `project.yml` (`targets.Basket.info.properties`).
+It is **generated into `Info.plist` by `xcodegen generate`**, so `project.yml`
+is the source of truth; never hand-edit the plist.
 
 - **`CFBundleVersion` (build number) — leave it alone.** `release.yml` overrides
   it with the CI run number on every TestFlight upload, so it's always unique
@@ -107,11 +106,11 @@ the plists.
   / `90062` ("must contain a higher version"). Bumping *per change* is wrong: it
   would churn the version pointlessly and stop the number mapping to real releases.
 
-**To bump** (a normal worktree task): raise `CFBundleShortVersionString` in **both**
-places in `project.yml`, run `xcodegen generate`, and commit `project.yml` +
-both regenerated `Info.plist` files. Then re-run the Release workflow. Full
-release mechanics (secrets, signing, the manual `workflow_dispatch` trigger) are
-in `README.md` → "Releasing to TestFlight".
+**To bump** (a normal worktree task): raise `CFBundleShortVersionString` in
+`project.yml`, run `xcodegen generate`, and commit `project.yml` + the
+regenerated `Info.plist`. Then re-run the Release workflow. Full release
+mechanics (secrets, signing, the manual `workflow_dispatch` trigger) are in
+`README.md` → "Releasing to TestFlight".
 
 ## Project map
 

@@ -40,7 +40,6 @@ struct ShoppingListView: View {
     /// Temporary debug state for selecting blur intensity when add bar is focused.
     @State private var selectedBlurStyle: BlurStyle = .medium
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.shouldFocusAddBar) private var shouldFocusAddBar
     @Environment(TipJar.self) private var tipJar
     /// Supporters tap the title to toggle the rainbow look. Defaults on after a
     /// tip and persists (UserDefaults) — even across relaunches — until toggled.
@@ -155,11 +154,6 @@ struct ShoppingListView: View {
             now = AppClock.now
             purgeExpired()
             updateTickerConnection()
-        }
-        .onChange(of: shouldFocusAddBar) { _, newValue in
-            if newValue {
-                addBarFocused = true
-            }
         }
         .onChange(of: recentlyGot.count) { _, _ in
             updateTickerConnection()

@@ -71,9 +71,6 @@ struct AddToBasketIntent: AppIntent {
         let context = container.mainContext
         AddItem.perform(item.name, context: context, now: AppClock.now)
         try context.save()
-        // The headline staleness case: a Siri add while the widget is on
-        // screen and the app never launches — nudge WidgetKit directly.
-        WidgetReload.reloadTimelines()
         return .result()
     }
 
