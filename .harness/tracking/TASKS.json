@@ -2009,7 +2009,7 @@
     {
       "id": "T076",
       "title": "Background blur behind add-bar + suggestions when focused (3 intensities behind a switch)",
-      "status": "pending",
+      "status": "done",
       "dependsOn": [],
       "gate": null,
       "tags": [
